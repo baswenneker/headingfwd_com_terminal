@@ -1,0 +1,161 @@
+# HeadingFWD - AI Engineering Consultancy
+
+> AI Engineering Services by Bas Wenneker
+
+## About
+
+HeadingFWD is an AI engineering consultancy specializing in Generative AI implementations. Led by Bas Wenneker, an experienced AI Lead/Engineer based in Delft, The Netherlands.
+
+This website features a terminal-style AI chatbot interface where visitors can learn about AI engineering services, explore Bas's expertise, and get in touch for consulting work.
+
+## Contact
+
+- Website: https://headingfwd.com
+- Email: bas@headingfwd.com
+- LinkedIn: https://www.linkedin.com/in/baswenneker
+- GitHub (this site's code): https://github.com/baswenneker/headingfwd_com_terminal
+
+## About Bas Wenneker
+
+### Professional Background
+
+Bas Wenneker is an AI Lead/Engineer specializing in Generative AI implementations with a focus on building production-ready AI systems.
+
+**Career Journey:**
+- Started as a software engineer while studying Computer Science at TU Delft
+- Worked as an IT consultant before focusing on innovation, lean startup, and design thinking
+- Founded and ran a webshop and several software startups (one acquired)
+- Started developing with LLMs when GPT-3 was released in 2020
+- Delivered multiple AI projects for enterprise clients including ASML, UWV, PGGM, BasicFit, and Eneco
+
+**Location:** Delft, The Netherlands
+
+### Technical Expertise
+
+**AI/LLM Technologies:**
+- LLM Providers: OpenAI, Anthropic (Claude), Google, open-source models
+- Frameworks: LangChain, LangGraph, Vercel AI SDK
+- Vector databases and RAG systems
+- AI agent development and orchestration
+- LLM evaluation and testing frameworks
+
+**Development Stack:**
+- Backend: Python, FastAPI
+- Frontend: TypeScript, Next.js, React
+- Fullstack development with modern web technologies
+
+**Observability & Testing:**
+- LangSmith
+- Ragas
+- Orq
+- Custom evaluation tools
+
+## Services Offered
+
+### 1. Agentic Workflow Development
+
+Building production-ready AI systems that actually work:
+
+- Build production-ready AI agents and virtual employees
+- Design multi-step workflows with human-in-the-loop patterns
+- Create reliable, maintainable agent systems
+- Evaluate and optimize agent performance
+- Develop autonomous systems that handle complex tasks
+
+### 2. AI Strategy & Consultancy
+
+Strategic guidance for AI adoption:
+
+- Evaluate AI use cases and ROI potential
+- Architecture design for LLM applications
+- Technology stack recommendations
+- Best practices for production deployments
+- Decision support for AI implementation
+
+### 3. Evaluation & Testing
+
+Ensure quality and reliability of AI systems:
+
+- Build evaluation frameworks for LLM outputs
+- Implement automated testing pipelines
+- Performance monitoring and observability
+- A/B testing for prompt variations
+- Quality assurance for AI applications
+
+## This Website
+
+### Technology Stack
+
+This terminal chatbot website is built with:
+
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript
+- **API Layer:** tRPC
+- **Database:** Drizzle ORM with Turso (distributed SQLite)
+- **AI Integration:** Vercel AI SDK with OpenAI GPT-4.1-mini
+- **Security:** Cloudflare Turnstile CAPTCHA
+- **Email:** Resend API
+- **Testing:** Playwright E2E tests
+
+### Features
+
+- Terminal-style chat interface
+- AI-powered assistant for answering questions about services
+- Slash command system for instant responses (/help, /services, /contact, etc.)
+- Natural language chat with OpenAI integration
+- Email sending capability through the chatbot
+- Session management with CAPTCHA verification
+- Rate limiting and security measures
+
+### Open Source
+
+The complete source code for this website is available on GitHub:
+https://github.com/baswenneker/headingfwd_com_terminal
+
+The repository includes:
+- Complete TypeScript/Next.js implementation
+- AI SDK integration patterns
+- Command system architecture
+- Database schema and migrations
+- CAPTCHA integration
+- Rate limiting implementation
+- E2E test suite
+
+## Available Commands
+
+Users can interact with the terminal using these slash commands:
+
+- **/help** - Show available commands
+- **/services** - Learn about AI engineering services offered
+- **/contact** - Get contact information
+- **/how-i-built-this** - See the GitHub repository for this site
+- **/linkedin** - Visit Bas's LinkedIn profile
+
+Users can also chat naturally with the AI assistant to learn about Bas's experience, services, and AI engineering topics.
+
+## Getting in Touch
+
+There are three ways to contact Bas:
+
+1. Use the terminal chatbot on the website to send a message directly
+2. Connect on LinkedIn and send a direct message
+3. Email directly at bas@headingfwd.com
+
+Bas typically responds within 24-48 hours.
+
+## Use Cases
+
+Bas and HeadingFWD can help with:
+
+- Building AI agents for business process automation
+- Implementing RAG (Retrieval Augmented Generation) systems
+- Creating conversational AI interfaces
+- Evaluating and testing LLM applications
+- Designing AI-first product architectures
+- Training teams on LLM development best practices
+- Prototyping and validating AI use cases
+- Production deployment of AI systems
+
+---
+
+Last updated: 2025-11-07
