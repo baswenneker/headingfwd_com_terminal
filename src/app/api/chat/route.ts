@@ -240,7 +240,7 @@ After you call sendMessage, you MUST immediately generate a text response to con
 
 IMPORTANT: Always include text in your response after calling the tool. The tool call alone is not enough - the user needs to see your confirmation message.
 `,
-      messages: convertToModelMessages(cleanedMessages),
+      messages: await convertToModelMessages(cleanedMessages),
       tools: {
         sendMessage: tool({
           description:
@@ -288,7 +288,8 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
               sessionId,
               senderEmail,
               message,
-              conversationHistory: convertToModelMessages(cleanedMessages),
+              conversationHistory:
+                await convertToModelMessages(cleanedMessages),
             });
 
             if (!result.success) {

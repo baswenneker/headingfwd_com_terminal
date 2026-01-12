@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import type { CoreMessage } from "ai";
+import type { ModelMessage } from "ai";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { emailLogs } from "~/server/db/schema";
@@ -25,7 +25,7 @@ function escapeHtml(text: string): string {
 /**
  * Format conversation history as HTML for email
  */
-export function formatConversationHistory(messages: CoreMessage[]): string {
+export function formatConversationHistory(messages: ModelMessage[]): string {
   if (!messages || messages.length === 0) {
     return "";
   }
@@ -45,8 +45,11 @@ export function formatConversationHistory(messages: CoreMessage[]): string {
       content = msg.content;
     } else if (Array.isArray(msg.content)) {
       content = msg.content
-        .filter((part) => part.type === "text")
-        .map((part) => ("text" in part ? part.text : ""))
+        .filter(
+          (part): part is { type: "text"; text: string } =>
+            part.type === "text",
+        )
+        .map((part) => part.text)
         .join("\n");
     }
 
@@ -117,7 +120,7 @@ export async function sendContactEmail(params: {
   sessionId: string;
   senderEmail: string;
   message: string;
-  conversationHistory: CoreMessage[];
+  conversationHistory: ModelMessage[];
 }): Promise<{ success: boolean; messageId?: string; error?: string }> {
   const { sessionId, senderEmail, message, conversationHistory } = params;
 

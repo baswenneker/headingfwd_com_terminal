@@ -1,0 +1,6 @@
+beans:
+    path: .beans
+    prefix: headingfwd_com_terminal-
+    id_length: 4
+    default_status: todo
+    default_type: task

@@ -92,6 +92,9 @@ export async function sendTerminalMessage(page: Page, message: string) {
     messagesBefore,
     { timeout: 10000 },
   );
+
+  // Wait for streaming to complete (loading indicator to disappear)
+  await waitForLoadingComplete(page);
 }
 
 /**

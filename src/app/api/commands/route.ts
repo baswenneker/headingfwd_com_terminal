@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         "Invalid request format",
         400,
         ErrorCode.INVALID_INPUT,
-        { errors: validatedRequest.error.errors },
+        { errors: validatedRequest.error.issues },
       );
     }
 

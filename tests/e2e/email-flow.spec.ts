@@ -43,6 +43,8 @@ test.describe("Email Sending Flow", () => {
       .locator('[data-testid="assistant-message"]')
       .last()
       .textContent();
+
+    console.log(lastMessage);
     expect(lastMessage?.toLowerCase()).toMatch(/email/);
 
     // Step 2: Provide email address
@@ -213,6 +215,8 @@ test.describe("Email Sending Flow", () => {
       .last()
       .textContent();
 
-    expect(lastMessage?.toLowerCase()).toMatch(/sent|verzonden|success/);
+    expect(lastMessage?.toLowerCase()).toMatch(
+      /sent|verstuurd|verzonden|success/,
+    );
   });
 });
