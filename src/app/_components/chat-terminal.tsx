@@ -36,6 +36,9 @@ export function ChatTerminal({
   // Explicitly specify UIMessage type to avoid type narrowing issues
   const { messages, setMessages, sendMessage, status, error, stop } =
     useChat<UIMessage>({
+      // body() is invoked by the transport at request time (not during render),
+      // so reading sessionIdRef.current here is safe.
+      // eslint-disable-next-line react-hooks/refs
       transport: new DefaultChatTransport({
         api: "/api/chat",
         body: (opts?: { body?: Record<string, unknown> }) => {
@@ -351,11 +354,7 @@ export function ChatTerminal({
                             <div className="font-mono">{toolName}()</div>
                             {hasResult ? (
                               <pre className="mt-1 overflow-x-auto">
-                                {JSON.stringify(
-                                  part.result as Record<string, unknown>,
-                                  null,
-                                  2,
-                                )}
+                                {JSON.stringify(part.result, null, 2)}
                               </pre>
                             ) : null}
                           </div>
