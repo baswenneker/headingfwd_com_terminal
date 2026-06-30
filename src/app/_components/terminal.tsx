@@ -2,15 +2,26 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./terminal.module.css";
+import { TerminalFeed } from "./terminal-feed";
+import { type FeedLine, runCommand } from "./terminal-commands";
 
 /**
- * Full-page terminal shell. Renders the cyan backdrop, the macOS-style
- * window chrome, the intro content, and a text input that auto-focuses
- * on load. Command execution and AI integration are wired in later.
+ * Full-page terminal shell with a live command layer.
+ *
+ * Visitors type slash-commands (/help, /about, /services, /work, /stack,
+ * /contact, /clear, /portfolio) into the input at the bottom. Each command
+ * echoes the typed line and appends styled output to the feed above. Arrow
+ * keys recall previous commands; clicking anywhere in the body refocuses the
+ * input so the keyboard stays ready.
  */
 export function Terminal() {
   const [inputValue, setInputValue] = useState("");
+  const [feed, setFeed] = useState<FeedLine[]>([]);
+  const [history, setHistory] = useState<string[]>([]);
+  const [histIdx, setHistIdx] = useState(-1);
+
   const inputRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   // Focus the input shortly after mount so the visitor can type immediately.
   // The 650ms delay matches the reference design's intentional rhythm.
@@ -20,6 +31,58 @@ export function Terminal() {
     }, 650);
     return () => clearTimeout(timer);
   }, []);
+
+  // Scroll the body to the bottom whenever new lines land in the feed,
+  // including after /clear (which resets to an empty array).
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [feed]);
+
+  /**
+   * Handle keyboard input in the command field.
+   *
+   * Enter — trims the input, records it in history (capped at 40 entries),
+   *   routes it through runCommand, and either clears the feed (/clear) or
+   *   appends the result lines. Empty input is a no-op.
+   *
+   * ArrowUp / ArrowDown — walk backward / forward through the history buffer.
+   *   Index -1 means the field is empty (no history entry selected).
+   */
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      const raw = inputValue.trim();
+      setInputValue("");
+      setHistIdx(-1);
+      if (!raw) return;
+
+      // Prepend to history and cap at 40 entries (most-recent first).
+      setHistory((prev) => [raw, ...prev].slice(0, 40));
+
+      const result = runCommand(raw);
+      if (result.action === "clear") {
+        setFeed([]);
+      } else {
+        setFeed((prev) => [...prev, ...result.lines]);
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!history.length) return;
+      const newIdx = Math.min(histIdx + 1, history.length - 1);
+      setHistIdx(newIdx);
+      setInputValue(history[newIdx] ?? "");
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const newIdx = histIdx - 1;
+      if (newIdx < 0) {
+        setHistIdx(-1);
+        setInputValue("");
+      } else {
+        setHistIdx(newIdx);
+        setInputValue(history[newIdx] ?? "");
+      }
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -49,8 +112,12 @@ export function Terminal() {
         </div>
 
         {/* ── Scrollable body ── */}
-        {/* Clicking anywhere in the body refocuses the hidden input. */}
+        {/*
+         * Clicking anywhere in the body refocuses the hidden input so the
+         * visitor can keep typing without manually clicking the field.
+         */}
         <div
+          ref={bodyRef}
           className={styles.body}
           onClick={() => inputRef.current?.focus()}
         >
@@ -115,7 +182,8 @@ export function Terminal() {
           {/* Divider separating the intro from the command feed area */}
           <div className={styles.divider} />
 
-          {/* Command feed output will be rendered here in a later feature */}
+          {/* Live command feed — grows as the visitor types commands */}
+          <TerminalFeed lines={feed} />
 
           {/* Input row */}
           <div className={styles.inputRow}>
@@ -130,6 +198,7 @@ export function Terminal() {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="type a command…"
               spellCheck={false}
               autoComplete="off"
@@ -146,8 +215,11 @@ export function Terminal() {
           </span>
           <span>main</span>
           <span>utf-8</span>
-          {/* Line count: 18 intro lines (no feed items yet) */}
-          <span className={styles.statusRight}>18 lines · /help</span>
+          {/*
+           * Line count: 18 accounts for the fixed intro block; feed.length
+           * adds the growing command output. Matches the reference formula.
+           */}
+          <span className={styles.statusRight}>{18 + feed.length} lines · /help</span>
         </div>
 
       </div>

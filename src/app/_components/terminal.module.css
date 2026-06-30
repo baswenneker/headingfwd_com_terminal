@@ -335,6 +335,142 @@
   }
 }
 
+/* ─── Command feed ───────────────────────────────────────────────────────── */
+/*
+ * The feed wraps the growing list of command output lines. A small top
+ * margin separates it from the divider above the first result.
+ */
+.feed {
+  margin-top: 14px;
+}
+
+/*
+ * Base style shared by every renderable feed line. Sets the monospace
+ * rhythm (font size, line height) and prevents long strings from
+ * overflowing the container.
+ */
+.feedLine {
+  font-size: 14px;
+  line-height: 1.72;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 10px blank spacer inserted after each command's output block */
+.feedSpacer {
+  height: 10px;
+}
+
+/* Command echo: slight top margin to separate it from the previous block */
+.feedCmd {
+  margin-top: 4px;
+}
+
+/* "bas@headingfwd " portion of the echoed prompt — prompt-green, bold */
+.feedCmdPrompt {
+  color: var(--prompt);
+  font-weight: 700;
+}
+
+/* "~$ " portion of the echoed prompt — accent color, bold */
+.feedCmdAccent {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* The raw typed text following the echoed prompt */
+.feedCmdText {
+  color: #eafbfe;
+}
+
+/* Section heading — accent color, bold, small top margin */
+.feedHead {
+  color: var(--accent);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Regular output text */
+.feedOut {
+  color: #cfe2e7;
+}
+
+/* Subdued helper / hint text */
+.feedDim {
+  color: rgba(160, 178, 182, 0.6);
+}
+
+/* Bullet line base — body text color; the mark is added as a child span */
+.feedBullet {
+  color: #cfe2e7;
+}
+
+/* The "* " bullet character shown before the bullet body */
+.feedBulletMark {
+  color: var(--accent);
+}
+
+/* Two-column command-list row */
+.feedRow {
+  display: flex;
+  gap: 16px;
+}
+
+/* Left column of a row — command name in accent, bold, fixed minimum width */
+.feedRowLabel {
+  color: var(--accent);
+  font-weight: 700;
+  min-width: 96px;
+}
+
+/* Right column of a row — description in a slightly muted tone */
+.feedRowDesc {
+  color: rgba(207, 226, 231, 0.78);
+}
+
+/* Engagement / project row */
+.feedJob {
+  display: flex;
+  gap: 14px;
+}
+
+/* Project index number ("01"–"04") — accent, bold */
+.feedJobNum {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Project name — bright white, medium weight, never wraps */
+.feedJobName {
+  color: #eafbfe;
+  font-weight: 500;
+  min-width: max-content;
+}
+
+/* Project description — dim, prefixed with "— " by the renderer */
+.feedJobDesc {
+  color: rgba(160, 178, 182, 0.7);
+}
+
+/* Clickable link row — same two-column structure as feedRow */
+.feedLink {
+  display: flex;
+  gap: 16px;
+}
+
+/* Left column of a link row — dim label, fixed minimum width */
+.feedLinkLabel {
+  color: rgba(160, 178, 182, 0.7);
+  min-width: 96px;
+}
+
+/* The anchor in a link row — accent color with a readable underline */
+.feedLinkAnchor {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* ─── Narrow container breakpoint (≤560px) ───────────────────────────── */
 /*
  * When the page container is 560px wide or less, collapse the layout:
