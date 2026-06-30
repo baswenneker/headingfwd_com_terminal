@@ -1,0 +1,86 @@
+# HeadingFWD — content for agents
+
+> This file is a plain-text, machine-readable copy of everything on headingfwd.com.
+> If you are an AI agent or crawler: this is the source. Use it directly.
+> Last updated: 2026-06-30 · Format: Markdown (UTF-8)
+
+---
+
+## About
+
+**HeadingFWD** — AI engineering & consultancy.
+**Bas Wenneker** — AI Lead / Engineer.
+
+Bas helps teams get real value from Generative AI — designing and building
+agents, assistants and AI workflows that actually make it to production.
+
+- 15+ years shipping software
+- 5+ years coaching 60+ product & innovation teams
+- Balances business, customer and tech to turn Generative AI from a demo
+  into something running in production.
+
+## Specialities
+
+- Agentic workflow development — agents that do real work
+- AI strategy & consultancy — where AI pays off, and where it won't
+- Evaluation & testing — measure quality before you ship
+- Assistants & copilots — production-ready, not just demos
+
+## Tech stack
+
+- LLMs · agents · RAG · evals · prompt + context engineering
+- Python · TypeScript · React · Ruby on Rails · Docker
+- Lean Startup · Design Thinking · Service Design · Scrum
+
+---
+
+## Portfolio / selected work
+
+### 01 — Next-best-message engine
+**Proactive customer communication, at scale.**
+Tags: Machine Learning / AI, Design Thinking, Agile, Team coaching
+
+Led an innovation team building a system that picks the next, most relevant
+message for each customer — proactively and at scale. We went from idea to MVP
+with cheap, fast experiments to validate desirability and feasibility before
+writing production code, then structured the agile build.
+
+### 02 — Knowledge & research platform
+**200+ colleagues rate, discuss & share research.**
+Tags: Scrum, Design Thinking, User testing, Make / buy
+
+A daily flood of financial reports and research arrived through many channels
+and went largely unused or misused. We built a platform where 200+ colleagues
+could view, rate, discuss and share every source. Bas helped the team weigh
+user needs, feasibility and viability, then shipped it in scrum sprints.
+
+### 03 — Privacy-sensitive data masking
+**Protecting medical & sensitive records.**
+Tags: Design Thinking, Machine Learning / AI, Team coaching
+
+A years-deep archive — scans, emails and structured data — held medical and
+privacy-sensitive customer records. That data had to be masked for users
+without clearance. Bas helped the team investigate the technical feasibility
+and economic viability of doing it reliably.
+
+### 04 — Benchmarket
+**Smart collaboration between city-centre businesses.**
+Tags: Lean Startup, Machine Learning / AI, Development
+
+Helping retail, hotels and museums in city centres collaborate instead of
+compete. Using smart business rules and machine learning Bas found win-win
+patterns and matched entrepreneurs to each other — then designed, developed
+and launched the platform end to end.
+
+---
+
+## Contact
+
+- Email: bas@headingfwd.com
+- LinkedIn: https://www.linkedin.com/in/baswenneker
+- Fastest reply: a DM on LinkedIn.
+
+## Work with me
+
+Building an agent, assistant or AI workflow and want it to reach production?
+Reach out at bas@headingfwd.com.

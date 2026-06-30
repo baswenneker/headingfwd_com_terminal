@@ -325,6 +325,38 @@
   animation: statusPulse 2s ease-in-out infinite;
 }
 
+/* agents.txt link — points crawlers/agents at the machine-readable source */
+.statusAgents {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.statusAgents:hover {
+  text-decoration: underline;
+}
+
+/* Small accent dot with glow, mirroring the online indicator's treatment */
+.statusAgentsDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* Full descriptive label — shown on wide screens; hidden on narrow (below). */
+.statusAgentsFull {
+  display: inline;
+}
+
+/* Compact "llms.txt" label — hidden on wide screens, shown on narrow (below). */
+.statusAgentsShort {
+  display: none;
+}
+
 /* Right-aligned line counter */
 .statusRight {
   margin-left: auto;
@@ -615,6 +647,15 @@
   .statusBar {
     gap: 11px;
     font-size: 10px;
+  }
+
+  /* On narrow screens show only the compact "llms.txt" label. */
+  .statusAgentsFull {
+    display: none;
+  }
+
+  .statusAgentsShort {
+    display: inline;
   }
 
   .specialitiesGrid {

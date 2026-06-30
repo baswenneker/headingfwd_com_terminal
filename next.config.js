@@ -11,6 +11,13 @@ const config = {
     "/api/**/*": ["./drizzle/**/*"],
     "/*": ["./drizzle/**/*"],
   },
+  // `/agents.txt` is an alias for crawlers that look for that name — forward
+  // it to the canonical full file at `/llms.txt`.
+  async redirects() {
+    return [
+      { source: "/agents.txt", destination: "/llms.txt", permanent: true },
+    ];
+  },
 };
 
 export default config;

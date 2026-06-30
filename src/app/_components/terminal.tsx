@@ -413,7 +413,10 @@ export function Terminal() {
             <span className={styles.valuePropBright}>agents</span>,{" "}
             <span className={styles.valuePropBright}>assistants</span> and{" "}
             <span className={styles.valuePropBright}>AI workflows</span> that
-            actually make it to production.
+            actually make it to production, training{" "}
+            <span className={styles.valuePropBright}>dev teams</span>, and
+            consulting on{" "}
+            <span className={styles.valuePropBright}>AI strategy</span>.
           </div>
 
           {/* "// specialities" is terminal-style comment decoration */}
@@ -425,15 +428,15 @@ export function Terminal() {
             </div>
             <div>
               <span className={styles.specialityBullet}>*</span>
-              AI strategy &amp; consultancy
+              AI strategy &amp; consulting
             </div>
             <div>
               <span className={styles.specialityBullet}>*</span>
-              Evaluation &amp; testing
+              Agentic coding training for dev teams
             </div>
             <div>
               <span className={styles.specialityBullet}>*</span>
-              Assistants &amp; copilots, production-ready
+              AI techniques: RAG, graphs, memory and more
             </div>
           </div>
 
@@ -715,6 +718,24 @@ export function Terminal() {
           </span>
           <span>main</span>
           <span>utf-8</span>
+          {/*
+           * Plain-text source for AI agents & crawlers. Points at the
+           * statically-generated /llms.txt (see app/llms.txt/route.ts).
+           * The descriptive label collapses to just "llms.txt" on narrow
+           * screens to keep the status bar compact.
+           */}
+          <a
+            className={styles.statusAgents}
+            href="/llms.txt"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className={styles.statusAgentsDot} />
+            <span className={styles.statusAgentsFull}>
+              Plaintext version for agents (llms.txt)
+            </span>
+            <span className={styles.statusAgentsShort}>llms.txt</span>
+          </a>
           {/*
            * Line count: 18 for the fixed intro block; feedLineCount for the
            * growing command + AI turn content.

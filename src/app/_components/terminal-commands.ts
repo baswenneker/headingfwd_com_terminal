@@ -7,6 +7,8 @@
  * feed entirely or append a list of new lines.
  */
 
+import { ABOUT, CONTACT, SPECIALTIES, STACK } from "~/content/site-content";
+
 // ── Discriminated-union line model ──────────────────────────────────────────
 
 /** 10px-tall blank spacer, used to add visual breathing room after a command. */
@@ -93,6 +95,7 @@ function helpLines(): FeedLine[] {
     { kind: "row", label: "/portfolio", desc: "browse my work in fullscreen ↵" },
     { kind: "row", label: "/stack",     desc: "tools, models & tech" },
     { kind: "row", label: "/contact",   desc: "how to reach me" },
+    { kind: "row", label: "/agents",    desc: "plaintext version for agents (llms.txt)" },
     { kind: "row", label: "/clear",     desc: "clear the screen" },
     { kind: "dim", text: "tip: arrow keys recall history · or just type a question" },
   ];
@@ -101,20 +104,17 @@ function helpLines(): FeedLine[] {
 function aboutLines(): FeedLine[] {
   return [
     { kind: "head", text: "$ whoami" },
-    { kind: "out",  text: "Bas Wenneker — AI Lead / Engineer @ HeadingFWD" },
-    { kind: "out",  text: "15+ yrs shipping software · 5+ yrs coaching 60+ product" },
-    { kind: "out",  text: "& innovation teams. I balance business, customer and tech" },
-    { kind: "out",  text: "to turn Generative AI from a demo into something in production." },
+    { kind: "out", text: ABOUT.name },
+    ...ABOUT.lines.map((text): FeedLine => ({ kind: "out", text })),
   ];
 }
 
 function servicesLines(): FeedLine[] {
   return [
-    { kind: "head",   text: "// what I help teams with" },
-    { kind: "bullet", text: "Agentic workflow development — agents that do real work" },
-    { kind: "bullet", text: "AI strategy & consultancy — where AI pays off, where it won't" },
-    { kind: "bullet", text: "Evaluation & testing — measure quality before you ship" },
-    { kind: "bullet", text: "Assistants & copilots — production-ready, not just demos" },
+    { kind: "head", text: "// what I help teams with" },
+    ...SPECIALTIES.map(
+      (s): FeedLine => ({ kind: "bullet", text: `${s.title} — ${s.blurb}` }),
+    ),
   ];
 }
 
@@ -131,18 +131,26 @@ function workLines(): FeedLine[] {
 function stackLines(): FeedLine[] {
   return [
     { kind: "head", text: "// stack" },
-    { kind: "out",  text: "LLMs · agents · RAG · evals · prompt + context engineering" },
-    { kind: "out",  text: "Python · TypeScript · React · Ruby on Rails · Docker" },
-    { kind: "out",  text: "Lean Startup · Design Thinking · Service Design · Scrum" },
+    ...STACK.map((text): FeedLine => ({ kind: "out", text })),
   ];
 }
 
 function contactLines(): FeedLine[] {
   return [
     { kind: "head", text: "let's talk →" },
-    { kind: "link", label: "email",    text: "bas@headingfwd.com",          href: "mailto:bas@headingfwd.com" },
-    { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: "https://www.linkedin.com/in/baswenneker" },
-    { kind: "dim",  text: "fastest reply: drop me a DM on LinkedIn." },
+    { kind: "link", label: "email",    text: CONTACT.email,             href: `mailto:${CONTACT.email}` },
+    { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
+    { kind: "dim",  text: CONTACT.note },
+  ];
+}
+
+/** Points visitors and AI agents at the plain-text, machine-readable source. */
+function agentsLines(): FeedLine[] {
+  return [
+    { kind: "head", text: "// plaintext version for agents" },
+    { kind: "out",  text: "A plain-text, machine-readable copy of everything here —" },
+    { kind: "out",  text: "so AI agents & crawlers can read the source directly." },
+    { kind: "link", label: "file", text: "llms.txt", href: "/llms.txt" },
   ];
 }
 
@@ -157,6 +165,8 @@ const COMMANDS: Record<string, () => FeedLine[]> = {
   work:     workLines,
   stack:    stackLines,
   contact:  contactLines,
+  agents:   agentsLines,
+  llms:     agentsLines,
   whoami:   () => [{ kind: "out", text: "guest@headingfwd — welcome :)" }],
   ls:       () => [{ kind: "out", text: "about/  services/  work/  stack/  contact/" }],
 };

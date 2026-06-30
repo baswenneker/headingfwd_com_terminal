@@ -96,6 +96,7 @@
       <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:var(--prompt,#5BE6A0);box-shadow:0 0 8px var(--prompt,#5BE6A0)"></span>online</span>
       <span>main</span>
       <span>utf-8</span>
+      <a href="agents.txt" target="_blank" rel="noopener" title="Plain-text copy of this site for AI agents & crawlers" style="color:var(--accent,#2EE6F6);text-decoration:none;display:inline-flex;align-items:center;gap:5px" style-hover="text-decoration:underline"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent,#2EE6F6);box-shadow:0 0 7px var(--accent,#2EE6F6)"></span>agents.txt</a>
       <span style="margin-left:auto">{{ feedCount }} lines · /help</span>
     </div>
 
@@ -244,6 +245,7 @@ class Component extends DCLogic {
         { k:"row", a:"/portfolio",b:"browse my work in fullscreen ↵" },
         { k:"row", a:"/stack",    b:"tools, models & tech" },
         { k:"row", a:"/contact",  b:"how to reach me" },
+        { k:"row", a:"/agents",   b:"plain-text source for AI agents" },
         { k:"row", a:"/clear",    b:"clear the screen" },
         { k:"dim",  t:"tip: arrow keys recall history · or just type a question" },
       ],
@@ -280,6 +282,13 @@ class Component extends DCLogic {
         { k:"link", a:"linkedin", t:"linkedin.com/in/baswenneker", href:"https://www.linkedin.com/in/baswenneker" },
         { k:"dim", t:"fastest reply: drop me a DM on LinkedIn." },
       ],
+      agents: ()=>[
+        { k:"head", t:"// for AI agents & crawlers" },
+        { k:"out",  t:"A plain-text, machine-readable copy of this whole site:" },
+        { k:"link", a:"file", t:"agents.txt", href:"agents.txt" },
+        { k:"dim",  t:"about · specialities · stack · portfolio · contact — all in markdown." },
+      ],
+      llms: function(){ return this.agents ? this.agents() : []; },
       whoami: ()=>[ { k:"out", t:"guest@headingfwd — welcome :)" } ],
       ls: ()=>[ { k:"out", t:"about/  services/  work/  stack/  contact/" } ],
     };
