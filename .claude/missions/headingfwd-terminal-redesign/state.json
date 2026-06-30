@@ -177,12 +177,60 @@
         "VC-5",
         "VC-8"
       ],
-      "status": "pending",
-      "attempts": 0,
-      "commit_sha": null,
-      "started_at": null,
-      "completed_at": null,
-      "error": null
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "394bcd7e5a2c9a7c647f36f1ea1f5fce90035c08",
+      "started_at": "2026-06-30T13:41:36Z",
+      "completed_at": "2026-06-30T13:41:36Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "terminal-projects.ts: documented Project interface, fill-in template comment, four projects verbatim, optional image and caseUrl fields",
+          "portfolio-overlay.tsx: fullscreen overlay with ListView and DetailView; keyboard nav (up/down/enter/esc in list, left/right + esc/backspace in detail) and mouse (hover selects, click opens, buttons); overlay grabs focus on mount; detail view renders project.image in the visual box when present else a striped placeholder, and a 'read the case study' button when caseUrl is set",
+          "portfolio-overlay.module.css: full overlay styling pixel-exact (shell with accent glow + 42px grid, top bar, ASCII banner glow, list rows with selected state, detail view, chips, buttons, CTA)",
+          "terminal-commands.ts: CommandResult gained a portfolio action; /portfolio and /pf return it with echo + launch line",
+          "terminal.tsx: mode/pfIndex/pfDetail state; portfolio action opens the overlay after ~140ms; exitPortfolio restores input focus; PortfolioOverlay rendered conditionally inside .page"
+        ],
+        "left_undone": [
+          "Deeper mobile-touch polish (tap targets, keyboard suppression) — next feature",
+          "Playwright E2E tests for the portfolio — later feature",
+          "AI chat / CAPTCHA / tRPC integration — later milestone",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx / captcha-overlay.tsx — later cleanup",
+          "Real project images and case-study links — data fields ready, assets to be supplied"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          },
+          {
+            "command": "risky-scan.sh",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "Next.js <Image> with fill needs a positioned parent with explicit height; the detailVisualImage class sets this. An external image URL would also need a next.config remotePatterns entry — documented in the interface comments; local /public paths work directly.",
+          "The overlay's cqw units resolve against the .page container (container-type:inline-size), which is correct because the overlay is a child of .page.",
+          "Orchestrator Playwright check confirmed: /portfolio opens the overlay, up/down + enter navigate to detail, left/right cycles projects in detail, esc returns to list then exits with input refocus, and a mouse click opens a project — zero console errors."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok), no secrets staged",
+          "conventional commit feat(portfolio): with descriptive body",
+          "only the specific files staged (no git add -A)",
+          "no mission-internal codes in code, comments, or commit message",
+          "JSX // text wrapped as string expressions to satisfy react/jsx-no-comment-textnodes",
+          "orchestrator verified the running overlay with the Playwright MCP before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F3.md"
+      }
     },
     {
       "id": "F4",
