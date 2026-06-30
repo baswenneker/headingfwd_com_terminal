@@ -107,11 +107,19 @@
 /*
  * Block-letter "FWD" in accent color with a subtle glow.
  * white-space:pre preserves the exact spacing of the ASCII art.
+ *
+ * The banner uses block-element glyphs (█, U+2588). For the monospace grid to
+ * hold, the block character and the space must come from the same font and
+ * share an equal advance width. The page font (JetBrains Mono) is loaded with
+ * the latin subset only, which excludes Block Elements — so inheriting it
+ * would cause the browser to mix glyph widths from two fonts and break the
+ * art. An explicit system monospace stack is used instead; every font listed
+ * here includes both the block glyph and the space at a matching width.
  */
 .asciiBanner {
   position: relative;
   margin-top: clamp(18px, 3.5cqw, 40px);
-  font-family: inherit;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
   font-size: clamp(9px, 2.3cqw, 18px);
   line-height: 1.05;
   color: var(--accent);
