@@ -1,5 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 import * as dotenv from "dotenv";
+import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
 
@@ -8,6 +9,16 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 dotenv.config({ path: path.resolve(__dirname, ".env.test"), override: true });
+
+// Ensure the directory that will hold the test SQLite file exists.
+// The @libsql/client library does not create parent directories on its own,
+// so we create them here — before Playwright starts the webServer process —
+// to avoid a "can't open database" error on startup.
+const dbUrl = process.env.DATABASE_URL ?? "";
+if (dbUrl.startsWith("file:")) {
+  const dbFilePath = path.resolve(__dirname, dbUrl.slice(5));
+  fs.mkdirSync(path.dirname(dbFilePath), { recursive: true });
+}
 
 /**
  * Playwright configuration for terminal integration tests

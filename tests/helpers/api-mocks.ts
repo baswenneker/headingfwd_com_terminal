@@ -1,73 +1,142 @@
 import { type Page, type Route } from "@playwright/test";
 
 /**
- * API mocking utilities for Playwright tests
- * Handles mocking of external API calls (primarily OpenAI)
+ * Mocking utilities for the /api/chat endpoint.
+ *
+ * The AI SDK v6 `useChat` hook expects a Server-Sent Events stream when the
+ * response carries `x-vercel-ai-ui-message-stream: v1`. Each event is a
+ * `data: <json>\n\n` line. The helpers here construct that exact format so
+ * tests can assert UI behaviour without making real OpenAI API calls.
+ *
+ * All route mocks use Playwright's `page.route()`. Pass the `page` before
+ * navigation or before the action that triggers the request — Playwright
+ * intercepts the matching URL whenever the request is made.
  */
 
-export interface MockStreamingOptions {
-  content: string;
-  delay?: number; // Delay between chunks in ms
-  chunkSize?: number; // Number of words per chunk
-  includeThinking?: boolean;
+/**
+ * SSE headers that match what the real /api/chat route sends via
+ * `result.toUIMessageStreamResponse()`. The `x-vercel-ai-ui-message-stream`
+ * header is the signal that tells the AI SDK client to parse the body as
+ * a UI message stream rather than a plain data stream.
+ */
+const UI_STREAM_HEADERS: Record<string, string> = {
+  "content-type": "text/event-stream",
+  "cache-control": "no-cache",
+  "x-vercel-ai-ui-message-stream": "v1",
+};
+
+/** Serialise a single payload object to a `data:` SSE line. */
+function sseEvent(payload: object): string {
+  return `data: ${JSON.stringify(payload)}\n\n`;
 }
 
 /**
- * Create a Server-Sent Events (SSE) formatted streaming response
- * Matches the format expected by Vercel AI SDK
+ * Build a complete UI message stream body for a plain text AI reply.
+ *
+ * Stream sequence (AI SDK v6 protocol):
+ *   start → start-step → text-start → text-delta → text-end
+ *   → finish-step → finish → [DONE]
+ *
+ * The entire content is sent as a single text-delta chunk. Playwright
+ * delivers the full body at once via route.fulfill(), which the SDK client
+ * parses correctly without true chunked delivery.
  */
-export function createSSEStream(options: MockStreamingOptions): string {
-  const { content, includeThinking = false } = options;
-  const parts: string[] = [];
+export function createTextStream(content: string): string {
+  return [
+    sseEvent({ type: "start" }),
+    sseEvent({ type: "start-step" }),
+    sseEvent({ type: "text-start", id: "text-1" }),
+    sseEvent({ type: "text-delta", id: "text-1", delta: content }),
+    sseEvent({ type: "text-end", id: "text-1" }),
+    sseEvent({ type: "finish-step" }),
+    sseEvent({ type: "finish" }),
+    "data: [DONE]\n\n",
+  ].join("");
+}
 
-  // Add thinking indicator if requested
-  if (includeThinking) {
-    parts.push('0:"Thinking..."\n');
-  }
-
-  // Split content into words for progressive streaming
-  const words = content.split(" ");
-  let accumulated = "";
-
-  for (const word of words) {
-    accumulated += (accumulated ? " " : "") + word;
-    // Format: 0:"partial content"\n
-    parts.push(`0:"${accumulated.replace(/"/g, '\\"')}"\n`);
-  }
-
-  return parts.join("");
+export interface EmailToolOptions {
+  senderEmail: string;
+  message: string;
+  success: boolean;
+  /**
+   * Human-readable error description shown when success is false (e.g. a
+   * rate-limit message). Ignored when success is true.
+   */
+  error?: string;
 }
 
 /**
- * Mock a successful chat API streaming response
+ * Build a complete UI message stream body for a sendMessage tool call.
+ *
+ * Stream sequence:
+ *   start → start-step → tool-input-start → tool-input-available
+ *   → tool-output-available → finish-step → finish → [DONE]
+ *
+ * When success is true, the tool output is `{ success: true }` and the
+ * terminal renders "✓ message sent to bas@headingfwd.com".
+ *
+ * When success is false, the tool output is `{ success: false, error }` and
+ * the terminal renders the error string in red inside the assistant-message
+ * element.
  */
-export async function mockChatSuccess(
-  page: Page,
-  responseContent: string,
-  options?: {
-    delay?: number;
-    chunkSize?: number;
-  },
-) {
+export function createEmailToolStream(options: EmailToolOptions): string {
+  const output = options.success
+    ? { success: true, message: "Email sent successfully." }
+    : {
+        success: false,
+        error:
+          options.error ??
+          "You've reached the email limit (3 per hour). Please try again later.",
+      };
+
+  return [
+    sseEvent({ type: "start" }),
+    sseEvent({ type: "start-step" }),
+    sseEvent({
+      type: "tool-input-start",
+      toolCallId: "call-1",
+      toolName: "sendMessage",
+    }),
+    sseEvent({
+      type: "tool-input-available",
+      toolCallId: "call-1",
+      toolName: "sendMessage",
+      input: {
+        senderEmail: options.senderEmail,
+        message: options.message,
+        userConfirmed: true,
+      },
+    }),
+    sseEvent({
+      type: "tool-output-available",
+      toolCallId: "call-1",
+      output,
+    }),
+    sseEvent({ type: "finish-step" }),
+    sseEvent({ type: "finish" }),
+    "data: [DONE]\n\n",
+  ].join("");
+}
+
+/**
+ * Mock every POST to /api/chat with a successful text stream response.
+ * The mock stays active until clearChatMock() is called.
+ */
+export async function mockChatSuccess(page: Page, content: string) {
   await page.route("**/api/chat", async (route: Route) => {
-    const sseStream = createSSEStream({
-      content: responseContent,
-      ...options,
-    });
-
     await route.fulfill({
       status: 200,
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Transfer-Encoding": "chunked",
-      },
-      body: sseStream,
+      headers: UI_STREAM_HEADERS,
+      body: createTextStream(content),
     });
   });
 }
 
 /**
- * Mock a chat API error response
+ * Mock every POST to /api/chat with an HTTP error response.
+ *
+ * The body is JSON `{ "error": "<message>" }`. The terminal's readableError()
+ * function unwraps that envelope so visitors see plain text instead of JSON.
  */
 export async function mockChatError(
   page: Page,
@@ -77,18 +146,15 @@ export async function mockChatError(
   await page.route("**/api/chat", async (route: Route) => {
     await route.fulfill({
       status: statusCode,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        error: errorMessage,
-      }),
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ error: errorMessage }),
     });
   });
 }
 
 /**
- * Mock a rate limit error (429)
+ * Convenience wrapper that mocks a 429 rate-limit HTTP error from /api/chat.
+ * The terminal must show the unwrapped error text, not the raw JSON object.
  */
 export async function mockRateLimitError(page: Page) {
   await mockChatError(
@@ -99,146 +165,50 @@ export async function mockRateLimitError(page: Page) {
 }
 
 /**
- * Mock command API responses
- * Commands don't need streaming, just simple JSON responses
+ * Mock /api/chat to return a sendMessage tool stream with a successful result.
+ * The terminal renders "✓ message sent to bas@headingfwd.com" inside the
+ * assistant-message element.
  */
-export async function mockCommandSuccess(
+export async function mockEmailToolSuccess(
   page: Page,
-  commandResponses: Record<string, string>,
+  senderEmail: string,
+  message: string,
 ) {
-  await page.route("**/api/commands", async (route: Route) => {
-    const request = route.request();
-
-    if (request.method() === "POST") {
-      const postData = request.postDataJSON() as { command: string };
-      const command = postData.command.toLowerCase().trim();
-
-      const response = commandResponses[command] ?? {
-        response: "Unknown command. Type `/help` for available commands.",
-        success: false,
-      };
-
-      await route.fulfill({
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          response:
-            typeof response === "string"
-              ? response
-              : (response.response ?? response),
-          success: typeof response === "object" ? response.success : true,
-        }),
-      });
-    } else if (request.method() === "GET") {
-      // Return list of available commands
-      await route.fulfill({
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          commands: Object.keys(commandResponses),
-        }),
-      });
-    }
-  });
-}
-
-/**
- * Mock the session init tRPC call
- */
-export async function mockSessionInit(
-  page: Page,
-  sessionId: string,
-  success = true,
-) {
-  await page.route("**/trpc/chat.initSession*", async (route: Route) => {
-    if (success) {
-      await route.fulfill({
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          result: {
-            data: {
-              sessionId,
-              success: true,
-            },
-          },
-        }),
-      });
-    } else {
-      await route.fulfill({
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          error: {
-            message: "Failed to verify CAPTCHA",
-          },
-        }),
-      });
-    }
-  });
-}
-
-/**
- * Remove all API mocks from a page
- */
-export async function clearAllMocks(page: Page) {
-  await page.unroute("**/api/chat");
-  await page.unroute("**/api/commands");
-  await page.unroute("**/trpc/chat.initSession*");
-}
-
-/**
- * Create a mock streaming response that simulates network delay
- */
-export async function mockSlowChatResponse(page: Page, content: string) {
-  await mockChatSuccess(page, content, {
-    delay: 100, // 100ms between chunks
-    chunkSize: 5, // 5 words per chunk
-  });
-}
-
-/**
- * Mock a chat response with markdown content
- */
-export async function mockChatWithMarkdown(page: Page, markdown: string) {
-  await mockChatSuccess(page, markdown);
-}
-
-/**
- * Mock a chat response that includes tool usage
- */
-export async function mockChatWithTools(
-  page: Page,
-  content: string,
-  toolCalls: Array<{ name: string; result: string }>,
-) {
-  let sseStream = "";
-
-  // Add tool calls
-  for (const tool of toolCalls) {
-    sseStream += `9:{"toolCallId":"${tool.name}","toolName":"${tool.name}","args":{}}\n`;
-    sseStream += `a:{"toolCallId":"${tool.name}","result":"${tool.result}"}\n`;
-  }
-
-  // Add final content
-  sseStream += createSSEStream({ content });
-
   await page.route("**/api/chat", async (route: Route) => {
     await route.fulfill({
       status: 200,
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Transfer-Encoding": "chunked",
-      },
-      body: sseStream,
+      headers: UI_STREAM_HEADERS,
+      body: createEmailToolStream({ senderEmail, message, success: true }),
     });
   });
+}
+
+/**
+ * Mock /api/chat to return a sendMessage tool stream with a rate-limit failure.
+ * The terminal renders the error text in red inside the assistant-message
+ * element. The raw JSON object must NOT be visible.
+ */
+export async function mockEmailToolRateLimit(page: Page, errorMsg?: string) {
+  await page.route("**/api/chat", async (route: Route) => {
+    await route.fulfill({
+      status: 200,
+      headers: UI_STREAM_HEADERS,
+      body: createEmailToolStream({
+        senderEmail: "visitor@example.com",
+        message: "Test message",
+        success: false,
+        error:
+          errorMsg ??
+          "You've reached the email limit (3 per hour). Please try again later.",
+      }),
+    });
+  });
+}
+
+/**
+ * Remove the active /api/chat route mock so subsequent requests reach the
+ * real server (or a different mock registered later).
+ */
+export async function clearChatMock(page: Page) {
+  await page.unroute("**/api/chat");
 }
