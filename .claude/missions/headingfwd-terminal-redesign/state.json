@@ -358,12 +358,53 @@
         "VC-12",
         "VC-13"
       ],
-      "status": "pending",
-      "attempts": 0,
-      "commit_sha": null,
-      "started_at": null,
-      "completed_at": null,
-      "error": null
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "a158feb92d42420c70c009591a26d031a9a62504",
+      "started_at": "2026-06-30T16:18:27Z",
+      "completed_at": "2026-06-30T16:18:27Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Render the sendMessage tool outcome in the AI turn as a terminal status line (detects part.type === 'tool-sendMessage')",
+          "Three states: dim '✉ sending your message…' while pending, prompt-green '✓ message sent to bas@headingfwd.com' on success, terminal-red error line (reusing .aiError) on failure — so the rate-limit message reliably appears",
+          "New .toolSending and .toolSent CSS classes using the dim tone and --prompt; failures reuse .aiError",
+          "Broader monospace font stack on .aiResponse so the box-drawing separators (━) in the email preview render with consistent width (same latin-subset cause as the ASCII banner)",
+          "Backend untouched; preview + confirmation remain AI-text driven by the server system prompt"
+        ],
+        "left_undone": [
+          "Playwright E2E tests for the email flow — later feature",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx — later cleanup"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "AI SDK v6 tool parts use type 'tool-${name}' (here 'tool-sendMessage') with state machine input-streaming -> input-available -> output-available (output) or output-error (errorText). Output shape for this tool: {success:true,message} or {success:false,error}.",
+          "TypeScript can't narrow ToolUIPart (tool-${string}) to a literal 'tool-sendMessage' shape, so a double cast through unknown is used (documented in a code comment).",
+          "Orchestrator verified the full flow with a mocked /api/chat stream using the exact v6 tool chunks (tool-input-start/-available, tool-output-available) — preview renders cleanly, '✓ message sent' shows in prompt-green, and the rate-limit failure shows '→ You've reached the email limit…' in terminal-red with no raw JSON. No real email was sent."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok)",
+          "conventional commit feat(terminal):",
+          "only terminal.tsx and terminal.module.css staged",
+          "no backend files modified (api/chat, server/, tRPC routers untouched)",
+          "no new dependencies; no mission-internal codes in code, comments, or commit message",
+          "orchestrator verified the email rendering with the Playwright MCP (mocked tool stream) before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F6.md"
+      }
     },
     {
       "id": "F7",
