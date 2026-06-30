@@ -434,7 +434,8 @@
           "evidence": "Grep of src/ for mission codes (VC-/F#/M#/milestone/pre-F) is clean in product files; the feat/fix commit messages are standalone-readable.",
           "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-review.md"
         }
-      ]
+      ],
+      "walkthrough_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-walkthrough.md"
     },
     {
       "id": "M2",
