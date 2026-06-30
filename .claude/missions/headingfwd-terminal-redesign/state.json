@@ -116,12 +116,57 @@
         "VC-3",
         "VC-8"
       ],
-      "status": "pending",
-      "attempts": 0,
-      "commit_sha": null,
-      "started_at": null,
-      "completed_at": null,
-      "error": null
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "087b65c99dcc4667131de025b88c58e17147a437",
+      "started_at": "2026-06-30T13:25:10Z",
+      "completed_at": "2026-06-30T13:25:10Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Discriminated-union FeedLine type (sp, cmd, head, out, dim, bullet, row, job, link) in terminal-commands.ts",
+          "Command registry with exact reference copy: /help, /about, /services, /work, /stack, /contact, plus aliases /whoami and /ls",
+          "Freeform fallback (lightweight demo assistant lines) for non-command input",
+          "/clear (/cls) returns action:clear; /portfolio (/pf) echoes + launching line without overlay or trailing spacer",
+          "runCommand(raw) public parser returning CommandResult, structured so an AI branch can be added later",
+          "TerminalFeed renderer in terminal-feed.tsx, all nine line kinds with pixel-exact CSS Module styles; link anchors stopPropagation",
+          "terminal.tsx wired with feed/history/histIdx state, bodyRef auto-scroll on feed change, Enter handler (echo + history cap 40 + runCommand), ArrowUp/ArrowDown history recall, dynamic status count 18 + feed.length",
+          "terminal.module.css extended with all feed line styles using --accent and --prompt tokens"
+        ],
+        "left_undone": [
+          "Portfolio fullscreen overlay and mode switch (next feature)",
+          "AI/CAPTCHA/tRPC routing for free-text input (later milestone; CommandResult ready for an ai action)",
+          "Playwright E2E suite updates (later feature)",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx / captcha-overlay.tsx (later cleanup)"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "noUncheckedIndexedAccess makes COMMANDS[token], split()[0], and history[idx] resolve to T|undefined; handled with truthy guards and ?? '' fallbacks",
+          "The reference run() appends no trailing spacer for /portfolio; matched exactly",
+          "Orchestrator Playwright check on the running dev server confirmed: input auto-focus, /help exact output, /clear empties feed, ArrowUp history recall, 375px breakpoint collapse, and zero console errors"
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok)",
+          "conventional commit feat(terminal):",
+          "staged only the four changed product files",
+          "pnpm typecheck, pnpm lint, pnpm build all exit 0",
+          "orchestrator verified the running UI with the Playwright MCP before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F2.md"
+      }
     },
     {
       "id": "F3",
