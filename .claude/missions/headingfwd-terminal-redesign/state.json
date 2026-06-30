@@ -667,10 +667,48 @@
         "F7",
         "F8"
       ],
-      "validation_status": "pending",
-      "validated_at": null,
-      "gate_results": [],
-      "vc_results": []
+      "validation_status": "passed",
+      "validated_at": "2026-06-30T17:02:08Z",
+      "gate_results": [
+        {
+          "id": "G1",
+          "command": "pnpm run typecheck",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G2",
+          "command": "pnpm run lint",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G3",
+          "command": "pnpm run build",
+          "exit_code": 0,
+          "passed": true
+        }
+      ],
+      "vc_results": [
+        {
+          "id": "VC-14",
+          "passed": true,
+          "evidence": "pnpm test:e2e run independently by the orchestrator: 27 passed (31.6s), 1 worker. Covers client-static commands, mocked AI stream, email success + rate-limit, 429 handling, and two 375px mobile-viewport tests. All external calls mocked with the AI SDK v6 stream format; no real OpenAI/Resend call.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M3-usertest.md"
+        },
+        {
+          "id": "VC-15",
+          "passed": true,
+          "evidence": "All 8 dead files deleted (status D); tree-wide grep finds no remaining references to the removed modules (the new terminal-commands.ts is the only 'commands' match); still-used files (captcha-overlay, memoized-markdown, email/rate-limiter/turnstile services, /api/chat, /api/health) all present; after rm -rf .next, pnpm check and pnpm build pass and the route table no longer lists /api/commands.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M3-review.md"
+        },
+        {
+          "id": "VC-16",
+          "passed": true,
+          "evidence": "Grep of the changed files and the two in-scope commit messages (test(e2e), chore(cleanup)) finds no mission-internal codes; comments are standalone-readable.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M3-review.md"
+        }
+      ]
     }
   ],
   "circuit_breaker": {
