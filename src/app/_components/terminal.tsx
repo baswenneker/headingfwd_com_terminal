@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./terminal.module.css";
 import { TerminalFeed } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
+import { PortfolioOverlay } from "./portfolio-overlay";
+import { PROJECTS } from "./terminal-projects";
 
 /**
  * Full-page terminal shell with a live command layer.
@@ -19,6 +21,12 @@ export function Terminal() {
   const [feed, setFeed] = useState<FeedLine[]>([]);
   const [history, setHistory] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
+
+  // Portfolio overlay state — all three are reset to defaults when the
+  // overlay opens so each visit starts at the first project in list view.
+  const [mode, setMode] = useState<"terminal" | "portfolio">("terminal");
+  const [pfIndex, setPfIndex] = useState(0);
+  const [pfDetail, setPfDetail] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -62,6 +70,15 @@ export function Terminal() {
       const result = runCommand(raw);
       if (result.action === "clear") {
         setFeed([]);
+      } else if (result.action === "portfolio") {
+        // Append the echo + launch message, then open the overlay after
+        // a short delay (~140ms) that matches the reference design's rhythm.
+        setFeed((prev) => [...prev, ...result.lines]);
+        setTimeout(() => {
+          setPfIndex(0);
+          setPfDetail(false);
+          setMode("portfolio");
+        }, 140);
       } else {
         setFeed((prev) => [...prev, ...result.lines]);
       }
@@ -83,6 +100,16 @@ export function Terminal() {
       }
     }
   };
+
+  /**
+   * Close the portfolio overlay and return keyboard focus to the terminal
+   * input. The 40ms delay gives React time to finish the re-render so the
+   * input element is visible and focusable before focus() is called.
+   */
+  function exitPortfolio() {
+    setMode("terminal");
+    setTimeout(() => inputRef.current?.focus(), 40);
+  }
 
   return (
     <div className={styles.page}>
@@ -223,6 +250,23 @@ export function Terminal() {
         </div>
 
       </div>
+
+      {/*
+       * Portfolio overlay — rendered on top of the window when the visitor
+       * opens /portfolio. Absolutely positioned inside .page so it covers the
+       * full viewport. The overlay manages its own keyboard focus; exiting it
+       * returns focus to the terminal input via exitPortfolio.
+       */}
+      {mode === "portfolio" && (
+        <PortfolioOverlay
+          projects={PROJECTS}
+          pfIndex={pfIndex}
+          pfDetail={pfDetail}
+          onSetPfIndex={setPfIndex}
+          onSetPfDetail={setPfDetail}
+          onExit={exitPortfolio}
+        />
+      )}
     </div>
   );
 }

@@ -68,11 +68,17 @@ export type FeedLine =
 
 /**
  * What the terminal should do after parsing a command.
- * `clear` empties the feed; `lines` appends the given line objects.
+ *
+ * `clear`     — empties the feed entirely.
+ * `lines`     — appends the given line objects to the feed.
+ * `portfolio` — appends the given lines (echo + launch message) and signals
+ *               that the fullscreen portfolio overlay should open after a
+ *               short delay. The terminal handles the state change.
  */
 export type CommandResult =
   | { action: "clear" }
-  | { action: "lines"; lines: FeedLine[] };
+  | { action: "lines"; lines: FeedLine[] }
+  | { action: "portfolio"; lines: FeedLine[] };
 
 // ── Command handlers ─────────────────────────────────────────────────────────
 
@@ -193,10 +199,10 @@ export function runCommand(raw: string): CommandResult {
   }
 
   if (token === "portfolio" || token === "pf") {
-    // The fullscreen portfolio overlay is built in a later step.
-    // For now, echo the command and acknowledge the launch request.
+    // Echo the command and the launch acknowledgement, then signal the
+    // terminal to open the portfolio overlay after a short delay.
     return {
-      action: "lines",
+      action: "portfolio",
       lines: [echo, { kind: "out", text: "→ launching portfolio…" }],
     };
   }
