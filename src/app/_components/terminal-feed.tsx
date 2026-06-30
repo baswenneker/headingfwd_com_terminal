@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { type FeedLine } from "./terminal-commands";
 import styles from "./terminal.module.css";
 
@@ -23,16 +24,21 @@ interface TerminalFeedProps {
 export function TerminalFeed({ lines, onRunCommand }: TerminalFeedProps) {
   return (
     <div className={styles.feed}>
-      {lines.map((line, i) => renderLine(line, i, onRunCommand))}
+      {lines.map((line, i) => renderFeedLine(line, i, onRunCommand))}
     </div>
   );
 }
 
-function renderLine(
+/**
+ * Renders a single FeedLine as a React node. Exported so callers that embed
+ * feed lines inside a custom wrapper (e.g. a mixed command + AI feed) can
+ * reuse this logic without mounting a full TerminalFeed component.
+ */
+export function renderFeedLine(
   line: FeedLine,
-  key: number,
+  key: number | string,
   onRunCommand?: (cmd: string) => void,
-): React.ReactNode {
+): ReactNode {
   switch (line.kind) {
     case "sp":
       return <div key={key} className={styles.feedSpacer} />;

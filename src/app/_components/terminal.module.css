@@ -495,6 +495,64 @@
   text-underline-offset: 3px;
 }
 
+/* ─── AI conversation turn ───────────────────────────────────────────── */
+
+/*
+ * Blinking block cursor shown at the end of a streaming AI response.
+ * The keyframe mirrors the reference design's 0%→49% on / 50%→100% off
+ * cycle, giving a classic square-blink cadence rather than a CSS transition.
+ */
+@keyframes cursorBlink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Wraps a single free-text turn: user echo + assistant response */
+.aiTurn {
+  margin-top: 4px;
+}
+
+/*
+ * Shown while the AI request is in-flight (either waiting for the first
+ * token or while content is streaming in). Disappears when streaming ends.
+ */
+.aiThinking {
+  color: rgba(160, 178, 182, 0.6);
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+/* Container for the streamed or completed assistant markdown response */
+.aiResponse {
+  color: #cfe2e7;
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+/* Blinking block cursor appended at the end of streaming content */
+.aiCursor {
+  display: inline-block;
+  width: 8px;
+  height: 0.9em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 1s step-start infinite;
+}
+
+/* Error line rendered when the AI request returns an error status */
+.aiError {
+  color: rgba(255, 110, 110, 0.9);
+  font-size: 14px;
+  line-height: 1.72;
+}
+
 /* ─── Narrow container breakpoint (≤560px) ───────────────────────────── */
 /*
  * When the page container is 560px wide or less, collapse the layout:

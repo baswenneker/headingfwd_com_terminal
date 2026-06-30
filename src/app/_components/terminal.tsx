@@ -1,11 +1,31 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { api } from "~/trpc/react";
+import { env } from "~/env";
 import styles from "./terminal.module.css";
-import { TerminalFeed } from "./terminal-feed";
+import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
 import { PortfolioOverlay } from "./portfolio-overlay";
 import { PROJECTS } from "./terminal-projects";
+import { CaptchaOverlay } from "./captcha-overlay";
+import { MemoizedMarkdown } from "./memoized-markdown";
+
+// ── Feed block model ────────────────────────────────────────────────────────
+//
+// The terminal body is an ordered list of blocks. A command block holds the
+// static lines produced by a slash-command. An AI turn block holds a single
+// free-text exchange: the visitor's message plus the streaming AI response.
+// Blocks are kept in the order they were created so the feed always reads
+// top-to-bottom in the order events happened.
+
+type CommandBlock = { type: "cmd"; lines: FeedLine[] };
+type AiTurnBlock  = { type: "ai";  userText: string };
+type FeedBlock    = CommandBlock | AiTurnBlock;
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
  * Returns true when the device has a fine pointer (mouse / trackpad).
@@ -22,35 +42,79 @@ function prefersAutoFocus(): boolean {
   );
 }
 
+// ── Component ────────────────────────────────────────────────────────────────
+
 /**
- * Full-page terminal shell with a live command layer.
+ * Full-page terminal shell that handles both slash-commands (instant, no
+ * session) and free-text messages (routed to the AI after CAPTCHA + session).
  *
- * Visitors type slash-commands (/help, /about, /services, /work, /stack,
- * /contact, /clear, /portfolio) into the input at the bottom. Each command
- * echoes the typed line and appends styled output to the feed above. Arrow
- * keys recall previous commands; clicking anywhere in the body refocuses the
- * input so the keyboard stays ready.
+ * The body is a single chronological feed mixing static command output blocks
+ * and AI conversation turns. Slash-commands never require a session or
+ * CAPTCHA. Free-text messages trigger a deferred CAPTCHA on the first
+ * submission; once verified, the session is created and the pending message
+ * is sent to the AI. Subsequent free-text messages skip the CAPTCHA.
+ *
+ * When NEXT_PUBLIC_DISABLE_CAPTCHA is "true" (dev / test), the Turnstile
+ * widget is skipped entirely and the session is initialised immediately with
+ * a placeholder token that the server accepts in bypass mode.
  */
 export function Terminal() {
   const [inputValue, setInputValue] = useState("");
-  const [feed, setFeed] = useState<FeedLine[]>([]);
+  const [blocks, setBlocks] = useState<FeedBlock[]>([]);
   const [history, setHistory] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
 
-  // Portfolio overlay state — all three are reset to defaults when the
-  // overlay opens so each visit starts at the first project in list view.
+  // Portfolio overlay state — all three are reset when the overlay opens so
+  // each visit starts at the first project in list view.
   const [mode, setMode] = useState<"terminal" | "portfolio">("terminal");
   const [pfIndex, setPfIndex] = useState(0);
   const [pfDetail, setPfDetail] = useState(false);
 
+  // Session state for the AI chat.
+  // sessionIdRef is the single source of truth read at request time by the
+  // transport body callback; hasSession drives the UI gating logic.
+  const [captchaVisible, setCaptchaVisible] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
+  const sessionIdRef = useRef<string | null>(null);
+  // Holds the visitor's free-text message while the CAPTCHA overlay is open.
+  const pendingMessageRef = useRef<string | null>(null);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  // Auto-focus the input shortly after mount on devices with a precise pointer
-  // (mouse / trackpad). The 650ms delay matches the reference design's rhythm.
-  // On touch screens the auto-focus is deliberately skipped: popping the
-  // on-screen keyboard before the visitor has expressed intent to type is
-  // disruptive. Touch users tap the input field themselves when ready.
+  // tRPC mutation that creates a verified session after Turnstile challenge.
+  const initSessionMutation = api.chat.initSession.useMutation();
+
+  // AI chat hook — starts with an empty message history. The session ID is
+  // injected into every request via the transport body callback so we always
+  // read the latest ref value rather than a stale closure value.
+  const { messages, setMessages, sendMessage, status, error, stop } =
+    useChat<UIMessage>({
+      // eslint-disable-next-line react-hooks/refs
+      transport: new DefaultChatTransport({
+        api: "/api/chat",
+        // body() is invoked by the transport at request time, not during render,
+        // so reading sessionIdRef.current inside it is safe and intentional.
+        body: (opts?: { body?: Record<string, unknown> }) => ({
+          ...(opts?.body ?? {}),
+          sessionId: sessionIdRef.current,
+        }),
+      }),
+      onError: (err: Error) => {
+        console.error("[AI Chat Error]", err.message);
+      },
+    });
+
+  // Abort any in-flight stream when the component unmounts.
+  useEffect(() => {
+    return () => {
+      void stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-focus the input shortly after mount on fine-pointer devices.
+  // The 650ms delay matches the reference design's initial rhythm.
   useEffect(() => {
     if (!prefersAutoFocus()) return;
     const timer = setTimeout(() => {
@@ -59,48 +123,141 @@ export function Terminal() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Scroll the body to the bottom whenever new lines land in the feed,
-  // including after /clear (which resets to an empty array).
+  // Scroll the body to the bottom whenever the feed grows or streaming
+  // updates the latest AI turn.
   useEffect(() => {
     const el = bodyRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [feed]);
+  }, [blocks, messages]);
+
+  // ── Session management ──────────────────────────────────────────────────
 
   /**
-   * Run a command string through the registry and update the feed and overlay
-   * state. Shared by the keyboard Enter handler and the tappable command tokens
-   * in the tip line and /help rows. The caller is responsible for clearing the
-   * text input when it was the source of the raw string.
+   * Call tRPC initSession with the given Turnstile token and store the
+   * resulting session ID. When NEXT_PUBLIC_DISABLE_CAPTCHA is "true" the
+   * server accepts any token without verifying against Cloudflare.
+   * Returns true if the session was created, false on error.
+   */
+  async function initSession(turnstileToken: string): Promise<boolean> {
+    try {
+      const result = await initSessionMutation.mutateAsync({ turnstileToken });
+      sessionIdRef.current = result.sessionId;
+      setHasSession(true);
+      return true;
+    } catch (err) {
+      console.error(
+        "[Session Init Error]",
+        err instanceof Error ? err.message : String(err),
+      );
+      return false;
+    }
+  }
+
+  // ── AI message dispatch ─────────────────────────────────────────────────
+
+  /**
+   * Push an AI turn block into the feed and trigger the useChat hook.
+   * Only called when sessionIdRef.current is already set.
+   *
+   * The N-th AI turn block maps to messages[N*2] (user) and
+   * messages[N*2+1] (assistant) in the useChat messages array. This
+   * correspondence is maintained as long as /clear resets both blocks and
+   * messages simultaneously (which it does in dispatchCommand below).
+   */
+  function dispatchAiMessage(text: string) {
+    if (!sessionIdRef.current) return;
+    setBlocks((prev) => [...prev, { type: "ai", userText: text }]);
+    void sendMessage({ text });
+  }
+
+  /**
+   * Route a free-text message to the AI, creating a session first if one
+   * does not yet exist.
+   *
+   * If no session: in dev/test mode (CAPTCHA disabled) the session is
+   * created immediately using a placeholder token. In production, the
+   * CAPTCHA overlay is shown and the message is held in pendingMessageRef
+   * until the visitor solves the challenge.
+   */
+  async function handleFreeText(text: string) {
+    if (hasSession) {
+      dispatchAiMessage(text);
+      return;
+    }
+
+    pendingMessageRef.current = text;
+
+    if (env.NEXT_PUBLIC_DISABLE_CAPTCHA === "true") {
+      // Dev / test bypass: skip the overlay and create the session with a
+      // placeholder token. The server's Turnstile service returns success
+      // when DISABLE_CAPTCHA is true, so any token string works here.
+      const ok = await initSession("dev-bypass-token");
+      if (ok) {
+        pendingMessageRef.current = null;
+        dispatchAiMessage(text);
+      }
+      return;
+    }
+
+    // Production: show the Turnstile overlay; session creation and message
+    // dispatch happen in handleCaptchaSuccess once the challenge is solved.
+    setCaptchaVisible(true);
+  }
+
+  /**
+   * Called by CaptchaOverlay when the visitor successfully solves the
+   * Turnstile challenge. Closes the overlay, creates the session, then sends
+   * the message that was held in pendingMessageRef.
+   */
+  async function handleCaptchaSuccess(token: string) {
+    setCaptchaVisible(false);
+    const ok = await initSession(token);
+    if (ok) {
+      const pending = pendingMessageRef.current;
+      pendingMessageRef.current = null;
+      if (pending) dispatchAiMessage(pending);
+    }
+  }
+
+  // ── Slash-command dispatch ──────────────────────────────────────────────
+
+  /**
+   * Run a slash-command string through the registry and update the feed and
+   * overlay state. Shared by the keyboard Enter handler and the tappable
+   * command tokens in the tip line and /help rows.
    */
   function dispatchCommand(raw: string) {
     const trimmed = raw.trim();
     if (!trimmed) return;
 
-    // Record in history (most-recent first, capped at 40 entries).
     setHistory((prev) => [trimmed, ...prev].slice(0, 40));
 
     const result = runCommand(trimmed);
     if (result.action === "clear") {
-      setFeed([]);
+      // /clear wipes the visual feed and resets the AI conversation so that
+      // AI turn indices remain in sync with the useChat messages array.
+      void stop();
+      setBlocks([]);
+      setMessages([]);
     } else if (result.action === "portfolio") {
-      // Append the echo + launch message, then open the overlay after
-      // a short delay (~140ms) that matches the reference design's rhythm.
-      setFeed((prev) => [...prev, ...result.lines]);
+      setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
       setTimeout(() => {
         setPfIndex(0);
         setPfDetail(false);
         setMode("portfolio");
       }, 140);
     } else {
-      setFeed((prev) => [...prev, ...result.lines]);
+      setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
     }
   }
+
+  // ── Keyboard handler ────────────────────────────────────────────────────
 
   /**
    * Handle keyboard input in the command field.
    *
-   * Enter — trims the input, clears the field, routes through dispatchCommand.
-   *   Empty input is a no-op.
+   * Enter — routes to dispatchCommand for slash-commands or handleFreeText
+   *   for everything else. Empty input is a no-op.
    *
    * ArrowUp / ArrowDown — walk backward / forward through the history buffer.
    *   Index -1 means the field is empty (no history entry selected).
@@ -111,7 +268,17 @@ export function Terminal() {
       setInputValue("");
       setHistIdx(-1);
       if (!raw) return;
-      dispatchCommand(raw);
+
+      if (raw.startsWith("/")) {
+        // Slash-command: instant, no session needed. History is recorded
+        // inside dispatchCommand.
+        dispatchCommand(raw);
+      } else {
+        // Free text: record to history here (dispatchCommand handles its own)
+        // then route to the AI.
+        setHistory((prev) => [raw, ...prev].slice(0, 40));
+        void handleFreeText(raw);
+      }
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (!history.length) return;
@@ -131,12 +298,12 @@ export function Terminal() {
     }
   };
 
+  // ── Portfolio overlay ───────────────────────────────────────────────────
+
   /**
    * Close the portfolio overlay and, on fine-pointer devices, return keyboard
-   * focus to the terminal input. The 40ms delay gives React time to finish the
-   * re-render so the input is visible and focusable before focus() is called.
-   * On touch devices the focus is skipped to avoid popping the on-screen
-   * keyboard immediately after the visitor dismisses the portfolio.
+   * focus to the terminal input. The 40ms delay gives React time to finish
+   * the re-render so the input is visible before focus() is called.
    */
   function exitPortfolio() {
     setMode("terminal");
@@ -144,6 +311,24 @@ export function Terminal() {
       if (prefersAutoFocus()) inputRef.current?.focus();
     }, 40);
   }
+
+  // ── Derived values for rendering ────────────────────────────────────────
+
+  // Collect all AI turn blocks in order so we can derive the turn index of
+  // each block (the N-th AI block maps to messages[N*2] and messages[N*2+1]).
+  const aiTurnBlocks = blocks.filter((b): b is AiTurnBlock => b.type === "ai");
+
+  // True while the AI has a request in flight (waiting or streaming).
+  const isAiInFlight = status === "submitted" || status === "streaming";
+
+  // Approximate line count for the status bar: intro is fixed at 18 lines;
+  // each command block contributes its line count and each AI turn adds ~2.
+  const feedLineCount = blocks.reduce(
+    (sum, b) => (b.type === "cmd" ? sum + b.lines.length : sum + 2),
+    0,
+  );
+
+  // ── JSX ─────────────────────────────────────────────────────────────────
 
   return (
     <div className={styles.page}>
@@ -155,29 +340,23 @@ export function Terminal() {
 
         {/* ── Title bar ── */}
         <div className={styles.titleBar}>
-          {/* Traffic-light close/minimise/maximise dots */}
           <div className={styles.trafficLights}>
             <span className={`${styles.dot} ${styles.dotRed}`} />
             <span className={`${styles.dot} ${styles.dotAmber}`} />
             <span className={`${styles.dot} ${styles.dotGreen}`} />
           </div>
-
-          {/* Centered window title; the "— zsh" segment hides on narrow viewports */}
           <div className={styles.titleText}>
             bas@headingfwd: ~/ai-engineering
             <span className={styles.titleZsh}> — zsh</span>
           </div>
-
-          {/* Right-hand brand label — hidden on narrow viewports */}
           <div className={styles.brand}>HeadingFWD</div>
         </div>
 
         {/* ── Scrollable body ── */}
         {/*
-         * On fine-pointer devices (mouse / trackpad), clicking anywhere in the
-         * body refocuses the hidden input so the visitor can keep typing without
-         * manually clicking the field. On touch devices the handler is skipped:
-         * forcing focus here would pop the on-screen keyboard unintentionally.
+         * On fine-pointer devices, clicking anywhere in the body refocuses
+         * the hidden input so the visitor can keep typing. On touch devices
+         * the handler is skipped to avoid popping the on-screen keyboard.
          */}
         <div
           ref={bodyRef}
@@ -194,7 +373,6 @@ export function Terminal() {
             Heading
             <span className={styles.wordmarkAccent}>FWD</span>
             <span className={styles.wordmarkArrows}>
-              {/* ›› — › rendered as HTML entities */}
               {" "}&rsaquo;&rsaquo;&mdash;&rsaquo;
             </span>
           </div>
@@ -215,7 +393,7 @@ export function Terminal() {
             actually make it to production.
           </div>
 
-          {/* "// specialities" is terminal-style comment decoration, not a JS comment */}
+          {/* "// specialities" is terminal-style comment decoration */}
           <div className={styles.specialitiesLabel}>{'// specialities'}</div>
           <div className={styles.specialitiesGrid}>
             <div>
@@ -236,14 +414,9 @@ export function Terminal() {
             </div>
           </div>
 
-          {/* Hint line pointing visitors toward commands */}
+          {/* Hint line — command tokens are real buttons for touch visitors */}
           <div className={styles.tip}>
             tip: type{" "}
-            {/*
-             * These command tokens are real buttons so a touch visitor can tap
-             * one to run the command without typing. stopPropagation prevents
-             * the body's click handler from interfering with the dispatch.
-             */}
             <button
               className={styles.tipCommand}
               onClick={(e) => {
@@ -266,13 +439,152 @@ export function Terminal() {
             {" "}to browse my work fullscreen · or just ask
           </div>
 
-          {/* Divider separating the intro from the command feed area */}
+          {/* Divider separating the intro from the chronological feed */}
           <div className={styles.divider} />
 
-          {/* Live command feed — grows as the visitor types commands */}
-          <TerminalFeed lines={feed} onRunCommand={dispatchCommand} />
+          {/* ── Chronological feed: command blocks + AI turns ── */}
+          <div className={styles.feed}>
+            {blocks.map((block, blockIdx) => {
+              // ── Command block ──────────────────────────────────
+              if (block.type === "cmd") {
+                return (
+                  <Fragment key={blockIdx}>
+                    {block.lines.map((line, lineIdx) =>
+                      renderFeedLine(line, lineIdx, dispatchCommand),
+                    )}
+                  </Fragment>
+                );
+              }
 
-          {/* Input row */}
+              // ── AI turn block ──────────────────────────────────
+              //
+              // The N-th AI turn (0-indexed within aiTurnBlocks) maps to
+              // messages[N*2] (user message) and messages[N*2+1] (assistant).
+              // This is valid as long as /clear resets both arrays together.
+              const turnIdx = aiTurnBlocks.indexOf(block);
+              const isLatestTurn = turnIdx === aiTurnBlocks.length - 1;
+
+              const userMsg = messages[turnIdx * 2];
+              const assistantMsg = messages[turnIdx * 2 + 1];
+
+              // Determine what to show for this turn.
+              // isInFlight: this specific turn is still being processed.
+              const isInFlight = isLatestTurn && isAiInFlight;
+
+              // hasStreamedText: the assistant has produced at least one
+              // non-empty text part (content is already arriving).
+              const hasStreamedText = assistantMsg?.parts.some(
+                (p) =>
+                  p.type === "text" &&
+                  (p as { type: "text"; text: string }).text.trim().length > 0,
+              );
+
+              // Show "Thinking…" while submitted (no response yet) OR while
+              // streaming but the first text token has not yet arrived.
+              const showThinking =
+                isInFlight && (status === "submitted" || !hasStreamedText);
+
+              // Show cursor on the last text part while streaming.
+              const showCursor = isLatestTurn && status === "streaming";
+
+              // Show an error line when this is the latest turn and the
+              // request ended in an error state.
+              const showError = isLatestTurn && status === "error";
+
+              return (
+                <div key={blockIdx} className={styles.aiTurn}>
+                  {/*
+                   * Echo the visitor's typed message in the same prompt style
+                   * as slash-commands so the feed reads consistently.
+                   *
+                   * userMsg may be undefined for a split second before the
+                   * useChat hook processes the new message; block.userText is
+                   * always available immediately.
+                   */}
+                  <div className={`${styles.feedLine} ${styles.feedCmd}`}>
+                    <span className={styles.feedCmdPrompt}>
+                      {"bas@headingfwd "}
+                    </span>
+                    <span className={styles.feedCmdAccent}>{"~$ "}</span>
+                    <span className={styles.feedCmdText}>
+                      {userMsg
+                        ? (userMsg.parts.find(
+                            (p): p is { type: "text"; text: string } =>
+                              p.type === "text",
+                          )?.text ?? block.userText)
+                        : block.userText}
+                    </span>
+                  </div>
+
+                  {/*
+                   * "Thinking…" indicator — visible throughout the entire
+                   * in-flight phase (submitted + streaming). The loading-
+                   * indicator data-testid lets E2E tests verify when the
+                   * response is complete.
+                   */}
+                  {isInFlight && (
+                    <div
+                      className={styles.aiThinking}
+                      data-testid="loading-indicator"
+                      style={showThinking ? undefined : { display: "none" }}
+                      aria-hidden={!showThinking}
+                    >
+                      Thinking…
+                    </div>
+                  )}
+
+                  {/* Streamed or completed assistant response */}
+                  {assistantMsg && (
+                    <div
+                      className={styles.aiResponse}
+                      data-testid="assistant-message"
+                    >
+                      {assistantMsg.parts.map((part, partIdx) => {
+                        if (part.type !== "text") {
+                          // Tool-call parts (e.g. sendMessage) are hidden;
+                          // the AI is instructed to always follow up with text.
+                          return null;
+                        }
+                        const textPart = part as { type: "text"; text: string };
+                        if (!textPart.text) return null;
+                        const isLastPart =
+                          partIdx === assistantMsg.parts.length - 1;
+                        return (
+                          <Fragment key={partIdx}>
+                            <MemoizedMarkdown
+                              content={textPart.text}
+                              id={`ai-${blockIdx}-${partIdx}`}
+                            />
+                            {showCursor && isLastPart && (
+                              <span
+                                className={styles.aiCursor}
+                                aria-hidden="true"
+                              />
+                            )}
+                          </Fragment>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Error display in terminal style */}
+                  {showError && (
+                    <div
+                      className={styles.aiError}
+                      data-testid="error-message"
+                    >
+                      {"→ "}
+                      {error instanceof Error
+                        ? error.message
+                        : "An error occurred. Please try again."}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ── Input row ── */}
           <div className={styles.inputRow}>
             <span className={styles.inputPrompt}>
               {/* Full prefix hides on narrow viewports */}
@@ -286,16 +598,23 @@ export function Terminal() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="type a command…"
+              placeholder={
+                captchaVisible
+                  ? "complete verification to continue…"
+                  : isAiInFlight
+                    ? "AI is responding…"
+                    : "type a command…"
+              }
+              disabled={captchaVisible || isAiInFlight}
               spellCheck={false}
               autoComplete="off"
+              data-testid="terminal-input"
             />
           </div>
         </div>
 
         {/* ── Status bar ── */}
         <div className={styles.statusBar}>
-          {/* Pulsing online indicator */}
           <span className={styles.statusOnline}>
             <span className={styles.statusDot} />
             online
@@ -303,19 +622,37 @@ export function Terminal() {
           <span>main</span>
           <span>utf-8</span>
           {/*
-           * Line count: 18 accounts for the fixed intro block; feed.length
-           * adds the growing command output. Matches the reference formula.
+           * Line count: 18 for the fixed intro block; feedLineCount for the
+           * growing command + AI turn content.
            */}
-          <span className={styles.statusRight}>{18 + feed.length} lines · /help</span>
+          <span className={styles.statusRight}>
+            {18 + feedLineCount} lines · /help
+          </span>
         </div>
 
+        {/*
+         * CAPTCHA overlay — shown on the first free-text message in
+         * production. Rendered inside .window so it covers exactly the
+         * terminal surface (absolute positioning relative to position:relative
+         * on .window). Hidden when captchaVisible is false.
+         */}
+        {captchaVisible && (
+          <CaptchaOverlay
+            onSuccess={(token) => {
+              void handleCaptchaSuccess(token);
+            }}
+            onError={() => {
+              setCaptchaVisible(false);
+              pendingMessageRef.current = null;
+            }}
+          />
+        )}
       </div>
 
       {/*
        * Portfolio overlay — rendered on top of the window when the visitor
        * opens /portfolio. Absolutely positioned inside .page so it covers the
-       * full viewport. The overlay manages its own keyboard focus; exiting it
-       * returns focus to the terminal input via exitPortfolio.
+       * full viewport.
        */}
       {mode === "portfolio" && (
         <PortfolioOverlay
