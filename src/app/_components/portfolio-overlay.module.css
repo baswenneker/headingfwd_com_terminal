@@ -376,3 +376,83 @@
   border: none;
   cursor: pointer;
 }
+
+/* ─── Narrow container breakpoint (≤560px) ───────────────────────────── */
+/*
+ * On narrow containers (mobile phones), increase the touch target height of
+ * all interactive controls to approximately 44px, which matches the minimum
+ * recommended tap-target size. Also fix horizontal overflow from the ASCII
+ * banner and long list tag strings, and ensure the detail title wraps.
+ */
+@container page (max-width: 560px) {
+  /*
+   * The ASCII banner: enforce a maximum width so the <pre> element stays within
+   * the flex column. overflow-x:auto (already set in the base rule) provides
+   * a scrollbar for the rare case where the banner still exceeds its box.
+   */
+  .asciiBanner {
+    max-width: 100%;
+  }
+
+  /* Exit button: grow to at least 44px tall for comfortable tapping. */
+  .exitBtn {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  /*
+   * "← back to all work" text button: add vertical padding so the touch
+   * target reaches ~44px. The button has no border so the padding does not
+   * change its visual footprint noticeably.
+   */
+  .backBtn {
+    padding: 12px 0;
+    min-height: 44px;
+  }
+
+  /* Outline nav buttons (← prev, next →, read the case study →): 44px min. */
+  .outlineBtn {
+    min-height: 44px;
+    padding: 11px 16px;
+  }
+
+  /* CTA "work with me →": 44px min. */
+  .ctaBtn {
+    min-height: 44px;
+    padding: 13px 18px;
+  }
+
+  /*
+   * List rows: guarantee a minimum touch height. In practice the rows are
+   * taller (they contain three lines of text + padding), but a floor of 44px
+   * protects edge-cases with very short content.
+   */
+  .listRow {
+    min-height: 44px;
+  }
+
+  /*
+   * List tag strings: tags joined with four-space separators can be very long.
+   * word-break:break-word lets the browser split at whitespace characters in
+   * the separator so the text wraps instead of overflowing the grid cell.
+   */
+  .listRowTags {
+    word-break: break-word;
+  }
+
+  /*
+   * Detail title: force word wrapping so a long project name breaks at word
+   * boundaries rather than overflowing to the right of the overlay.
+   */
+  .detailTitle {
+    word-break: break-word;
+  }
+
+  /*
+   * Detail body: remove the ch-based max-width so the text fills the available
+   * container width at 375px instead of potentially overflowing.
+   */
+  .detailBody {
+    max-width: 100%;
+  }
+}

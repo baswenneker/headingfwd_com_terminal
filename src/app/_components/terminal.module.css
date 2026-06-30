@@ -236,10 +236,20 @@
   color: rgba(245, 197, 68, 0.9);
 }
 
-/* Highlighted command names inside the tip */
+/* Highlighted command tokens inside the tip line, rendered as inline buttons.
+ * Button-reset rules strip browser chrome so the element looks identical to
+ * the old <span> while remaining keyboard- and tap-accessible. */
 .tipCommand {
   color: var(--accent);
   font-weight: 700;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  display: inline;
 }
 
 /* 1px rule separating the intro block from the (future) command feed */
@@ -423,6 +433,20 @@
   min-width: 96px;
 }
 
+/* Applied to .feedRowLabel when it is rendered as a <button> so the browser's
+ * default button appearance is stripped while the visual style is preserved. */
+.feedRowLabelBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: inline-block;
+}
+
 /* Right column of a row — description in a slightly muted tone */
 .feedRowDesc {
   color: rgba(207, 226, 231, 0.78);
@@ -476,6 +500,9 @@
  * When the page container is 560px wide or less, collapse the layout:
  * the window goes full-height, title bar and prompt are shortened,
  * and the specialities grid drops to one column.
+ *
+ * Additional rules below prevent horizontal overflow in the command feed
+ * and enlarge tap targets on the tappable row labels.
  */
 @container page (max-width: 560px) {
   .window {
@@ -506,5 +533,35 @@
 
   .specialitiesGrid {
     grid-template-columns: 1fr;
+  }
+
+  /*
+   * Job rows: allow contents to wrap so a long project name or description
+   * does not force the row wider than the viewport. Removing min-width from
+   * feedJobName lets it shrink and wrap rather than pushing the layout.
+   */
+  .feedJob {
+    flex-wrap: wrap;
+  }
+
+  .feedJobName {
+    min-width: 0;
+  }
+
+  /*
+   * Link anchors: allow the URL text to break at any character so a long
+   * URL (e.g. a LinkedIn profile path) does not overflow the row.
+   */
+  .feedLinkAnchor {
+    word-break: break-all;
+    min-width: 0;
+  }
+
+  /*
+   * Tappable /help row labels: add vertical padding so the touch target is
+   * comfortably tall (~44px accounting for line height + padding).
+   */
+  .feedRowLabelBtn {
+    padding: 8px 0;
   }
 }

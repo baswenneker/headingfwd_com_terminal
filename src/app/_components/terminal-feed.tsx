@@ -3,6 +3,13 @@ import styles from "./terminal.module.css";
 
 interface TerminalFeedProps {
   lines: FeedLine[];
+  /**
+   * When provided, slash-command labels in "row" lines become tappable
+   * buttons that call this function with the label text (e.g. "/help").
+   * This lets touch visitors browse commands in the /help output by tapping
+   * the label instead of typing. Pass the terminal's dispatchCommand here.
+   */
+  onRunCommand?: (cmd: string) => void;
 }
 
 /**
@@ -13,15 +20,19 @@ interface TerminalFeedProps {
  * custom properties that the page container provides. This matches the
  * visual output of the reference design's `el()` renderer.
  */
-export function TerminalFeed({ lines }: TerminalFeedProps) {
+export function TerminalFeed({ lines, onRunCommand }: TerminalFeedProps) {
   return (
     <div className={styles.feed}>
-      {lines.map((line, i) => renderLine(line, i))}
+      {lines.map((line, i) => renderLine(line, i, onRunCommand))}
     </div>
   );
 }
 
-function renderLine(line: FeedLine, key: number): React.ReactNode {
+function renderLine(
+  line: FeedLine,
+  key: number,
+  onRunCommand?: (cmd: string) => void,
+): React.ReactNode {
   switch (line.kind) {
     case "sp":
       return <div key={key} className={styles.feedSpacer} />;
@@ -65,9 +76,26 @@ function renderLine(line: FeedLine, key: number): React.ReactNode {
       );
 
     case "row":
+      // When the label is a slash-command and a dispatch function is provided,
+      // render the label as a button so touch visitors can tap it to run the
+      // command without having to type. Keyboard users continue to navigate via
+      // the input field as before. stopPropagation prevents the body's
+      // click-to-refocus handler from conflicting with the button action.
       return (
         <div key={key} className={`${styles.feedLine} ${styles.feedRow}`}>
-          <span className={styles.feedRowLabel}>{line.label}</span>
+          {onRunCommand && line.label.startsWith("/") ? (
+            <button
+              className={`${styles.feedRowLabel} ${styles.feedRowLabelBtn}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onRunCommand(line.label);
+              }}
+            >
+              {line.label}
+            </button>
+          ) : (
+            <span className={styles.feedRowLabel}>{line.label}</span>
+          )}
           <span className={styles.feedRowDesc}>{line.desc}</span>
         </div>
       );

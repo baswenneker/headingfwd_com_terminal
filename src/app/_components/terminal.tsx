@@ -31,9 +31,17 @@ export function Terminal() {
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  // Focus the input shortly after mount so the visitor can type immediately.
-  // The 650ms delay matches the reference design's intentional rhythm.
+  // Auto-focus the input shortly after mount on devices with a precise pointer
+  // (mouse / trackpad). The 650ms delay matches the reference design's rhythm.
+  // On touch screens the auto-focus is deliberately skipped: popping the
+  // on-screen keyboard before the visitor has expressed intent to type is
+  // disruptive. Touch users tap the input field themselves when ready.
   useEffect(() => {
+    const isFinePointer =
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (!isFinePointer) return;
+
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 650);
@@ -48,11 +56,40 @@ export function Terminal() {
   }, [feed]);
 
   /**
+   * Run a command string through the registry and update the feed and overlay
+   * state. Shared by the keyboard Enter handler and the tappable command tokens
+   * in the tip line and /help rows. The caller is responsible for clearing the
+   * text input when it was the source of the raw string.
+   */
+  function dispatchCommand(raw: string) {
+    const trimmed = raw.trim();
+    if (!trimmed) return;
+
+    // Record in history (most-recent first, capped at 40 entries).
+    setHistory((prev) => [trimmed, ...prev].slice(0, 40));
+
+    const result = runCommand(trimmed);
+    if (result.action === "clear") {
+      setFeed([]);
+    } else if (result.action === "portfolio") {
+      // Append the echo + launch message, then open the overlay after
+      // a short delay (~140ms) that matches the reference design's rhythm.
+      setFeed((prev) => [...prev, ...result.lines]);
+      setTimeout(() => {
+        setPfIndex(0);
+        setPfDetail(false);
+        setMode("portfolio");
+      }, 140);
+    } else {
+      setFeed((prev) => [...prev, ...result.lines]);
+    }
+  }
+
+  /**
    * Handle keyboard input in the command field.
    *
-   * Enter — trims the input, records it in history (capped at 40 entries),
-   *   routes it through runCommand, and either clears the feed (/clear) or
-   *   appends the result lines. Empty input is a no-op.
+   * Enter — trims the input, clears the field, routes through dispatchCommand.
+   *   Empty input is a no-op.
    *
    * ArrowUp / ArrowDown — walk backward / forward through the history buffer.
    *   Index -1 means the field is empty (no history entry selected).
@@ -63,25 +100,7 @@ export function Terminal() {
       setInputValue("");
       setHistIdx(-1);
       if (!raw) return;
-
-      // Prepend to history and cap at 40 entries (most-recent first).
-      setHistory((prev) => [raw, ...prev].slice(0, 40));
-
-      const result = runCommand(raw);
-      if (result.action === "clear") {
-        setFeed([]);
-      } else if (result.action === "portfolio") {
-        // Append the echo + launch message, then open the overlay after
-        // a short delay (~140ms) that matches the reference design's rhythm.
-        setFeed((prev) => [...prev, ...result.lines]);
-        setTimeout(() => {
-          setPfIndex(0);
-          setPfDetail(false);
-          setMode("portfolio");
-        }, 140);
-      } else {
-        setFeed((prev) => [...prev, ...result.lines]);
-      }
+      dispatchCommand(raw);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (!history.length) return;
@@ -140,13 +159,22 @@ export function Terminal() {
 
         {/* ── Scrollable body ── */}
         {/*
-         * Clicking anywhere in the body refocuses the hidden input so the
-         * visitor can keep typing without manually clicking the field.
+         * On fine-pointer devices (mouse / trackpad), clicking anywhere in the
+         * body refocuses the hidden input so the visitor can keep typing without
+         * manually clicking the field. On touch devices the handler is skipped:
+         * forcing focus here would pop the on-screen keyboard unintentionally.
          */}
         <div
           ref={bodyRef}
           className={styles.body}
-          onClick={() => inputRef.current?.focus()}
+          onClick={() => {
+            if (
+              typeof window !== "undefined" &&
+              window.matchMedia("(hover: hover) and (pointer: fine)").matches
+            ) {
+              inputRef.current?.focus();
+            }
+          }}
         >
           {/* Shell prompt that precedes the intro */}
           <div className={styles.promptLine}>bas@headingfwd:~$ ./hello --who</div>
@@ -201,16 +229,38 @@ export function Terminal() {
           {/* Hint line pointing visitors toward commands */}
           <div className={styles.tip}>
             tip: type{" "}
-            <span className={styles.tipCommand}>/help</span> for commands ·{" "}
-            <span className={styles.tipCommand}>/portfolio</span> to browse my
-            work fullscreen · or just ask
+            {/*
+             * These command tokens are real buttons so a touch visitor can tap
+             * one to run the command without typing. stopPropagation prevents
+             * the body's click handler from interfering with the dispatch.
+             */}
+            <button
+              className={styles.tipCommand}
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatchCommand("/help");
+              }}
+            >
+              /help
+            </button>
+            {" "}for commands ·{" "}
+            <button
+              className={styles.tipCommand}
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatchCommand("/portfolio");
+              }}
+            >
+              /portfolio
+            </button>
+            {" "}to browse my work fullscreen · or just ask
           </div>
 
           {/* Divider separating the intro from the command feed area */}
           <div className={styles.divider} />
 
           {/* Live command feed — grows as the visitor types commands */}
-          <TerminalFeed lines={feed} />
+          <TerminalFeed lines={feed} onRunCommand={dispatchCommand} />
 
           {/* Input row */}
           <div className={styles.inputRow}>
