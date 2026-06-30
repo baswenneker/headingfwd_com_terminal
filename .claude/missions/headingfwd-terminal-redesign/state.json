@@ -708,7 +708,8 @@
           "evidence": "Grep of the changed files and the two in-scope commit messages (test(e2e), chore(cleanup)) finds no mission-internal codes; comments are standalone-readable.",
           "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M3-review.md"
         }
-      ]
+      ],
+      "walkthrough_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M3-walkthrough.md"
     }
   ],
   "circuit_breaker": {
