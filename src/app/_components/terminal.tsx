@@ -42,6 +42,32 @@ function prefersAutoFocus(): boolean {
   );
 }
 
+/**
+ * Extracts a human-readable sentence from an error thrown by the AI chat route.
+ *
+ * The /api/chat endpoint returns errors as JSON bodies of the shape
+ * `{"error":"…"}`. When the Vercel AI SDK surfaces these as an Error object,
+ * the message is the raw response text, which includes the JSON envelope.
+ * This helper unwraps that envelope so visitors see a clean message instead
+ * of raw JSON. If the input is not JSON, or the JSON does not contain an
+ * "error" string, the raw text is returned as-is. An empty result falls back
+ * to a generic prompt.
+ */
+function readableError(err: unknown): string {
+  const raw =
+    err instanceof Error ? err.message : typeof err === "string" ? err : "";
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && "error" in parsed) {
+      const e = (parsed as { error?: unknown }).error;
+      if (typeof e === "string" && e.trim()) return e;
+    }
+  } catch {
+    // raw was not JSON — fall through to the raw text
+  }
+  return raw.trim() || "Something went wrong. Please try again.";
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 /**
@@ -373,7 +399,7 @@ export function Terminal() {
             Heading
             <span className={styles.wordmarkAccent}>FWD</span>
             <span className={styles.wordmarkArrows}>
-              {" "}&rsaquo;&rsaquo;&mdash;&rsaquo;
+              {" "}&gt;&gt;
             </span>
           </div>
 
@@ -574,9 +600,7 @@ export function Terminal() {
                       data-testid="error-message"
                     >
                       {"→ "}
-                      {error instanceof Error
-                        ? error.message
-                        : "An error occurred. Please try again."}
+                      {readableError(error)}
                     </div>
                   )}
                 </div>
