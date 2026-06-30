@@ -241,12 +241,53 @@
         "VC-7",
         "VC-8"
       ],
-      "status": "pending",
-      "attempts": 0,
-      "commit_sha": null,
-      "started_at": null,
-      "completed_at": null,
-      "error": null
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "1a18bcec1caa2e3cc5892f74debc3319d097a12d",
+      "started_at": "2026-06-30T14:01:53Z",
+      "completed_at": "2026-06-30T14:01:53Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Single prefersAutoFocus() helper (SSR-guarded) gates all three focus paths: mount auto-focus, body click-refocus, and exitPortfolio — the on-screen keyboard no longer pops unprompted on touch",
+          "Tip-line /help and /portfolio tokens are real buttons routing through a shared dispatchCommand; /help output row labels become tappable buttons via an optional onRunCommand prop on TerminalFeed (spans otherwise)",
+          "375px overflow fixes: feedJob flex-wrap + feedJobName min-width:0 (mobile only, desktop keeps max-content), feedLinkAnchor word-break:break-all; portfolio asciiBanner max-width, listRowTags/detailTitle word-break, detailBody max-width",
+          "Tap-targets ~44px on the portfolio exit/back/prev/next/CTA buttons and list rows via the portfolio mobile container query",
+          "Existing terminal 560px breakpoint (VC-7) preserved intact"
+        ],
+        "left_undone": [
+          "AI streaming / deferred CAPTCHA / tRPC — next milestone",
+          "Playwright E2E suite updates — later feature",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx / captcha-overlay.tsx — later cleanup"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "Playwright-narrow viewports report pointer:fine, so the touch keyboard-suppression behavior is code-verified rather than observable in the headless test; on real touch devices all three focus paths are now gated.",
+          "List rows remain div+onClick (tappable); the overlay-level keyboard handler covers keyboard access, so per-row tabIndex was intentionally not added.",
+          "Orchestrator Playwright check at 375px confirmed: no horizontal overflow on terminal or portfolio, tapping the tip /portfolio opens the overlay, and a full tap-only flow (row -> next -> exit) works; zero console errors."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok)",
+          "two conventional commits: feat(mobile): then fix(mobile): for the shared-helper focus gating",
+          "only the relevant files staged (no git add -A)",
+          "no mission-internal codes in code, comments, or commit messages",
+          "orchestrator verified the running 375px UI with the Playwright MCP before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F4.md"
+      }
     },
     {
       "id": "F5",
