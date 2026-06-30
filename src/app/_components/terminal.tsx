@@ -8,6 +8,21 @@ import { PortfolioOverlay } from "./portfolio-overlay";
 import { PROJECTS } from "./terminal-projects";
 
 /**
+ * Returns true when the device has a fine pointer (mouse / trackpad).
+ *
+ * Used to decide whether to focus the text input automatically. On touch
+ * screens the on-screen keyboard should not appear until the visitor taps the
+ * input deliberately; on pointer devices immediate focus is expected.
+ * Returns false during server-side rendering (window is not available).
+ */
+function prefersAutoFocus(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches
+  );
+}
+
+/**
  * Full-page terminal shell with a live command layer.
  *
  * Visitors type slash-commands (/help, /about, /services, /work, /stack,
@@ -37,11 +52,7 @@ export function Terminal() {
   // on-screen keyboard before the visitor has expressed intent to type is
   // disruptive. Touch users tap the input field themselves when ready.
   useEffect(() => {
-    const isFinePointer =
-      typeof window !== "undefined" &&
-      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (!isFinePointer) return;
-
+    if (!prefersAutoFocus()) return;
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 650);
@@ -121,13 +132,17 @@ export function Terminal() {
   };
 
   /**
-   * Close the portfolio overlay and return keyboard focus to the terminal
-   * input. The 40ms delay gives React time to finish the re-render so the
-   * input element is visible and focusable before focus() is called.
+   * Close the portfolio overlay and, on fine-pointer devices, return keyboard
+   * focus to the terminal input. The 40ms delay gives React time to finish the
+   * re-render so the input is visible and focusable before focus() is called.
+   * On touch devices the focus is skipped to avoid popping the on-screen
+   * keyboard immediately after the visitor dismisses the portfolio.
    */
   function exitPortfolio() {
     setMode("terminal");
-    setTimeout(() => inputRef.current?.focus(), 40);
+    setTimeout(() => {
+      if (prefersAutoFocus()) inputRef.current?.focus();
+    }, 40);
   }
 
   return (
@@ -168,12 +183,7 @@ export function Terminal() {
           ref={bodyRef}
           className={styles.body}
           onClick={() => {
-            if (
-              typeof window !== "undefined" &&
-              window.matchMedia("(hover: hover) and (pointer: fine)").matches
-            ) {
-              inputRef.current?.focus();
-            }
+            if (prefersAutoFocus()) inputRef.current?.focus();
           }}
         >
           {/* Shell prompt that precedes the intro */}
