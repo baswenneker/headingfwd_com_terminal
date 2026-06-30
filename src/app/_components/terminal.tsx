@@ -1,139 +1,155 @@
 "use client";
 
-import { useState } from "react";
-import { CaptchaOverlay } from "./captcha-overlay";
-import { CodeBlock } from "./code-block";
-import { ChatTerminal } from "./chat-terminal";
-import { env } from "~/env";
+import { useEffect, useRef, useState } from "react";
+import styles from "./terminal.module.css";
 
+/**
+ * Full-page terminal shell. Renders the cyan backdrop, the macOS-style
+ * window chrome, the intro content, and a text input that auto-focuses
+ * on load. Command execution and AI integration are wired in later.
+ */
 export function Terminal() {
-  const isCaptchaDisabled = env.NEXT_PUBLIC_DISABLE_CAPTCHA === "true";
-  const [showCaptcha, setShowCaptcha] = useState(false);
-  const [isVerified, setIsVerified] = useState(isCaptchaDisabled);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(
-    isCaptchaDisabled ? "dev-bypass-token" : null,
-  );
+  const [inputValue, setInputValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleShowCaptcha = () => {
-    if (!isVerified && !showCaptcha && !isCaptchaDisabled) {
-      setShowCaptcha(true);
-    }
-  };
-
-  const handleCaptchaSuccess = (token: string) => {
-    setTurnstileToken(token);
-    setIsVerifying(true); // Mark as verifying
-    // Don't hide captcha yet - wait for session initialization to complete
-  };
-
-  const handleVerificationComplete = () => {
-    setIsVerified(true);
-    setIsVerifying(false);
-    setShowCaptcha(false); // Hide overlay after successful session creation
-  };
+  // Focus the input shortly after mount so the visitor can type immediately.
+  // The 650ms delay matches the reference design's intentional rhythm.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 650);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-0 md:p-8">
-      {/* Terminal Window - outer container with border */}
-      <div className="flex h-full w-full flex-col overflow-hidden md:h-auto md:max-h-[calc(100vh-8rem)] md:max-w-6xl md:overflow-auto md:rounded-xl md:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
-        {/* macOS Window Chrome - Hidden on mobile */}
-        <div className="hidden shrink-0 items-center gap-2 border-b border-gray-700/50 bg-[#3a3a3a] px-4 py-3 md:flex">
-          {/* Three colored dots */}
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-gray-400"></div>
-            <div className="h-3 w-3 rounded-full bg-gray-400"></div>
-            <div className="h-3 w-3 rounded-full bg-gray-400"></div>
+    <div className={styles.page}>
+      {/* Faint repeating dot grid — sits behind the terminal window */}
+      <div className={styles.grid} aria-hidden="true" />
+
+      {/* macOS-style terminal window */}
+      <div className={styles.window}>
+
+        {/* ── Title bar ── */}
+        <div className={styles.titleBar}>
+          {/* Traffic-light close/minimise/maximise dots */}
+          <div className={styles.trafficLights}>
+            <span className={`${styles.dot} ${styles.dotRed}`} />
+            <span className={`${styles.dot} ${styles.dotAmber}`} />
+            <span className={`${styles.dot} ${styles.dotGreen}`} />
           </div>
-          {/* Title */}
-          <div className="ml-4 flex-1 text-center text-sm text-gray-300">
-            HeadingFWD - AI Engineering & Consultancy
+
+          {/* Centered window title; the "— zsh" segment hides on narrow viewports */}
+          <div className={styles.titleText}>
+            bas@headingfwd: ~/ai-engineering
+            <span className={styles.titleZsh}> — zsh</span>
           </div>
+
+          {/* Right-hand brand label — hidden on narrow viewports */}
+          <div className={styles.brand}>HeadingFWD</div>
         </div>
 
-        {/* Terminal Content with fieldset inside */}
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-[#1e1e1e] p-4 font-mono text-sm text-gray-400 md:flex-initial md:p-6">
-          {/* CAPTCHA Overlay - covers entire terminal */}
-          {showCaptcha && !isVerified && (
-            <CaptchaOverlay onSuccess={handleCaptchaSuccess} />
-          )}
-          {/* Fieldset containing the content */}
-          <fieldset className="border border-cyan-800 p-4 md:p-6">
-            <legend className="px-2 text-gray-100">
-              Bas Wenneker [AI Lead/Engineer]
-            </legend>
-            {/* Two column layout with vertical divider - stacks on mobile */}
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-0">
-              {/* Left Column - Code */}
-              <div className="space-y-2 md:border-r md:border-cyan-800 md:pr-12">
-                {/* Prompt */}
-                <div className="mb-4">
-                  <span className="animate-pulse text-cyan-400">{">"}</span>{" "}
-                  <span className="text-gray-100">Working on solution...</span>
-                </div>
+        {/* ── Scrollable body ── */}
+        {/* Clicking anywhere in the body refocuses the hidden input. */}
+        <div
+          className={styles.body}
+          onClick={() => inputRef.current?.focus()}
+        >
+          {/* Shell prompt that precedes the intro */}
+          <div className={styles.promptLine}>bas@headingfwd:~$ ./hello --who</div>
 
-                {/* Code snippet - NO syntax highlighting, all same color */}
-                <CodeBlock />
-              </div>
+          {/* Wordmark: "Heading" white, "FWD" + arrows in accent */}
+          <div className={styles.wordmark}>
+            Heading
+            <span className={styles.wordmarkAccent}>FWD</span>
+            <span className={styles.wordmarkArrows}>
+              {/* ›› — › rendered as HTML entities */}
+              {" "}&rsaquo;&rsaquo;&mdash;&rsaquo;
+            </span>
+          </div>
 
-              {/* Right Column - Description with vertical spacing from divider */}
-              <div className="space-y-6 font-mono text-sm md:pl-12">
-                {/* Main description */}
-                <div className="border-t border-b border-cyan-800 pt-6 pb-6 md:border-t-0 md:pt-0">
-                  <p className="font-bold text-gray-100">
-                    I help teams get value from Generative AI by developing
-                    agents, assistants and AI workflows.
-                  </p>
-                </div>
+          {/* Tagline */}
+          <div className={styles.subtitle}>
+            AI engineering &amp; consultancy · Bas Wenneker — AI Lead / Engineer
+          </div>
 
-                {/* Services list */}
-                <div className="space-y-1 text-sm text-gray-300">
-                  <div className="flex items-start gap-3">
-                    <span>Specialities:</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span>*</span>
-                    <span>Agentic workflow development</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span>*</span>
-                    <span>AI strategy & consultancy</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span>*</span>
-                    <span>Evaluation and testing</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span>*</span>
-                    <span>
-                      ... more, send me a{" "}
-                      <a
-                        href="https://www.linkedin.com/in/baswenneker"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-cyan-400 underline hover:text-cyan-300"
-                      >
-                        dm
-                      </a>{" "}
-                      on LinkedIn or type{" "}
-                      <span className="font-bold">/contact</span> below for
-                      contact info.
-                    </span>
-                  </div>
-                </div>
-              </div>
+          {/* Value proposition */}
+          <div className={styles.valueProp}>
+            I help teams get real value from{" "}
+            <span className={styles.valuePropAccent}>Generative AI</span> —
+            designing and building{" "}
+            <span className={styles.valuePropBright}>agents</span>,{" "}
+            <span className={styles.valuePropBright}>assistants</span> and{" "}
+            <span className={styles.valuePropBright}>AI workflows</span> that
+            actually make it to production.
+          </div>
+
+          {/* "// specialities" is terminal-style comment decoration, not a JS comment */}
+          <div className={styles.specialitiesLabel}>{'// specialities'}</div>
+          <div className={styles.specialitiesGrid}>
+            <div>
+              <span className={styles.specialityBullet}>*</span> Agentic
+              workflow development
             </div>
-          </fieldset>
+            <div>
+              <span className={styles.specialityBullet}>*</span> AI strategy
+              &amp; consultancy
+            </div>
+            <div>
+              <span className={styles.specialityBullet}>*</span> Evaluation
+              &amp; testing
+            </div>
+            <div>
+              <span className={styles.specialityBullet}>*</span> Assistants
+              &amp; copilots, production-ready
+            </div>
+          </div>
 
-          {/* Interactive Chat Terminal */}
-          <ChatTerminal
-            onRequestVerification={handleShowCaptcha}
-            turnstileToken={turnstileToken}
-            onVerificationComplete={handleVerificationComplete}
-            isVerified={isVerified}
-            isVerifying={isVerifying}
-          />
+          {/* Hint line pointing visitors toward commands */}
+          <div className={styles.tip}>
+            tip: type{" "}
+            <span className={styles.tipCommand}>/help</span> for commands ·{" "}
+            <span className={styles.tipCommand}>/portfolio</span> to browse my
+            work fullscreen · or just ask
+          </div>
+
+          {/* Divider separating the intro from the command feed area */}
+          <div className={styles.divider} />
+
+          {/* Command feed output will be rendered here in a later feature */}
+
+          {/* Input row */}
+          <div className={styles.inputRow}>
+            <span className={styles.inputPrompt}>
+              {/* Full prefix hides on narrow viewports */}
+              <span className={styles.inputPromptFull}>bas@headingfwd </span>
+              <span className={styles.inputPromptAccent}>~$</span>
+            </span>
+            <input
+              ref={inputRef}
+              className={styles.input}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="type a command…"
+              spellCheck={false}
+              autoComplete="off"
+            />
+          </div>
         </div>
+
+        {/* ── Status bar ── */}
+        <div className={styles.statusBar}>
+          {/* Pulsing online indicator */}
+          <span className={styles.statusOnline}>
+            <span className={styles.statusDot} />
+            online
+          </span>
+          <span>main</span>
+          <span>utf-8</span>
+          {/* Line count: 18 intro lines (no feed items yet) */}
+          <span className={styles.statusRight}>18 lines · /help</span>
+        </div>
+
       </div>
     </div>
   );

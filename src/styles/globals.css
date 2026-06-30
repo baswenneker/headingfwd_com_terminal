@@ -1,7 +1,40 @@
 @import "tailwindcss";
 
+/* Wire JetBrains Mono (loaded via layout.tsx) as the monospace font variable. */
 @theme {
-  --font-sans:
-    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+/* Prevent the outer page from scrolling; the terminal window scrolls internally. */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Apply the monospace font globally and enable sub-pixel antialiasing. */
+body {
+  font-family: var(--font-jetbrains-mono, ui-monospace, monospace);
+  -webkit-font-smoothing: antialiased;
+
+  /* Cyan backdrop with two radial-gradient overlays for depth:
+     a top highlight (white) and a bottom shadow (dark). */
+  background-color: #0bd3e6;
+  background-image:
+    radial-gradient(
+      120% 130% at 50% 0%,
+      rgba(255, 255, 255, 0.18),
+      transparent 42%
+    ),
+    radial-gradient(
+      140% 120% at 50% 120%,
+      rgba(0, 0, 0, 0.32),
+      transparent 55%
+    );
+}
+
+/* Highlight color for selected text uses the accent token. */
+::selection {
+  background: var(--accent, #2ee6f6);
+  color: #04181c;
 }
