@@ -222,6 +222,7 @@
 /* Accent bullet character before each speciality */
 .specialityBullet {
   color: var(--accent);
+  margin-right: 0.5em;
 }
 
 /* Tip / hint line in amber */

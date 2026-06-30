@@ -420,20 +420,20 @@ export function Terminal() {
           <div className={styles.specialitiesLabel}>{'// specialities'}</div>
           <div className={styles.specialitiesGrid}>
             <div>
-              <span className={styles.specialityBullet}>*</span> Agentic
-              workflow development
+              <span className={styles.specialityBullet}>*</span>
+              Agentic workflow development
             </div>
             <div>
-              <span className={styles.specialityBullet}>*</span> AI strategy
-              &amp; consultancy
+              <span className={styles.specialityBullet}>*</span>
+              AI strategy &amp; consultancy
             </div>
             <div>
-              <span className={styles.specialityBullet}>*</span> Evaluation
-              &amp; testing
+              <span className={styles.specialityBullet}>*</span>
+              Evaluation &amp; testing
             </div>
             <div>
-              <span className={styles.specialityBullet}>*</span> Assistants
-              &amp; copilots, production-ready
+              <span className={styles.specialityBullet}>*</span>
+              Assistants &amp; copilots, production-ready
             </div>
           </div>
 
