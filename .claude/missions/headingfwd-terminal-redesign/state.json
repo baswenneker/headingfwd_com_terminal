@@ -2,14 +2,14 @@
   "version": 1,
   "slug": "headingfwd-terminal-redesign",
   "title": "HeadingFWD terminal-redesign",
-  "status": "in_progress",
+  "status": "done",
   "branch": "mission/headingfwd-terminal-redesign",
   "worktree": "/Users/bas/Development/HeadingFWD/headingfwd_com_terminal/.trees/mission/headingfwd-terminal-redesign",
   "base_branch": "main",
   "created_at": "2026-06-30T12:24:45Z",
   "started_at": "2026-06-30T12:48:26Z",
   "started_at_epoch": 1782823706,
-  "completed_at": null,
+  "completed_at": "2026-06-30T17:03:16Z",
   "gates": [
     {
       "id": "G1",
