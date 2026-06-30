@@ -527,6 +527,15 @@
   color: #cfe2e7;
   font-size: 14px;
   line-height: 1.72;
+  /*
+   * Extend the font stack beyond the loaded JetBrains Mono latin subset.
+   * Box-drawing characters used in email previews (e.g. ━) fall outside
+   * the latin range, so including system monospace fonts that carry those
+   * glyphs prevents inconsistent glyph widths when the primary font
+   * falls back to the browser's default.
+   */
+  font-family: var(--font-jetbrains-mono), "Menlo", "Consolas",
+    "DejaVu Sans Mono", ui-monospace, monospace;
 }
 
 /* Blinking block cursor appended at the end of streaming content */
@@ -543,6 +552,30 @@
 /* Error line rendered when the AI request returns an error status */
 .aiError {
   color: rgba(255, 110, 110, 0.9);
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+/* ─── Email tool status lines ────────────────────────────────────────────── */
+
+/*
+ * Dim placeholder shown while the email send tool is in flight.
+ * The same muted tone as "Thinking…" communicates that work is happening
+ * without drawing attention away from the surrounding text.
+ */
+.toolSending {
+  color: rgba(160, 178, 182, 0.6);
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+/*
+ * Success confirmation line shown when the email was delivered.
+ * Uses --prompt (the same green as the shell prompt) so it reads as a
+ * positive terminal outcome rather than an error.
+ */
+.toolSent {
+  color: var(--prompt);
   font-size: 14px;
   line-height: 1.72;
 }

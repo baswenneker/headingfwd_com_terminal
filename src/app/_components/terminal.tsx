@@ -563,9 +563,82 @@ export function Terminal() {
                       data-testid="assistant-message"
                     >
                       {assistantMsg.parts.map((part, partIdx) => {
+                        // Render the email-send tool outcome as a terminal-style
+                        // status line so the visitor always sees what happened,
+                        // even on failure (e.g. rate-limit exhausted).
+                        if (part.type === "tool-sendMessage") {
+                          // The generic UIMessage type does not carry the specific
+                          // tool parameter, so we cast to the shape we know the
+                          // sendMessage tool produces at runtime. The double cast
+                          // through unknown is required because tool-${string}
+                          // and "tool-sendMessage" are not directly comparable
+                          // by the TypeScript checker.
+                          const toolPart = part as unknown as {
+                            type: "tool-sendMessage";
+                            state: string;
+                            output?: {
+                              success: boolean;
+                              message?: string;
+                              error?: string;
+                            };
+                            errorText?: string;
+                          };
+
+                          if (toolPart.state === "output-available") {
+                            if (toolPart.output?.success) {
+                              return (
+                                <div
+                                  key={partIdx}
+                                  className={styles.toolSent}
+                                >
+                                  {"✓ message sent to bas@headingfwd.com"}
+                                </div>
+                              );
+                            }
+                            // Tool ran but returned a failure (e.g. rate limit).
+                            // Show the error text in the same red style used for
+                            // network/stream errors so it is clearly a problem.
+                            return (
+                              <div
+                                key={partIdx}
+                                className={styles.aiError}
+                              >
+                                {"→ "}
+                                {toolPart.output?.error ??
+                                  "Failed to send your message."}
+                              </div>
+                            );
+                          }
+
+                          if (toolPart.state === "output-error") {
+                            // The tool threw an exception rather than returning
+                            // a structured failure; show the raw error text.
+                            return (
+                              <div
+                                key={partIdx}
+                                className={styles.aiError}
+                              >
+                                {"→ "}
+                                {toolPart.errorText ??
+                                  "Failed to send your message."}
+                              </div>
+                            );
+                          }
+
+                          // While the tool's input is still being built or the
+                          // execution is pending, show a dim placeholder.
+                          return (
+                            <div
+                              key={partIdx}
+                              className={styles.toolSending}
+                            >
+                              {"✉ sending your message…"}
+                            </div>
+                          );
+                        }
+
                         if (part.type !== "text") {
-                          // Tool-call parts (e.g. sendMessage) are hidden;
-                          // the AI is instructed to always follow up with text.
+                          // Skip other non-text parts (reasoning, step-start, etc.).
                           return null;
                         }
                         const textPart = part as { type: "text"; text: string };
