@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'JetBrains Mono',ui-monospace,monospace;-webkit-font-smoothing:antialiased;overflow:hidden}
+  ::selection{background:var(--accent,#2EE6F6);color:#04181c}
+  .tw-body::-webkit-scrollbar{width:10px}
+  .tw-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px;border:3px solid transparent;background-clip:content-box}
+  .tw-body::-webkit-scrollbar-track{background:transparent}
+  .tw-input::placeholder{color:rgba(220,240,245,.32)}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  .intro-line{opacity:1}
+  @container page (max-width:560px){
+    .tw-win{height:calc(100% - 2px) !important;border-radius:14px !important}
+    .tw-title{font-size:11px !important}
+    .tw-zsh{display:none !important}
+    .tw-brand{display:none !important}
+    .tw-prompt-full{display:none !important}
+    .tw-status{gap:11px !important;font-size:10px !important}
+    .tw-spec{grid-template-columns:1fr !important}
+  }
+</style>
+</helmet>
+<div class="page" style="container-type:inline-size;container-name:page;--accent: {{ accent }}; --backdrop: {{ backdrop }}; --prompt: {{ prompt }}; --scan: {{ scan }}; min-height:100vh;height:100vh;width:100vw;display:flex;align-items:center;justify-content:center;padding:clamp(12px,3.5cqw,52px);background:radial-gradient(120% 130% at 50% 0%, rgba(255,255,255,.18), rgba(0,0,0,0) 42%), radial-gradient(140% 120% at 50% 120%, rgba(0,0,0,.32), rgba(0,0,0,0) 55%), var(--backdrop,#0BD3E6);background-color:var(--backdrop,#0BD3E6)">
+
+  <!-- faint grid -->
+  <div style="position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:38px 38px;mask-image:radial-gradient(circle at 50% 45%,#000 30%,transparent 78%);-webkit-mask-image:radial-gradient(circle at 50% 45%,#000 30%,transparent 78%)"></div>
+  <!-- scanlines -->
+  <div style="position:fixed;inset:0;pointer-events:none;z-index:90;opacity:var(--scan,0);background:repeating-linear-gradient(rgba(0,0,0,.5) 0px,rgba(0,0,0,.5) 1px,transparent 2px,transparent 4px)"></div>
+
+  <!-- TERMINAL WINDOW -->
+  <div class="tw-win" style="position:relative;width:min(980px,100%);height:min(84vh,780px);display:flex;flex-direction:column;background:#0A0E11;border:1px solid rgba(255,255,255,.09);border-radius:13px;overflow:hidden;box-shadow:0 1px 0 rgba(255,255,255,.07) inset, 0 40px 90px -20px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.25)">
+
+    <!-- titlebar -->
+    <div style="flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:13px 16px;background:linear-gradient(#15191d,#0f1316);border-bottom:1px solid rgba(255,255,255,.07)">
+      <div style="display:flex;gap:8px">
+        <span style="width:12px;height:12px;border-radius:50%;background:#ff5f57"></span>
+        <span style="width:12px;height:12px;border-radius:50%;background:#febc2e"></span>
+        <span style="width:12px;height:12px;border-radius:50%;background:#28c840"></span>
+      </div>
+      <div class="tw-title" style="flex:1;text-align:center;font-size:12.5px;color:rgba(220,235,240,.55);letter-spacing:.2px">bas@headingfwd: ~/ai-engineering<span class="tw-zsh"> — zsh</span></div>
+      <div class="tw-brand" style="font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--accent,#2EE6F6);opacity:.85">HeadingFWD</div>
+    </div>
+
+    <!-- body -->
+    <div class="tw-body" ref="{{ bodyRef }}" onClick="{{ focus }}" style="flex:1;min-height:0;overflow-y:auto;padding:26px clamp(18px,3cqw,34px) 22px;color:#D6E6EA;font-size:14px;line-height:1.72;cursor:text">
+
+      <!-- banner -->
+      <div class="intro-line" style="animation-delay:.02s;color:var(--prompt,#5BE6A0);font-size:12.5px">bas@headingfwd:~$ ./hello --who</div>
+      <div class="intro-line" style="animation-delay:.08s;margin-top:8px;font-size:clamp(28px,7cqw,46px);font-weight:800;letter-spacing:-1.5px;color:#EAFBFE;line-height:1.02">Heading<span style="color:var(--accent,#2EE6F6)">FWD</span><span style="color:var(--accent,#2EE6F6);font-weight:500"> &rsaquo;&rsaquo;&mdash;&rsaquo;</span></div>
+      <div class="intro-line" style="animation-delay:.14s;margin-top:6px;font-size:13.5px;color:rgba(214,230,234,.62)">AI engineering &amp; consultancy · Bas Wenneker — AI Lead / Engineer</div>
+
+      <!-- value prop -->
+      <div class="intro-line" style="animation-delay:.22s;margin-top:24px;max-width:64ch">
+        I help teams get real value from <span style="color:var(--accent,#2EE6F6)">Generative AI</span> — designing and building <span style="color:#EAFBFE;font-weight:500">agents</span>, <span style="color:#EAFBFE;font-weight:500">assistants</span> and <span style="color:#EAFBFE;font-weight:500">AI workflows</span> that actually make it to production.
+      </div>
+
+      <!-- specialities -->
+      <div class="intro-line" style="animation-delay:.3s;margin-top:22px;color:rgba(160,178,182,.7)">// specialities</div>
+      <div class="intro-line tw-spec" style="animation-delay:.36s;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px 26px;margin-top:6px;max-width:70ch">
+        <div><span style="color:var(--accent,#2EE6F6)">*</span> Agentic workflow development</div>
+        <div><span style="color:var(--accent,#2EE6F6)">*</span> AI strategy &amp; consultancy</div>
+        <div><span style="color:var(--accent,#2EE6F6)">*</span> Evaluation &amp; testing</div>
+        <div><span style="color:var(--accent,#2EE6F6)">*</span> Assistants &amp; copilots, production-ready</div>
+      </div>
+
+      <!-- hint -->
+      <div class="intro-line" style="animation-delay:.46s;margin-top:22px;color:rgba(245,197,68,.9)">tip: type <span style="color:var(--accent,#2EE6F6);font-weight:700">/help</span> for commands · <span style="color:var(--accent,#2EE6F6);font-weight:700">/portfolio</span> to browse my work fullscreen · or just ask</div>
+
+      <div class="intro-line" style="animation-delay:.54s;margin-top:14px;height:1px;background:rgba(255,255,255,.08)"></div>
+
+      <!-- dynamic command feed -->
+      <div style="margin-top:14px">{{ feedEls }}</div>
+
+      <!-- input row -->
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+        <span style="color:var(--prompt,#5BE6A0);font-weight:700;flex:0 0 auto"><span class="tw-prompt-full">bas@headingfwd </span><span style="color:var(--accent,#2EE6F6)">~$</span></span>
+        <input class="tw-input" ref="{{ inputRef }}" value="{{ inputVal }}" onChange="{{ onInput }}" onKeyDown="{{ onKey }}" spellcheck="false" autocomplete="off" placeholder="type a command…" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:#EAFBFE;font-family:inherit;font-size:14px;caret-color:var(--accent,#2EE6F6)" />
+      </div>
+
+    </div>
+
+    <!-- status bar -->
+    <div class="tw-status" style="flex:0 0 auto;display:flex;align-items:center;gap:18px;padding:7px 16px;background:#0d1115;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(200,218,222,.5)">
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:var(--prompt,#5BE6A0);box-shadow:0 0 8px var(--prompt,#5BE6A0)"></span>online</span>
+      <span>main</span>
+      <span>utf-8</span>
+      <span style="margin-left:auto">{{ feedCount }} lines · /help</span>
+    </div>
+
+  </div>
+
+  <!-- PORTFOLIO FULLSCREEN -->
+  <sc-if value="{{ inPortfolio }}" hint-placeholder-val="{{ false }}">
+    <div ref="{{ portRef }}" tabindex="0" onKeyDown="{{ pfKey }}" onClick="{{ refocusPort }}" style="position:absolute;inset:0;z-index:120;outline:none;display:flex;flex-direction:column;padding:clamp(20px,4cqw,60px);color:#D6E6EA;font-size:14px;line-height:1.7;background:radial-gradient(130% 120% at 50% -10%,rgba(46,230,246,.10),rgba(0,0,0,0) 45%),#07090B;opacity:1;overflow-y:auto">
+
+      <div style="position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at 50% 26%,#000 18%,transparent 72%);-webkit-mask-image:radial-gradient(circle at 50% 26%,#000 18%,transparent 72%)"></div>
+
+      <!-- top bar -->
+      <div style="position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <span style="color:var(--prompt,#5BE6A0);font-weight:700">bas@headingfwd:<span style="color:var(--accent,#2EE6F6)">~/portfolio</span></span>
+        <button onClick="{{ exitPortfolio }}" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(214,230,234,.8);font-family:inherit;font-size:12px;padding:7px 14px;border-radius:7px;cursor:pointer" style-hover="border-color:var(--accent,#2EE6F6);color:var(--accent,#2EE6F6)">[ esc ] exit</button>
+      </div>
+
+      <!-- ascii banner -->
+      <pre style="position:relative;margin-top:clamp(18px,3.5cqw,40px);font-family:'JetBrains Mono',monospace;font-size:clamp(9px,2.3cqw,18px);line-height:1.05;color:var(--accent,#2EE6F6);text-shadow:0 0 20px rgba(46,230,246,.38);white-space:pre;flex:0 0 auto;overflow-x:auto">██████  ██   ██  █████ 
+██      ██   ██  ██  ██
+█████   ██ █ ██  ██  ██
+██      ███████  ██  ██
+██      ██   ██  █████ </pre>
+      <div style="position:relative;margin-top:12px;color:rgba(160,178,182,.78)">// selected work — AI engineering &amp; product design</div>
+
+      <!-- LIST VIEW -->
+      <sc-if value="{{ pfListMode }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;margin-top:clamp(20px,3cqw,38px);border-top:1px solid rgba(255,255,255,.08);max-width:1040px">
+          <sc-for list="{{ projects }}" as="p" hint-placeholder-count="4">
+            <div style="{{ p.rowStyle }}" onClick="{{ p.onOpen }}" onMouseEnter="{{ p.onHover }}">
+              <span style="color:var(--accent,#2EE6F6);font-weight:700;font-size:15px">{{ p.n }}</span>
+              <div>
+                <div style="font-size:clamp(17px,2.5cqw,23px);font-weight:500;color:#EAFBFE">{{ p.name }}</div>
+                <div style="margin-top:5px;color:rgba(170,188,192,.72);font-size:13px">{{ p.kind }}</div>
+                <div style="margin-top:10px;color:rgba(120,140,144,.9);font-size:11.5px;letter-spacing:.02em">{{ p.tagStr }}</div>
+              </div>
+            </div>
+          </sc-for>
+          <div style="border-bottom:1px solid rgba(255,255,255,.08)"></div>
+        </div>
+        <div style="position:relative;margin-top:20px;color:rgba(245,197,68,.85);font-size:12.5px">↑ ↓ navigate · ↵ open · or click a project · esc returns to terminal</div>
+      </sc-if>
+
+      <!-- DETAIL VIEW -->
+      <sc-if value="{{ pfDetailMode }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;margin-top:clamp(20px,3cqw,36px);max-width:800px">
+          <button onClick="{{ backToList }}" style="background:transparent;border:none;color:var(--accent,#2EE6F6);font-family:inherit;font-size:13px;cursor:pointer;padding:0;margin-bottom:22px" style-hover="text-decoration:underline">← back to all work</button>
+          <div style="display:flex;align-items:baseline;gap:14px">
+            <span style="color:var(--accent,#2EE6F6);font-weight:700;font-size:15px">{{ curN }}</span>
+            <span style="color:rgba(160,178,182,.6);font-size:12px">{{ curLabel }}</span>
+          </div>
+          <h2 style="margin-top:6px;font-size:clamp(26px,4.6cqw,44px);font-weight:700;letter-spacing:-.5px;line-height:1.05;color:#EAFBFE">{{ curName }}</h2>
+          <div style="margin-top:8px;color:var(--accent,#2EE6F6);font-size:15px">{{ curKind }}</div>
+          <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ curTags }}" as="tag" hint-placeholder-count="3">
+              <span style="font-size:12px;padding:5px 11px;border:1px solid rgba(255,255,255,.16);border-radius:999px;color:rgba(214,230,234,.8)">{{ tag }}</span>
+            </sc-for>
+          </div>
+          <div style="margin-top:24px;max-width:62ch">
+            <sc-for list="{{ curDetail }}" as="para" hint-placeholder-count="2">
+              <p style="margin-bottom:14px;color:#C6DCE1;line-height:1.72">{{ para }}</p>
+            </sc-for>
+          </div>
+          <div style="margin-top:12px;height:clamp(170px,26cqw,250px);border:1px solid rgba(255,255,255,.1);border-radius:10px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 12px,transparent 12px 24px);display:flex;align-items:center;justify-content:center;color:rgba(160,178,182,.55);font-size:12px;text-align:center;padding:16px">[ project visual / case study — drop one in on request ]</div>
+          <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap">
+            <button onClick="{{ prevProj }}" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(214,230,234,.8);font-family:inherit;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer" style-hover="border-color:var(--accent,#2EE6F6);color:var(--accent,#2EE6F6)">← prev</button>
+            <button onClick="{{ nextProj }}" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(214,230,234,.8);font-family:inherit;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer" style-hover="border-color:var(--accent,#2EE6F6);color:var(--accent,#2EE6F6)">next →</button>
+            <a href="mailto:bas@headingfwd.com" style="background:var(--accent,#2EE6F6);color:#04181c;font-weight:700;font-size:13px;padding:10px 18px;border-radius:8px;text-decoration:none">work with me →</a>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Cyan&quot;,&quot;Matrix&quot;,&quot;Amber&quot;],&quot;default&quot;:&quot;Cyan&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;scanlines&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { feed: [], input: "", history: [], hidx: -1, mode: "terminal", pfIndex: 0, pfDetail: false, pfShown: false };
+
+  constructor(props){
+    super(props);
+    this.bodyRef = React.createRef();
+    this.inputRef = React.createRef();
+    this.onInput = (e)=> this.setState({ input: e.target.value });
+    this.onKey = this.onKey.bind(this);
+    this.focus = ()=>{ const i=this.inputRef.current; if(i) i.focus(); };
+    this.portRef = React.createRef();
+    this.pfKey = this.pfKey.bind(this);
+  }
+
+  componentDidMount(){ setTimeout(this.focus, 650); }
+
+  pal(){
+    const t = (this.props.theme || "Cyan");
+    if (t === "Matrix") return { accent:"#3CF08A", backdrop:"#04150D", prompt:"#3CF08A" };
+    if (t === "Amber")  return { accent:"#F5B544", backdrop:"#160F05", prompt:"#F5B544" };
+    return { accent:"#2EE6F6", backdrop:"#0BD3E6", prompt:"#5BE6A0" };
+  }
+
+  scroll(){ const el=this.bodyRef.current; if(el) el.scrollTop = el.scrollHeight; }
+
+  push(lines){
+    this.setState(s=>({ feed: [...s.feed, ...lines] }), ()=> this.scroll());
+  }
+
+  onKey(e){
+    if(e.key === "Enter"){
+      const raw = this.state.input.trim();
+      this.setState({ input:"", hidx:-1 });
+      if(!raw) return;
+      const hist = [raw, ...this.state.history].slice(0,40);
+      this.setState({ history: hist });
+      this.run(raw);
+    } else if(e.key === "ArrowUp"){
+      e.preventDefault();
+      const h=this.state.history; if(!h.length) return;
+      const ni=Math.min(this.state.hidx+1, h.length-1);
+      this.setState({ hidx:ni, input:h[ni] });
+    } else if(e.key === "ArrowDown"){
+      e.preventDefault();
+      const h=this.state.history;
+      const ni=this.state.hidx-1;
+      if(ni < 0){ this.setState({ hidx:-1, input:"" }); }
+      else { this.setState({ hidx:ni, input:h[ni] }); }
+    }
+  }
+
+  run(raw){
+    const cmd = raw.replace(/^\//,"").toLowerCase().split(/\s+/)[0];
+    const echo = { k:"cmd", t: raw };
+    if(cmd === "clear" || cmd === "cls"){ this.setState({ feed: [] }, ()=> this.scroll()); return; }
+    if(cmd === "portfolio" || cmd === "pf"){ this.push([echo, { k:"out", t:"\u2192 launching portfolio…" }]); setTimeout(()=> this.enterPortfolio(), 140); return; }
+    const out = (this.commands()[cmd]) ? this.commands()[cmd]() : this.freeform(raw);
+    this.push([echo, ...out, { k:"sp" }]);
+  }
+
+  commands(){
+    return {
+      help: ()=>[
+        { k:"head", t:"available commands" },
+        { k:"row", a:"/about",    b:"who I am & how I work" },
+        { k:"row", a:"/services", b:"what I help teams with" },
+        { k:"row", a:"/work",     b:"selected engagements" },
+        { k:"row", a:"/portfolio",b:"browse my work in fullscreen ↵" },
+        { k:"row", a:"/stack",    b:"tools, models & tech" },
+        { k:"row", a:"/contact",  b:"how to reach me" },
+        { k:"row", a:"/clear",    b:"clear the screen" },
+        { k:"dim",  t:"tip: arrow keys recall history · or just type a question" },
+      ],
+      about: ()=>[
+        { k:"head", t:"$ whoami" },
+        { k:"out",  t:"Bas Wenneker — AI Lead / Engineer @ HeadingFWD" },
+        { k:"out",  t:"15+ yrs shipping software · 5+ yrs coaching 60+ product" },
+        { k:"out",  t:"& innovation teams. I balance business, customer and tech" },
+        { k:"out",  t:"to turn Generative AI from a demo into something in production." },
+      ],
+      services: ()=>[
+        { k:"head", t:"// what I help teams with" },
+        { k:"bullet", t:"Agentic workflow development — agents that do real work" },
+        { k:"bullet", t:"AI strategy & consultancy — where AI pays off, where it won't" },
+        { k:"bullet", t:"Evaluation & testing — measure quality before you ship" },
+        { k:"bullet", t:"Assistants & copilots — production-ready, not just demos" },
+      ],
+      work: ()=>[
+        { k:"head", t:"selected engagements" },
+        { k:"job", n:"01", a:"Next-best-message engine", b:"proactive customer comms at scale · idea → MVP" },
+        { k:"job", n:"02", a:"Knowledge platform", b:"200+ users rate, discuss & share research" },
+        { k:"job", n:"03", a:"Privacy data masking", b:"ML to protect medical & sensitive records" },
+        { k:"job", n:"04", a:"Benchmarket", b:"smart matching for city-centre businesses" },
+      ],
+      stack: ()=>[
+        { k:"head", t:"// stack" },
+        { k:"out", t:"LLMs · agents · RAG · evals · prompt + context engineering" },
+        { k:"out", t:"Python · TypeScript · React · Ruby on Rails · Docker" },
+        { k:"out", t:"Lean Startup · Design Thinking · Service Design · Scrum" },
+      ],
+      contact: ()=>[
+        { k:"head", t:"let's talk →" },
+        { k:"link", a:"email", t:"bas@headingfwd.com", href:"mailto:bas@headingfwd.com" },
+        { k:"link", a:"linkedin", t:"linkedin.com/in/baswenneker", href:"https://www.linkedin.com/in/baswenneker" },
+        { k:"dim", t:"fastest reply: drop me a DM on LinkedIn." },
+      ],
+      whoami: ()=>[ { k:"out", t:"guest@headingfwd — welcome :)" } ],
+      ls: ()=>[ { k:"out", t:"about/  services/  work/  stack/  contact/" } ],
+    };
+  }
+
+  freeform(raw){
+    return [
+      { k:"out", t:"\u2192 I'm a lightweight demo assistant on this page." },
+      { k:"out", t:"  Type /help for commands, or reach Bas directly:" },
+      { k:"link", a:"email", t:"bas@headingfwd.com", href:"mailto:bas@headingfwd.com" },
+    ];
+  }
+
+  el(line, i){
+    const p = this.pal();
+    const mono = { fontFamily:"'JetBrains Mono',monospace", fontSize:"14px", lineHeight:"1.72", whiteSpace:"pre-wrap", wordBreak:"break-word" };
+    const k = line.k;
+    if(k === "sp") return React.createElement("div",{key:i,style:{height:"10px"}});
+    if(k === "cmd") return React.createElement("div",{key:i,style:{...mono,marginTop:"4px"}},
+      React.createElement("span",{style:{color:p.prompt,fontWeight:700}},"bas@headingfwd "),
+      React.createElement("span",{style:{color:p.accent,fontWeight:700}},"~$ "),
+      React.createElement("span",{style:{color:"#EAFBFE"}},line.t));
+    if(k === "head") return React.createElement("div",{key:i,style:{...mono,color:p.accent,fontWeight:700,marginTop:"4px"}},line.t);
+    if(k === "dim") return React.createElement("div",{key:i,style:{...mono,color:"rgba(160,178,182,.6)"}},line.t);
+    if(k === "out") return React.createElement("div",{key:i,style:{...mono,color:"#CFE2E7"}},line.t);
+    if(k === "bullet") return React.createElement("div",{key:i,style:{...mono,color:"#CFE2E7"}},
+      React.createElement("span",{style:{color:p.accent}},"* "), line.t);
+    if(k === "row") return React.createElement("div",{key:i,style:{...mono,display:"flex",gap:"16px"}},
+      React.createElement("span",{style:{color:p.accent,fontWeight:700,minWidth:"96px"}},line.a),
+      React.createElement("span",{style:{color:"rgba(207,226,231,.78)"}},line.b));
+    if(k === "job") return React.createElement("div",{key:i,style:{...mono,display:"flex",gap:"14px"}},
+      React.createElement("span",{style:{color:p.accent,fontWeight:700}},line.n),
+      React.createElement("span",{style:{color:"#EAFBFE",fontWeight:500,minWidth:"max-content"}},line.a),
+      React.createElement("span",{style:{color:"rgba(160,178,182,.7)"}},"— "+line.b));
+    if(k === "link") return React.createElement("div",{key:i,style:{...mono,display:"flex",gap:"16px"}},
+      React.createElement("span",{style:{color:"rgba(160,178,182,.7)",minWidth:"96px"}},line.a),
+      React.createElement("a",{href:line.href,target:"_blank",rel:"noreferrer",style:{color:p.accent,textDecoration:"underline",textUnderlineOffset:"3px"},onClick:(e)=>e.stopPropagation()},line.t));
+    return React.createElement("div",{key:i,style:mono},line.t);
+  }
+
+  enterPortfolio(){
+    this.setState({ mode:"portfolio", pfIndex:0, pfDetail:false }, ()=>{
+      const el=this.portRef.current; if(el) el.focus();
+    });
+  }
+  exitPortfolio(){
+    this.setState({ mode:"terminal" }, ()=> setTimeout(this.focus, 40));
+  }
+  pfKey(e){
+    const n = this.projects().length;
+    if(this.state.pfDetail){
+      if(e.key==="Escape"||e.key==="Backspace"){ e.preventDefault(); this.setState({ pfDetail:false }); }
+      else if(e.key==="ArrowRight"){ e.preventDefault(); this.setState(s=>({ pfIndex:(s.pfIndex+1)%n })); }
+      else if(e.key==="ArrowLeft"){ e.preventDefault(); this.setState(s=>({ pfIndex:(s.pfIndex-1+n)%n })); }
+      return;
+    }
+    if(e.key==="ArrowDown"){ e.preventDefault(); this.setState(s=>({ pfIndex:(s.pfIndex+1)%n })); }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); this.setState(s=>({ pfIndex:(s.pfIndex-1+n)%n })); }
+    else if(e.key==="Enter"){ e.preventDefault(); this.setState({ pfDetail:true }); }
+    else if(e.key==="Escape"){ e.preventDefault(); this.exitPortfolio(); }
+  }
+  projects(){
+    return [
+      { n:"01", name:"Next-best-message engine", kind:"Proactive customer communication, at scale",
+        tags:["Machine Learning / AI","Design Thinking","Agile","Team coaching"],
+        detail:[
+          "I led an innovation team building a system that picks the next, most relevant message for each customer — proactively and at scale.",
+          "We went from idea to MVP with cheap, fast experiments to validate desirability and feasibility before writing production code, then structured the agile build."
+        ] },
+      { n:"02", name:"Knowledge & research platform", kind:"200+ colleagues rate, discuss & share research",
+        tags:["Scrum","Design Thinking","User testing","Make / buy"],
+        detail:[
+          "A daily flood of financial reports and research arrived through many channels and went largely unused or misused.",
+          "We built a platform where 200+ colleagues could view, rate, discuss and share every source. I helped the team weigh user needs, feasibility and viability, then we shipped it in scrum sprints."
+        ] },
+      { n:"03", name:"Privacy-sensitive data masking", kind:"Protecting medical & sensitive records",
+        tags:["Design Thinking","Machine Learning / AI","Team coaching"],
+        detail:[
+          "A years-deep archive — scans, emails and structured data — held medical and privacy-sensitive customer records.",
+          "That data had to be masked for users without clearance. I helped the team investigate the technical feasibility and economic viability of doing it reliably."
+        ] },
+      { n:"04", name:"Benchmarket", kind:"Smart collaboration between city-centre businesses",
+        tags:["Lean Startup","Machine Learning / AI","Development"],
+        detail:[
+          "Helping retail, hotels and museums in city centres collaborate instead of compete.",
+          "Using smart business rules and machine learning I found win-win patterns and matched entrepreneurs to each other — then designed, developed and launched the platform end to end."
+        ] },
+    ];
+  }
+
+  renderVals(){
+    const p = this.pal();
+    const projs = this.projects();
+    const idx = Math.max(0, Math.min(this.state.pfIndex, projs.length-1));
+    const cur = projs[idx];
+    const projsUI = projs.map((pr,i)=>({
+      n: pr.n, name: pr.name, kind: pr.kind, tagStr: pr.tags.join("    ·    "),
+      rowStyle: "display:grid;grid-template-columns:46px 1fr;gap:3px 18px;align-items:baseline;padding:18px clamp(14px,2.4cqw,24px);cursor:pointer;border-left:2px solid "+(i===idx?p.accent:"transparent")+";background:"+(i===idx?"rgba(255,255,255,.05)":"transparent")+";transition:background .15s,border-color .15s",
+      onOpen: ()=> this.setState({ pfIndex:i, pfDetail:true }),
+      onHover: ()=> this.setState({ pfIndex:i }),
+    }));
+    return {
+      inPortfolio: this.state.mode === "portfolio",
+      pfListMode: !this.state.pfDetail,
+      pfDetailMode: this.state.pfDetail,
+      pfOpacity: this.state.pfShown ? "1" : "0",
+      pfTransform: this.state.pfShown ? "translateY(0) scale(1)" : "translateY(8px) scale(0.99)",
+      projects: projsUI,
+      curName: cur.name, curKind: cur.kind, curN: cur.n, curTags: cur.tags, curDetail: cur.detail,
+      curLabel: (idx+1)+" / "+projs.length,
+      portRef: this.portRef,
+      pfKey: this.pfKey,
+      exitPortfolio: ()=> this.exitPortfolio(),
+      backToList: ()=> this.setState({ pfDetail:false }),
+      nextProj: ()=> this.setState(s=>({ pfIndex:(s.pfIndex+1)%projs.length })),
+      prevProj: ()=> this.setState(s=>({ pfIndex:(s.pfIndex-1+projs.length)%projs.length })),
+      refocusPort: ()=>{ const el=this.portRef.current; if(el) el.focus(); },
+      accent: p.accent, backdrop: p.backdrop, prompt: p.prompt,
+      scan: (this.props.scanlines ? "0.5" : "0"),
+      inputVal: this.state.input,
+      onInput: this.onInput,
+      onKey: this.onKey,
+      focus: this.focus,
+      bodyRef: this.bodyRef,
+      inputRef: this.inputRef,
+      feedCount: 18 + this.state.feed.length,
+      feedEls: this.state.feed.map((l,i)=> this.el(l,i)),
+    };
+  }
+}
+</script>
+</body>
+</html>
