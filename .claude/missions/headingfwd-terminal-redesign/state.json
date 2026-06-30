@@ -217,5 +217,12 @@
   "circuit_breaker": {
     "consecutive_failures": 0
   },
-  "decisions": []
+  "decisions": [
+    {
+      "timestamp": "2026-06-30T12:51:34Z",
+      "situation": "Reference HTML container query sets the mobile window border-radius to 14px, while the narrow-screen criterion describes a 'smaller' radius than the 13px base; the two conflict.",
+      "action": "Followed the reference HTML literally (14px under 560px) because the handoff README names the reference HTML as the source of truth for exact values; the discrepancy is noted so review judges against the reference.",
+      "feature": "F1"
+    }
+  ]
 }
