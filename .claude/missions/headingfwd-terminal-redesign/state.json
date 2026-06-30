@@ -581,7 +581,8 @@
           "evidence": "Grep of changed product files for mission codes returned only a false-positive ('submission'); feat/fix commit messages are standalone changelog prose with no F/M/VC IDs.",
           "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-review.md"
         }
-      ]
+      ],
+      "walkthrough_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-walkthrough.md"
     },
     {
       "id": "M3",
