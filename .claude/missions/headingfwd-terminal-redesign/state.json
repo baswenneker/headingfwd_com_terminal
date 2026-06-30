@@ -469,12 +469,48 @@
         "VC-15",
         "VC-16"
       ],
-      "status": "pending",
-      "attempts": 0,
-      "commit_sha": null,
-      "started_at": null,
-      "completed_at": null,
-      "error": null
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "a2cde0589c7569160946f773465cf36a4d216d31",
+      "started_at": "2026-06-30T16:58:02Z",
+      "completed_at": "2026-06-30T16:58:02Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Deleted src/app/_components/chat-terminal.tsx (old chat UI, no importers)",
+          "Deleted src/app/_components/code-block.tsx (only used by chat-terminal)",
+          "Deleted src/app/api/commands/route.ts and the now-empty src/app/api/commands/ directory",
+          "Deleted src/server/services/command-executor.ts (only used by the command route)",
+          "Deleted src/config/commands.ts and the now-empty src/config/ directory",
+          "Deleted unused tests/helpers/assertions.ts, tests/fixtures/test-sessions.ts, tests/fixtures/error-messages.ts"
+        ],
+        "left_undone": [],
+        "commands": [
+          {
+            "command": "pnpm check",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm test:e2e",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "Stale .next contained a generated validator.ts referencing the deleted command route (TS2307); rm -rf .next before re-running pnpm check resolved it.",
+          "CLAUDE.md still documents the old architecture (server-side /api/commands, command-executor, config/commands). Not source code and not in the validation contract, so left unchanged — flagged for a deliberate docs update."
+        ],
+        "procedures_followed": [
+          "grepped every candidate dead file for live importers before deleting; verified the full chat-terminal -> commands route -> executor -> config chain",
+          "risky-scan clean (ok)",
+          "conventional commit chore(cleanup):",
+          "orchestrator confirmed no lingering references to the deleted modules in src/"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F8.md"
+      }
     }
   ],
   "milestones": [
