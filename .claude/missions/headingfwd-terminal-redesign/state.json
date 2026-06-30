@@ -2,22 +2,42 @@
   "version": 1,
   "slug": "headingfwd-terminal-redesign",
   "title": "HeadingFWD terminal-redesign",
-  "status": "planned",
+  "status": "in_progress",
   "branch": "mission/headingfwd-terminal-redesign",
   "worktree": "/Users/bas/Development/HeadingFWD/headingfwd_com_terminal/.trees/mission/headingfwd-terminal-redesign",
   "base_branch": "main",
   "created_at": "2026-06-30T12:24:45Z",
-  "started_at": null,
-  "started_at_epoch": null,
+  "started_at": "2026-06-30T12:48:26Z",
+  "started_at_epoch": 1782823706,
   "completed_at": null,
   "gates": [
-    { "id": "G1", "name": "typecheck", "command": "pnpm run typecheck", "expected_exit": 0 },
-    { "id": "G2", "name": "lint", "command": "pnpm run lint", "expected_exit": 0 },
-    { "id": "G3", "name": "build", "command": "pnpm run build", "expected_exit": 0 }
+    {
+      "id": "G1",
+      "name": "typecheck",
+      "command": "pnpm run typecheck",
+      "expected_exit": 0
+    },
+    {
+      "id": "G2",
+      "name": "lint",
+      "command": "pnpm run lint",
+      "expected_exit": 0
+    },
+    {
+      "id": "G3",
+      "name": "build",
+      "command": "pnpm run build",
+      "expected_exit": 0
+    }
   ],
   "user_testing": {
     "boot_command": "pnpm dev",
-    "ready_probe": { "type": "http", "url": "http://localhost:3000", "expect_status": 200, "timeout_sec": 60 },
+    "ready_probe": {
+      "type": "http",
+      "url": "http://localhost:3000",
+      "expect_status": 200,
+      "timeout_sec": 60
+    },
     "smoke_commands": [
       "curl -fsS http://localhost:3000",
       "curl -fsS http://localhost:3000/api/health"
@@ -30,7 +50,12 @@
       "id": "F1",
       "title": "Shell, fonts, intro en cyaan backdrop",
       "milestone": "M1",
-      "vc_ids": ["VC-1", "VC-2", "VC-7", "VC-8"],
+      "vc_ids": [
+        "VC-1",
+        "VC-2",
+        "VC-7",
+        "VC-8"
+      ],
       "status": "pending",
       "attempts": 0,
       "commit_sha": null,
@@ -42,7 +67,10 @@
       "id": "F2",
       "title": "Feed-renderer, client-statische commands en input/history/scroll",
       "milestone": "M1",
-      "vc_ids": ["VC-3", "VC-8"],
+      "vc_ids": [
+        "VC-3",
+        "VC-8"
+      ],
       "status": "pending",
       "attempts": 0,
       "commit_sha": null,
@@ -54,7 +82,11 @@
       "id": "F3",
       "title": "Portfolio-overlay met aanleverbaar projectdataformat",
       "milestone": "M1",
-      "vc_ids": ["VC-4", "VC-5", "VC-8"],
+      "vc_ids": [
+        "VC-4",
+        "VC-5",
+        "VC-8"
+      ],
       "status": "pending",
       "attempts": 0,
       "commit_sha": null,
@@ -66,7 +98,11 @@
       "id": "F4",
       "title": "Mobiele afwerking en touch-bediening",
       "milestone": "M1",
-      "vc_ids": ["VC-6", "VC-7", "VC-8"],
+      "vc_ids": [
+        "VC-6",
+        "VC-7",
+        "VC-8"
+      ],
       "status": "pending",
       "attempts": 0,
       "commit_sha": null,
@@ -78,7 +114,12 @@
       "id": "F5",
       "title": "Uitgestelde CAPTCHA en AI-streaming in de feed",
       "milestone": "M2",
-      "vc_ids": ["VC-9", "VC-10", "VC-12", "VC-13"],
+      "vc_ids": [
+        "VC-9",
+        "VC-10",
+        "VC-12",
+        "VC-13"
+      ],
       "status": "pending",
       "attempts": 0,
       "commit_sha": null,
@@ -90,7 +131,11 @@
       "id": "F6",
       "title": "E-mail-tool preview, bevestiging en versturen — opnieuw vormgegeven",
       "milestone": "M2",
-      "vc_ids": ["VC-11", "VC-12", "VC-13"],
+      "vc_ids": [
+        "VC-11",
+        "VC-12",
+        "VC-13"
+      ],
       "status": "pending",
       "attempts": 0,
       "commit_sha": null,
@@ -102,7 +147,10 @@
       "id": "F7",
       "title": "Playwright-suite herschreven naar de nieuwe UI",
       "milestone": "M3",
-      "vc_ids": ["VC-14", "VC-16"],
+      "vc_ids": [
+        "VC-14",
+        "VC-16"
+      ],
       "status": "pending",
       "attempts": 0,
       "commit_sha": null,
@@ -114,7 +162,10 @@
       "id": "F8",
       "title": "Dode code verwijderd, check en build groen",
       "milestone": "M3",
-      "vc_ids": ["VC-15", "VC-16"],
+      "vc_ids": [
+        "VC-15",
+        "VC-16"
+      ],
       "status": "pending",
       "attempts": 0,
       "commit_sha": null,
@@ -127,7 +178,12 @@
     {
       "id": "M1",
       "title": "Statische terminal (pixel-exact, mobiel-net)",
-      "feature_ids": ["F1", "F2", "F3", "F4"],
+      "feature_ids": [
+        "F1",
+        "F2",
+        "F3",
+        "F4"
+      ],
       "validation_status": "pending",
       "validated_at": null,
       "gate_results": [],
@@ -136,7 +192,10 @@
     {
       "id": "M2",
       "title": "AI-chat in de shell",
-      "feature_ids": ["F5", "F6"],
+      "feature_ids": [
+        "F5",
+        "F6"
+      ],
       "validation_status": "pending",
       "validated_at": null,
       "gate_results": [],
@@ -145,13 +204,18 @@
     {
       "id": "M3",
       "title": "Tests en opruimen",
-      "feature_ids": ["F7", "F8"],
+      "feature_ids": [
+        "F7",
+        "F8"
+      ],
       "validation_status": "pending",
       "validated_at": null,
       "gate_results": [],
       "vc_results": []
     }
   ],
-  "circuit_breaker": { "consecutive_failures": 0 },
+  "circuit_breaker": {
+    "consecutive_failures": 0
+  },
   "decisions": []
 }
