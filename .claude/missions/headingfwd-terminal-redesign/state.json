@@ -414,12 +414,52 @@
         "VC-14",
         "VC-16"
       ],
-      "status": "pending",
-      "attempts": 0,
-      "commit_sha": null,
-      "started_at": null,
-      "completed_at": null,
-      "error": null
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "96a4908c701c6f3a1697f5209468305bcc7eb055",
+      "started_at": "2026-06-30T16:51:09Z",
+      "completed_at": "2026-06-30T16:51:09Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Rewrote tests/helpers/api-mocks.ts to the AI SDK v6 UI-message-stream SSE format (text-delta + tool chunks); old 0:/9:/a: format removed",
+          "Rewrote tests/helpers/session.ts: sendCommand (slash, no assistant-message wait), sendAIMessage (free text, waits for assistant-message + loading gone)",
+          "Rewrote tests/fixtures/command-outputs.ts and mock-responses.ts to the exact terminal-commands.ts copy, using unique substrings to avoid Playwright strict-mode double matches",
+          "Rewrote all four specs (commands, chat-streaming, email-flow, rate-limiting) and added two 375px mobile-viewport tests; covers client-static commands, AI stream, email success + rate-limit, 429 handling, and mobile no-overflow",
+          "Simplified tests/global-setup.ts (no OPENAI key check — all mocked) and made playwright.config.ts mkdir the SQLite test-DB directory before the server starts"
+        ],
+        "left_undone": [
+          "Unused tests/helpers/assertions.ts and tests/fixtures/test-sessions.ts / error-messages.ts not deleted (harmless; F8 cleanup)",
+          "SKIP_LIVE_TESTS in .env.test is now a no-op"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm test:e2e",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          ".env.test DATABASE_URL pointed at tmp/db/ which didn't exist; @libsql/client doesn't create parent dirs so the server failed to boot. Fixed via mkdirSync in playwright.config.ts (no .env.test change).",
+          "The speciality bullet texts appear twice (static intro + /services feed), tripping Playwright strict mode; resolved by asserting on unique substrings.",
+          "No product bug found; the [AI Chat Error] console.error during rate-limit tests is an intended debug log (UI shows the clean message)."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (after unstaging .env.test)",
+          "conventional commit test(e2e):",
+          "no product component changes — only tests, helpers, fixtures, playwright.config.ts",
+          "no mission-internal codes in code or commit",
+          "orchestrator independently re-ran pnpm test:e2e: 27 passed (31.6s)"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F7.md"
+      }
     },
     {
       "id": "F8",
