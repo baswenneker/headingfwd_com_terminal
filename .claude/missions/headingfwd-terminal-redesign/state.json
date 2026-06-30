@@ -56,12 +56,57 @@
         "VC-7",
         "VC-8"
       ],
-      "status": "pending",
-      "attempts": 0,
-      "commit_sha": null,
-      "started_at": null,
-      "completed_at": null,
-      "error": null
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "fa4c0a5c7dfa3163571802ca9f893768ebbf2b8d",
+      "started_at": "2026-06-30T13:09:07Z",
+      "completed_at": "2026-06-30T13:09:07Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "JetBrains Mono via next/font/google (weights 400/500/700/800, normal + italic 400), wired as --font-jetbrains-mono CSS variable",
+          "globals.css: cyan backdrop (#0BD3E6) with two radial-gradient overlays, body font wiring, ::selection in accent color, overflow:hidden",
+          "terminal.module.css (new): full CSS Module with --accent #2EE6F6, --backdrop #0BD3E6, --prompt #5BE6A0 tokens; page container with container-type:inline-size/container-name:page; window min(980px,100%) x min(84vh,780px), exact 3-layer shadow, radius 13px; title bar with traffic-light dots; scrollable body with clamp padding and scrollbar styles; wordmark clamp(28px,7cqw,46px) weight 800; specialities grid; status bar; @container page (max-width:560px) breakpoint collapsing grid to 1 column, window full-height/radius 14px, hiding zsh and brand label, shrinking status bar",
+          "terminal.tsx rewritten as use client component: static intro (prompt, wordmark, subtitle, value-prop, // specialities comment + 4-item grid, tip, divider, input row, status bar); controlled input with useState; auto-focus via useEffect 650ms; click-to-refocus on body; 18 lines in status bar; faint dot grid as fixed aria-hidden div",
+          "page.tsx simplified to render <Terminal /> only"
+        ],
+        "left_undone": [
+          "Command execution / feed renderer (later feature)",
+          "History recall with ArrowUp/ArrowDown (later feature)",
+          "Click-to-refocus behaviour after commands and auto-scroll (depends on feed — later feature)",
+          "Portfolio overlay (later feature)",
+          "AI streaming integration and deferred CAPTCHA flow (later feature)",
+          "E2E test suite rewrite (later feature)",
+          "Removal of chat-terminal.tsx, code-block.tsx, captcha-overlay.tsx (later cleanup feature)"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "The faint dot grid is implemented as a fixed aria-hidden <div> inside the page container (matching the reference HTML structure) rather than body::before, which would create its own stacking context and paint over the window.",
+          "Scrollbar styles must live in the CSS Module (scoped .body class), not globals.css, because CSS Module class names are compile-time scoped and unreachable from globals.",
+          "A literal // specialities text node in JSX trips react/jsx-no-comment-textnodes; wrap it in a string expression {'// specialities'}.",
+          "JetBrains_Mono with weight 400/500/700/800 x normal/italic loads 8 font files; only italic 400 is used, so italic 500/700/800 are loaded but unused — candidate for a small cleanup."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok) before staging and after",
+          "conventional commit feat(terminal): per project conventions",
+          "staged only the 5 changed/new product files",
+          "pnpm typecheck, pnpm lint and pnpm build all exit 0"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F1.md"
+      }
     },
     {
       "id": "F2",
