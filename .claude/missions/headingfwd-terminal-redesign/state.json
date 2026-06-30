@@ -528,10 +528,60 @@
         "F5",
         "F6"
       ],
-      "validation_status": "pending",
-      "validated_at": null,
-      "gate_results": [],
-      "vc_results": []
+      "validation_status": "passed",
+      "validated_at": "2026-06-30T16:24:03Z",
+      "gate_results": [
+        {
+          "id": "G1",
+          "command": "pnpm run typecheck",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G2",
+          "command": "pnpm run lint",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G3",
+          "command": "pnpm run build",
+          "exit_code": 0,
+          "passed": true
+        }
+      ],
+      "vc_results": [
+        {
+          "id": "VC-9",
+          "passed": true,
+          "evidence": "/help works with no overlay/session; free text shows the restyled CAPTCHA overlay (verified live with Cloudflare Turnstile test keys, screenshotted); with the auto-pass test key the full chain runs end-to-end: overlay -> verify -> tRPC session -> held message sent to the AI.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-usertest.md"
+        },
+        {
+          "id": "VC-10",
+          "passed": true,
+          "evidence": "Mocked UI-message stream renders markdown in the body style (h2 #eafbfe, body #cfe2e7, accent inline-code/links, list, code block); 'Thinking…' shows while waiting; blinking cursor via CSS keyframe; a mocked 429 shows '→ You've reached the email limit…' in terminal-red, no raw JSON.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-usertest.md"
+        },
+        {
+          "id": "VC-11",
+          "passed": true,
+          "evidence": "Full email flow mocked with the exact v6 tool chunks: preview renders cleanly (━ separators fixed), 'yes' yields '✓ message sent to bas@headingfwd.com' in prompt-green plus the AI confirmation, and a third attempt shows the rate-limit message in terminal-red. No real email sent.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-usertest.md"
+        },
+        {
+          "id": "VC-12",
+          "passed": true,
+          "evidence": "Backend untouched (no src/app/api, src/server, tRPC, schema changes); client reuses useChat->/api/chat and tRPC chat.initSession; only NEXT_PUBLIC_* public values in client code (no OpenAI/Resend/Turnstile secret); the sole AI call site dispatchAiMessage is guarded by sessionIdRef.current so no AI request fires before a valid session.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-review.md"
+        },
+        {
+          "id": "VC-13",
+          "passed": true,
+          "evidence": "Grep of changed product files for mission codes returned only a false-positive ('submission'); feat/fix commit messages are standalone changelog prose with no F/M/VC IDs.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-review.md"
+        }
+      ]
     },
     {
       "id": "M3",
