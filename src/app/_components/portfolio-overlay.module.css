@@ -1,0 +1,466 @@
+/*
+ * Portfolio overlay styles.
+ *
+ * The overlay sits inside the .page container (which carries the --accent,
+ * --backdrop and --prompt custom properties). All cqw units are therefore
+ * resolved against the page's inline-size, which equals the viewport width.
+ *
+ * Sizes and colors are taken verbatim from the design reference.
+ */
+
+/* ─── Fullscreen overlay shell ───────────────────────────────────────────── */
+/*
+ * position:absolute + inset:0 places the overlay over the entire .page
+ * element (which is the CSS containing block because it carries
+ * container-type:inline-size). z-index 120 puts it above the terminal window.
+ */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 120;
+  outline: none; /* focus ring suppressed — keyboard users navigate via pfKey */
+  display: flex;
+  flex-direction: column;
+  padding: clamp(20px, 4cqw, 60px);
+  color: #d6e6ea;
+  font-size: 14px;
+  line-height: 1.7;
+  background:
+    radial-gradient(130% 120% at 50% -10%, rgba(46, 230, 246, 0.1), rgba(0, 0, 0, 0) 45%),
+    #07090b;
+  overflow-y: auto;
+}
+
+/* Slim scrollbar — matches the terminal body aesthetic */
+.overlay::-webkit-scrollbar {
+  width: 10px;
+}
+
+.overlay::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.overlay::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ─── Faint grid ─────────────────────────────────────────────────────────── */
+/*
+ * 42px repeating grid at ~5% opacity, radially faded.
+ * Uses a tighter mask than the terminal's 38px grid (matches the reference).
+ */
+.overlayGrid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at 50% 26%, #000 18%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle at 50% 26%, #000 18%, transparent 72%);
+}
+
+/* ─── Top bar ────────────────────────────────────────────────────────────── */
+.topBar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* "bas@headingfwd:" in prompt-green */
+.topBarPrompt {
+  color: var(--prompt);
+  font-weight: 700;
+}
+
+/* "~/portfolio" in accent color */
+.topBarAccent {
+  color: var(--accent);
+}
+
+/* Exit button — outline style; hover transitions to accent */
+.exitBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(214, 230, 234, 0.8);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.exitBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ─── ASCII banner ───────────────────────────────────────────────────────── */
+/*
+ * Block-letter "FWD" in accent color with a subtle glow.
+ * white-space:pre preserves the exact spacing of the ASCII art.
+ *
+ * The banner uses block-element glyphs (█, U+2588). For the monospace grid to
+ * hold, the block character and the space must come from the same font and
+ * share an equal advance width. The page font (JetBrains Mono) is loaded with
+ * the latin subset only, which excludes Block Elements — so inheriting it
+ * would cause the browser to mix glyph widths from two fonts and break the
+ * art. An explicit system monospace stack is used instead; every font listed
+ * here includes both the block glyph and the space at a matching width.
+ */
+.asciiBanner {
+  position: relative;
+  margin-top: clamp(18px, 3.5cqw, 40px);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  font-size: clamp(9px, 2.3cqw, 18px);
+  line-height: 1.05;
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(46, 230, 246, 0.38);
+  white-space: pre;
+  flex: 0 0 auto;
+  overflow-x: auto;
+  margin-bottom: 0;
+}
+
+/* "// selected work" subheading below the banner */
+.subhead {
+  position: relative;
+  margin-top: 12px;
+  color: rgba(160, 178, 182, 0.78);
+}
+
+/* ─── List view ──────────────────────────────────────────────────────────── */
+
+.listView {
+  position: relative;
+  margin-top: clamp(20px, 3cqw, 38px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  max-width: 1040px;
+}
+
+/*
+ * Each project row: two-column grid — a fixed 46px index column, then the
+ * project details. Left border signals the active selection.
+ */
+.listRow {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 3px 18px;
+  align-items: baseline;
+  padding: 18px clamp(14px, 2.4cqw, 24px);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  background: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+/* Active / hovered row — 2px accent left border + faint fill */
+.listRowSelected {
+  border-left-color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Two-digit project index ("01", "02", …) — accent, bold */
+.listRowIndex {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* Project title — bright white, medium weight, fluid size */
+.listRowName {
+  font-size: clamp(17px, 2.5cqw, 23px);
+  font-weight: 500;
+  color: #eafbfe;
+}
+
+/* Kind / role line — muted, smaller */
+.listRowKind {
+  margin-top: 5px;
+  color: rgba(170, 188, 192, 0.72);
+  font-size: 13px;
+}
+
+/* Tags joined with "    ·    " — faintest text, tiny size */
+.listRowTags {
+  margin-top: 10px;
+  color: rgba(120, 140, 144, 0.9);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+}
+
+/* Bottom border closing the list */
+.listDivider {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Keyboard navigation hint below the list */
+.listHelper {
+  position: relative;
+  margin-top: 20px;
+  color: rgba(245, 197, 68, 0.85);
+  font-size: 12.5px;
+}
+
+/* ─── Detail view ────────────────────────────────────────────────────────── */
+
+.detailView {
+  position: relative;
+  margin-top: clamp(20px, 3cqw, 36px);
+  max-width: 800px;
+}
+
+/* "← back to all work" text button */
+.backBtn {
+  display: block;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 22px;
+  text-align: left;
+}
+
+.backBtn:hover {
+  text-decoration: underline;
+}
+
+/* "01   1 / 4" counter row */
+.detailCounter {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+/* The "01" portion — accent, bold */
+.detailCounterN {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* The "1 / 4" position indicator */
+.detailCounterLabel {
+  color: rgba(160, 178, 182, 0.6);
+  font-size: 12px;
+}
+
+/* Large project title */
+.detailTitle {
+  margin: 6px 0 0 0; /* reset browser h2 margins; keep 6px top gap */
+  padding: 0;
+  font-size: clamp(26px, 4.6cqw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.05;
+  color: #eafbfe;
+}
+
+/* Kind / role in accent below the title */
+.detailKind {
+  margin-top: 8px;
+  color: var(--accent);
+  font-size: 15px;
+}
+
+/* Container for tag chips */
+.detailTags {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Individual pill chip */
+.detailTag {
+  font-size: 12px;
+  padding: 5px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: rgba(214, 230, 234, 0.8);
+}
+
+/* Body paragraphs container — capped width for comfortable reading */
+.detailBody {
+  margin-top: 24px;
+  max-width: 62ch;
+}
+
+/* Individual paragraph */
+.detailPara {
+  margin-bottom: 14px;
+  color: #c6dce1;
+  line-height: 1.72;
+}
+
+/*
+ * Placeholder visual box — shown when no image is provided.
+ * 45° stripe pattern with a centered caption.
+ */
+.detailVisual {
+  margin-top: 12px;
+  height: clamp(170px, 26cqw, 250px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.03) 0 12px,
+    transparent 12px 24px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(160, 178, 182, 0.55);
+  font-size: 12px;
+  text-align: center;
+  padding: 16px;
+}
+
+/*
+ * Image container — shown when project.image is set.
+ * position:relative is required for Next.js Image fill mode.
+ */
+.detailVisualImage {
+  position: relative;
+  margin-top: 12px;
+  height: clamp(170px, 26cqw, 250px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ─── Detail button row ──────────────────────────────────────────────────── */
+
+.detailButtons {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Shared outline button style (prev / next / case link) */
+.outlineBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(214, 230, 234, 0.8);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.outlineBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Solid accent "work with me →" CTA */
+.ctaBtn {
+  background: var(--accent);
+  color: #04181c;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+}
+
+/* ─── Narrow container breakpoint (≤560px) ───────────────────────────── */
+/*
+ * On narrow containers (mobile phones), increase the touch target height of
+ * all interactive controls to approximately 44px, which matches the minimum
+ * recommended tap-target size. Also fix horizontal overflow from the ASCII
+ * banner and long list tag strings, and ensure the detail title wraps.
+ */
+@container page (max-width: 560px) {
+  /*
+   * The ASCII banner: enforce a maximum width so the <pre> element stays within
+   * the flex column. overflow-x:auto (already set in the base rule) provides
+   * a scrollbar for the rare case where the banner still exceeds its box.
+   */
+  .asciiBanner {
+    max-width: 100%;
+  }
+
+  /* Exit button: grow to at least 44px tall for comfortable tapping. */
+  .exitBtn {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  /*
+   * "← back to all work" text button: add vertical padding so the touch
+   * target reaches ~44px. The button has no border so the padding does not
+   * change its visual footprint noticeably.
+   */
+  .backBtn {
+    padding: 12px 0;
+    min-height: 44px;
+  }
+
+  /* Outline nav buttons (← prev, next →, read the case study →): 44px min. */
+  .outlineBtn {
+    min-height: 44px;
+    padding: 11px 16px;
+  }
+
+  /* CTA "work with me →": 44px min. */
+  .ctaBtn {
+    min-height: 44px;
+    padding: 13px 18px;
+  }
+
+  /*
+   * List rows: guarantee a minimum touch height. In practice the rows are
+   * taller (they contain three lines of text + padding), but a floor of 44px
+   * protects edge-cases with very short content.
+   */
+  .listRow {
+    min-height: 44px;
+  }
+
+  /*
+   * List tag strings: tags joined with four-space separators can be very long.
+   * word-break:break-word lets the browser split at whitespace characters in
+   * the separator so the text wraps instead of overflowing the grid cell.
+   */
+  .listRowTags {
+    word-break: break-word;
+  }
+
+  /*
+   * Detail title: force word wrapping so a long project name breaks at word
+   * boundaries rather than overflowing to the right of the overlay.
+   */
+  .detailTitle {
+    word-break: break-word;
+  }
+
+  /*
+   * Detail body: remove the ch-based max-width so the text fills the available
+   * container width at 375px instead of potentially overflowing.
+   */
+  .detailBody {
+    max-width: 100%;
+  }
+}

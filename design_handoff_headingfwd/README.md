@@ -52,7 +52,7 @@ Your task: **recreate this design in the existing Next.js codebase** using its e
    - **Command feed** — appended output for each entered command (see "Commands" below).
    - **Input row**: prompt label `bas@headingfwd ~$` (the `bas@headingfwd ` part hides on narrow; `~$` accent), then a borderless transparent `<input>` filling the row, 14px, `#EAFBFE`, `caret-color` = accent, placeholder `type a command…` at `rgba(220,240,245,.32)`.
 3. **Status bar** (`flex:0 0 auto`, padding `7px 16px`, `background:#0d1115`, top border `rgba(255,255,255,.07)`, 11px, `rgba(200,218,222,.5)`):
-   - Pulsing dot (prompt-green with glow) + `online`, then `main`, `utf-8`, and right-aligned `<n> lines · /help`.
+   - Pulsing dot (prompt-green with glow) + `online`, then `main`, `utf-8`, an **`agents.txt`** link (accent, with a small accent dot + glow), and right-aligned `<n> lines · /help`. The `agents.txt` link opens `/agents.txt` in a new tab (see "Agent-readable content" below).
 
 ### 2. Portfolio (fullscreen overlay — triggered by `/portfolio`)
 **Purpose:** Browse selected work. Replaces the terminal with an absolutely-positioned full-bleed overlay (z-index above the window).
@@ -81,15 +81,29 @@ Below it: `// selected work — AI engineering & product design` in `rgba(160,17
 ## Commands (terminal feed output)
 Typed text is parsed by stripping a leading `/`, lowercasing, taking the first whitespace-token. Each command echoes the typed line (`bas@headingfwd ~$ <raw>`) then prints output, then a blank spacer. Unknown input → a short "lightweight demo assistant" fallback that points to `/help` and the email. Output line styles: `head` (accent, weight 700), `out` (`#CFE2E7`), `dim` (`rgba(160,178,182,.6)`), `bullet` (accent `*` + text), `row` (accent label min-width 96px + description), `job` (accent number + white name + dimmed `— desc`), `link` (dim label + underlined accent anchor).
 
-- **`/help`** — lists every command with a one-line description (`row` style): `/about`, `/services`, `/work`, `/portfolio` (`browse my work in fullscreen ↵`), `/stack`, `/contact`, `/clear`; plus a dim history tip.
+- **`/help`** — lists every command with a one-line description (`row` style): `/about`, `/services`, `/work`, `/portfolio` (`browse my work in fullscreen ↵`), `/stack`, `/contact`, `/agents` (`plain-text source for AI agents`), `/clear`; plus a dim history tip.
 - **`/about`** — `$ whoami`: "Bas Wenneker — AI Lead / Engineer @ HeadingFWD", then 15+ yrs shipping software, 5+ yrs coaching 60+ product & innovation teams, balancing business/customer/tech to take GenAI from demo to production.
 - **`/services`** — `// what I help teams with`, four bullets: Agentic workflow development; AI strategy & consultancy; Evaluation & testing; Assistants & copilots (production-ready).
 - **`/work`** — `selected engagements`, four `job` rows (01–04) mirroring the portfolio projects (short form).
 - **`/stack`** — `// stack`: "LLMs · agents · RAG · evals · prompt + context engineering" / "Python · TypeScript · React · Ruby on Rails · Docker" / "Lean Startup · Design Thinking · Service Design · Scrum".
 - **`/contact`** — `let's talk →`, link rows: email → `mailto:bas@headingfwd.com`; linkedin → `https://www.linkedin.com/in/baswenneker`; dim "fastest reply: drop me a DM on LinkedIn."
 - **`/portfolio`** (alias `/pf`) — echoes "→ launching portfolio…" then switches `mode` to `"portfolio"`.
+- **`/agents`** (alias `/llms`) — points visitors (and AI agents) to the plain-text source: a `head` line, a short note, and a `link` row `file → agents.txt`.
 - **`/clear`** (alias `/cls`) — empties the feed.
 - Aliases also present: `/whoami`, `/ls`.
+
+---
+
+## Agent-readable content (`agents.txt`)
+**Purpose:** expose every piece of site content to AI agents and crawlers as a single, plain-text, machine-readable file — so an agent can read the source directly instead of scraping the interactive terminal UI.
+
+**What ships:** `agents.txt` (included in this bundle) — a Markdown/UTF-8 document containing About, Specialities, Tech stack, all four Portfolio cases (full descriptions + tags), and Contact. It opens with a short header telling agents this is the canonical source.
+
+**How it's exposed in the rebuild:**
+- Serve the file at the site root so the URL is **`https://headingfwd.com/agents.txt`** (in Next.js: place it in `/public/agents.txt`).
+- The status-bar **`agents.txt` link** and the terminal **`/agents`** command both point at that URL.
+- **Keep it in sync with the site content.** Treat `agents.txt` as generated from the same source data as the terminal commands and portfolio (the static project array + about/services/stack/contact copy). Ideally generate it at build time from one shared content module so it never drifts from the UI. Don't hand-maintain two copies.
+- Recommended (optional) extras: also expose it as **`/llms.txt`** (the emerging convention) — either a copy or a redirect — and reference it from `robots.txt`.
 
 ## Interactions & Behavior
 - **Input submit:** Enter runs the command, clears input, unshifts raw into `history` (cap 40).
@@ -126,4 +140,5 @@ None. The only graphic is the ASCII "FWD" banner (plain text, included above). P
 
 ## Files
 - `HeadingFWD.reference.html` — the full interactive design reference (template markup + `Component` logic class). Source of truth for any measurement or copy not spelled out above. Open it in a browser to see live behavior.
+- `agents.txt` — the plain-text, agent-readable copy of all site content (see "Agent-readable content" above). Ship at `/public/agents.txt`.
 - `claude-code-prompt.md` — a ready-to-paste prompt for kicking off the rebuild in Claude Code.

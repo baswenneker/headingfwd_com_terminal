@@ -13,29 +13,30 @@ const MemoizedMarkdownBlock = memo(
       <div>
         <ReactMarkdown
           components={{
-            // Style code blocks
+            // Inline code: accent-colored text on a very dark background
+            // Block code: body-text color, slightly indented dark surface
             code: ({ className, children, ...props }) => {
               const isInline = !className;
               return isInline ? (
                 <code
-                  className="rounded bg-cyan-900/30 px-1 py-0.5 text-cyan-300"
+                  className="rounded bg-black/30 px-1 py-0.5 text-[#2ee6f6]"
                   {...props}
                 >
                   {children}
                 </code>
               ) : (
                 <code
-                  className="block rounded bg-black/40 p-2 text-sm text-gray-300"
+                  className="block rounded bg-black/40 p-2 text-sm text-[#cfe2e7]"
                   {...props}
                 >
                   {children}
                 </code>
               );
             },
-            // Style links
+            // Links: accent color with a readable underline
             a: ({ children, ...props }) => (
               <a
-                className="text-cyan-400 underline hover:text-cyan-300"
+                className="text-[#2ee6f6] underline underline-offset-[3px] hover:brightness-125"
                 target="_blank"
                 rel="noopener noreferrer"
                 {...props}
@@ -43,36 +44,40 @@ const MemoizedMarkdownBlock = memo(
                 {children}
               </a>
             ),
-            // Style lists - minimal padding for terminal alignment
+            // Lists: body text color, compact vertical spacing
             ul: ({ children }) => (
-              <ul className="my-2 list-inside list-disc space-y-1 marker:text-gray-400">
+              <ul className="my-2 list-inside list-disc space-y-1 marker:text-[#cfe2e7]">
                 {children}
               </ul>
             ),
             ol: ({ children }) => (
-              <ol className="my-2 list-inside list-decimal space-y-1 marker:text-gray-400">
+              <ol className="my-2 list-inside list-decimal space-y-1 marker:text-[#cfe2e7]">
                 {children}
               </ol>
             ),
-            li: ({ children }) => <li className="text-gray-300">{children}</li>,
-            // Style headings
+            li: ({ children }) => (
+              <li className="text-[#cfe2e7]">{children}</li>
+            ),
+            // Headings: near-white, progressively smaller weights
             h1: ({ children }) => (
-              <h1 className="mt-4 mb-2 text-xl font-bold text-gray-100">
+              <h1 className="mt-4 mb-2 text-xl font-bold text-[#eafbfe]">
                 {children}
               </h1>
             ),
             h2: ({ children }) => (
-              <h2 className="mt-3 mb-2 text-lg font-bold text-gray-100">
+              <h2 className="mt-3 mb-2 text-lg font-bold text-[#eafbfe]">
                 {children}
               </h2>
             ),
             h3: ({ children }) => (
-              <h3 className="mt-2 mb-1 text-base font-bold text-gray-100">
+              <h3 className="mt-2 mb-1 text-base font-bold text-[#eafbfe]">
                 {children}
               </h3>
             ),
-            // Style paragraphs
-            p: ({ children }) => <p className="mb-2">{children}</p>,
+            // Paragraphs: terminal body text color
+            p: ({ children }) => (
+              <p className="mb-2 text-[#cfe2e7]">{children}</p>
+            ),
           }}
         >
           {content}

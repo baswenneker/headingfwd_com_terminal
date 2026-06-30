@@ -1,0 +1,726 @@
+{
+  "version": 1,
+  "slug": "headingfwd-terminal-redesign",
+  "title": "HeadingFWD terminal-redesign",
+  "status": "done",
+  "branch": "mission/headingfwd-terminal-redesign",
+  "worktree": "/Users/bas/Development/HeadingFWD/headingfwd_com_terminal/.trees/mission/headingfwd-terminal-redesign",
+  "base_branch": "main",
+  "created_at": "2026-06-30T12:24:45Z",
+  "started_at": "2026-06-30T12:48:26Z",
+  "started_at_epoch": 1782823706,
+  "completed_at": "2026-06-30T17:03:16Z",
+  "gates": [
+    {
+      "id": "G1",
+      "name": "typecheck",
+      "command": "pnpm run typecheck",
+      "expected_exit": 0
+    },
+    {
+      "id": "G2",
+      "name": "lint",
+      "command": "pnpm run lint",
+      "expected_exit": 0
+    },
+    {
+      "id": "G3",
+      "name": "build",
+      "command": "pnpm run build",
+      "expected_exit": 0
+    }
+  ],
+  "user_testing": {
+    "boot_command": "pnpm dev",
+    "ready_probe": {
+      "type": "http",
+      "url": "http://localhost:3000",
+      "expect_status": 200,
+      "timeout_sec": 60
+    },
+    "smoke_commands": [
+      "curl -fsS http://localhost:3000",
+      "curl -fsS http://localhost:3000/api/health"
+    ],
+    "playwright_present": true,
+    "teardown_command": null
+  },
+  "features": [
+    {
+      "id": "F1",
+      "title": "Shell, fonts, intro en cyaan backdrop",
+      "milestone": "M1",
+      "vc_ids": [
+        "VC-1",
+        "VC-2",
+        "VC-7",
+        "VC-8"
+      ],
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "fa4c0a5c7dfa3163571802ca9f893768ebbf2b8d",
+      "started_at": "2026-06-30T13:09:07Z",
+      "completed_at": "2026-06-30T13:09:07Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "JetBrains Mono via next/font/google (weights 400/500/700/800, normal + italic 400), wired as --font-jetbrains-mono CSS variable",
+          "globals.css: cyan backdrop (#0BD3E6) with two radial-gradient overlays, body font wiring, ::selection in accent color, overflow:hidden",
+          "terminal.module.css (new): full CSS Module with --accent #2EE6F6, --backdrop #0BD3E6, --prompt #5BE6A0 tokens; page container with container-type:inline-size/container-name:page; window min(980px,100%) x min(84vh,780px), exact 3-layer shadow, radius 13px; title bar with traffic-light dots; scrollable body with clamp padding and scrollbar styles; wordmark clamp(28px,7cqw,46px) weight 800; specialities grid; status bar; @container page (max-width:560px) breakpoint collapsing grid to 1 column, window full-height/radius 14px, hiding zsh and brand label, shrinking status bar",
+          "terminal.tsx rewritten as use client component: static intro (prompt, wordmark, subtitle, value-prop, // specialities comment + 4-item grid, tip, divider, input row, status bar); controlled input with useState; auto-focus via useEffect 650ms; click-to-refocus on body; 18 lines in status bar; faint dot grid as fixed aria-hidden div",
+          "page.tsx simplified to render <Terminal /> only"
+        ],
+        "left_undone": [
+          "Command execution / feed renderer (later feature)",
+          "History recall with ArrowUp/ArrowDown (later feature)",
+          "Click-to-refocus behaviour after commands and auto-scroll (depends on feed — later feature)",
+          "Portfolio overlay (later feature)",
+          "AI streaming integration and deferred CAPTCHA flow (later feature)",
+          "E2E test suite rewrite (later feature)",
+          "Removal of chat-terminal.tsx, code-block.tsx, captcha-overlay.tsx (later cleanup feature)"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "The faint dot grid is implemented as a fixed aria-hidden <div> inside the page container (matching the reference HTML structure) rather than body::before, which would create its own stacking context and paint over the window.",
+          "Scrollbar styles must live in the CSS Module (scoped .body class), not globals.css, because CSS Module class names are compile-time scoped and unreachable from globals.",
+          "A literal // specialities text node in JSX trips react/jsx-no-comment-textnodes; wrap it in a string expression {'// specialities'}.",
+          "JetBrains_Mono with weight 400/500/700/800 x normal/italic loads 8 font files; only italic 400 is used, so italic 500/700/800 are loaded but unused — candidate for a small cleanup."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok) before staging and after",
+          "conventional commit feat(terminal): per project conventions",
+          "staged only the 5 changed/new product files",
+          "pnpm typecheck, pnpm lint and pnpm build all exit 0"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F1.md"
+      }
+    },
+    {
+      "id": "F2",
+      "title": "Feed-renderer, client-statische commands en input/history/scroll",
+      "milestone": "M1",
+      "vc_ids": [
+        "VC-3",
+        "VC-8"
+      ],
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "087b65c99dcc4667131de025b88c58e17147a437",
+      "started_at": "2026-06-30T13:25:10Z",
+      "completed_at": "2026-06-30T13:25:10Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Discriminated-union FeedLine type (sp, cmd, head, out, dim, bullet, row, job, link) in terminal-commands.ts",
+          "Command registry with exact reference copy: /help, /about, /services, /work, /stack, /contact, plus aliases /whoami and /ls",
+          "Freeform fallback (lightweight demo assistant lines) for non-command input",
+          "/clear (/cls) returns action:clear; /portfolio (/pf) echoes + launching line without overlay or trailing spacer",
+          "runCommand(raw) public parser returning CommandResult, structured so an AI branch can be added later",
+          "TerminalFeed renderer in terminal-feed.tsx, all nine line kinds with pixel-exact CSS Module styles; link anchors stopPropagation",
+          "terminal.tsx wired with feed/history/histIdx state, bodyRef auto-scroll on feed change, Enter handler (echo + history cap 40 + runCommand), ArrowUp/ArrowDown history recall, dynamic status count 18 + feed.length",
+          "terminal.module.css extended with all feed line styles using --accent and --prompt tokens"
+        ],
+        "left_undone": [
+          "Portfolio fullscreen overlay and mode switch (next feature)",
+          "AI/CAPTCHA/tRPC routing for free-text input (later milestone; CommandResult ready for an ai action)",
+          "Playwright E2E suite updates (later feature)",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx / captcha-overlay.tsx (later cleanup)"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "noUncheckedIndexedAccess makes COMMANDS[token], split()[0], and history[idx] resolve to T|undefined; handled with truthy guards and ?? '' fallbacks",
+          "The reference run() appends no trailing spacer for /portfolio; matched exactly",
+          "Orchestrator Playwright check on the running dev server confirmed: input auto-focus, /help exact output, /clear empties feed, ArrowUp history recall, 375px breakpoint collapse, and zero console errors"
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok)",
+          "conventional commit feat(terminal):",
+          "staged only the four changed product files",
+          "pnpm typecheck, pnpm lint, pnpm build all exit 0",
+          "orchestrator verified the running UI with the Playwright MCP before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F2.md"
+      }
+    },
+    {
+      "id": "F3",
+      "title": "Portfolio-overlay met aanleverbaar projectdataformat",
+      "milestone": "M1",
+      "vc_ids": [
+        "VC-4",
+        "VC-5",
+        "VC-8"
+      ],
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "394bcd7e5a2c9a7c647f36f1ea1f5fce90035c08",
+      "started_at": "2026-06-30T13:41:36Z",
+      "completed_at": "2026-06-30T13:41:36Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "terminal-projects.ts: documented Project interface, fill-in template comment, four projects verbatim, optional image and caseUrl fields",
+          "portfolio-overlay.tsx: fullscreen overlay with ListView and DetailView; keyboard nav (up/down/enter/esc in list, left/right + esc/backspace in detail) and mouse (hover selects, click opens, buttons); overlay grabs focus on mount; detail view renders project.image in the visual box when present else a striped placeholder, and a 'read the case study' button when caseUrl is set",
+          "portfolio-overlay.module.css: full overlay styling pixel-exact (shell with accent glow + 42px grid, top bar, ASCII banner glow, list rows with selected state, detail view, chips, buttons, CTA)",
+          "terminal-commands.ts: CommandResult gained a portfolio action; /portfolio and /pf return it with echo + launch line",
+          "terminal.tsx: mode/pfIndex/pfDetail state; portfolio action opens the overlay after ~140ms; exitPortfolio restores input focus; PortfolioOverlay rendered conditionally inside .page"
+        ],
+        "left_undone": [
+          "Deeper mobile-touch polish (tap targets, keyboard suppression) — next feature",
+          "Playwright E2E tests for the portfolio — later feature",
+          "AI chat / CAPTCHA / tRPC integration — later milestone",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx / captcha-overlay.tsx — later cleanup",
+          "Real project images and case-study links — data fields ready, assets to be supplied"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          },
+          {
+            "command": "risky-scan.sh",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "Next.js <Image> with fill needs a positioned parent with explicit height; the detailVisualImage class sets this. An external image URL would also need a next.config remotePatterns entry — documented in the interface comments; local /public paths work directly.",
+          "The overlay's cqw units resolve against the .page container (container-type:inline-size), which is correct because the overlay is a child of .page.",
+          "Orchestrator Playwright check confirmed: /portfolio opens the overlay, up/down + enter navigate to detail, left/right cycles projects in detail, esc returns to list then exits with input refocus, and a mouse click opens a project — zero console errors."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok), no secrets staged",
+          "conventional commit feat(portfolio): with descriptive body",
+          "only the specific files staged (no git add -A)",
+          "no mission-internal codes in code, comments, or commit message",
+          "JSX // text wrapped as string expressions to satisfy react/jsx-no-comment-textnodes",
+          "orchestrator verified the running overlay with the Playwright MCP before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F3.md"
+      }
+    },
+    {
+      "id": "F4",
+      "title": "Mobiele afwerking en touch-bediening",
+      "milestone": "M1",
+      "vc_ids": [
+        "VC-6",
+        "VC-7",
+        "VC-8"
+      ],
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "1a18bcec1caa2e3cc5892f74debc3319d097a12d",
+      "started_at": "2026-06-30T14:01:53Z",
+      "completed_at": "2026-06-30T14:01:53Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Single prefersAutoFocus() helper (SSR-guarded) gates all three focus paths: mount auto-focus, body click-refocus, and exitPortfolio — the on-screen keyboard no longer pops unprompted on touch",
+          "Tip-line /help and /portfolio tokens are real buttons routing through a shared dispatchCommand; /help output row labels become tappable buttons via an optional onRunCommand prop on TerminalFeed (spans otherwise)",
+          "375px overflow fixes: feedJob flex-wrap + feedJobName min-width:0 (mobile only, desktop keeps max-content), feedLinkAnchor word-break:break-all; portfolio asciiBanner max-width, listRowTags/detailTitle word-break, detailBody max-width",
+          "Tap-targets ~44px on the portfolio exit/back/prev/next/CTA buttons and list rows via the portfolio mobile container query",
+          "Existing terminal 560px breakpoint (VC-7) preserved intact"
+        ],
+        "left_undone": [
+          "AI streaming / deferred CAPTCHA / tRPC — next milestone",
+          "Playwright E2E suite updates — later feature",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx / captcha-overlay.tsx — later cleanup"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "Playwright-narrow viewports report pointer:fine, so the touch keyboard-suppression behavior is code-verified rather than observable in the headless test; on real touch devices all three focus paths are now gated.",
+          "List rows remain div+onClick (tappable); the overlay-level keyboard handler covers keyboard access, so per-row tabIndex was intentionally not added.",
+          "Orchestrator Playwright check at 375px confirmed: no horizontal overflow on terminal or portfolio, tapping the tip /portfolio opens the overlay, and a full tap-only flow (row -> next -> exit) works; zero console errors."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok)",
+          "two conventional commits: feat(mobile): then fix(mobile): for the shared-helper focus gating",
+          "only the relevant files staged (no git add -A)",
+          "no mission-internal codes in code, comments, or commit messages",
+          "orchestrator verified the running 375px UI with the Playwright MCP before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F4.md"
+      }
+    },
+    {
+      "id": "F5",
+      "title": "Uitgestelde CAPTCHA en AI-streaming in de feed",
+      "milestone": "M2",
+      "vc_ids": [
+        "VC-9",
+        "VC-10",
+        "VC-12",
+        "VC-13"
+      ],
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "0fe8114028005d5465e38a74bab98eafe87a7ec3",
+      "started_at": "2026-06-30T16:04:54Z",
+      "completed_at": "2026-06-30T16:04:54Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Deferred CAPTCHA flow: first free-text message holds the input in a ref, shows the restyled CaptchaOverlay, and after verification calls tRPC initSession then sends the held message; no AI request fires before a valid session (dispatchAiMessage guards sessionIdRef)",
+          "Dev/test bypass when NEXT_PUBLIC_DISABLE_CAPTCHA=true: overlay skipped, session created with a bypass token the server accepts",
+          "AI streaming in one chronological feed: ordered command blocks + AI turn blocks; useChat + DefaultChatTransport with sessionId in the request body; assistant answer renders as markdown in terminal body style with a Thinking indicator, a blinking cursor (CSS keyframe), and terminal-red error lines",
+          "CaptchaOverlay and MemoizedMarkdown restyled to the terminal color theme (dark panel + window shadow, accent links/inline-code, body text colors); backend untouched, no secrets in client",
+          "User-directed: wordmark suffix removed entirely — wordmark now reads 'HeadingFWD' (deliberate deviation from the reference's arrows); dead .wordmarkArrows CSS removed",
+          "User-directed: readableError() helper unwraps the API error JSON so visitors see a clean message instead of raw JSON"
+        ],
+        "left_undone": [
+          "Email tool preview/confirmation/send redesign — next feature (F6)",
+          "Playwright E2E suite updates — later feature",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx — later cleanup"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "NEXT_PUBLIC_* vars are inlined by Turbopack at compile time, so toggling NEXT_PUBLIC_DISABLE_CAPTCHA via a new .env.local required clearing .next before the dev server picked it up.",
+          "Orchestrator verified the AI stream by mocking /api/chat (UI message stream SSE: text-delta chunks) via a window.fetch override — no OpenAI key needed; styling confirmed pixel-consistent.",
+          "Orchestrator tested the CAPTCHA live with Cloudflare Turnstile test keys: the restyled overlay appears on first free-text and the auto-pass key drives overlay->verify->session->AI end-to-end; test keys and .env.local removed afterwards.",
+          "The plain `pnpm run build` (as gate G3 runs it) exits 0; the coder's SKIP_ENV_VALIDATION was unnecessary caution."
+        ],
+        "procedures_followed": [
+          "risky-scan clean across the feature and the two follow-up commits",
+          "three conventional commits: feat(terminal) core, then two fix(terminal) for the wordmark + error-message tweaks",
+          "backend files (/api/chat, tRPC routers, services, schema) left completely untouched",
+          "no mission-internal codes in code, comments, or commit messages",
+          "orchestrator verified the running UI (AI styling, Thinking, error, and the live CAPTCHA overlay) with the Playwright MCP before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F5.md"
+      }
+    },
+    {
+      "id": "F6",
+      "title": "E-mail-tool preview, bevestiging en versturen — opnieuw vormgegeven",
+      "milestone": "M2",
+      "vc_ids": [
+        "VC-11",
+        "VC-12",
+        "VC-13"
+      ],
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "a158feb92d42420c70c009591a26d031a9a62504",
+      "started_at": "2026-06-30T16:18:27Z",
+      "completed_at": "2026-06-30T16:18:27Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Render the sendMessage tool outcome in the AI turn as a terminal status line (detects part.type === 'tool-sendMessage')",
+          "Three states: dim '✉ sending your message…' while pending, prompt-green '✓ message sent to bas@headingfwd.com' on success, terminal-red error line (reusing .aiError) on failure — so the rate-limit message reliably appears",
+          "New .toolSending and .toolSent CSS classes using the dim tone and --prompt; failures reuse .aiError",
+          "Broader monospace font stack on .aiResponse so the box-drawing separators (━) in the email preview render with consistent width (same latin-subset cause as the ASCII banner)",
+          "Backend untouched; preview + confirmation remain AI-text driven by the server system prompt"
+        ],
+        "left_undone": [
+          "Playwright E2E tests for the email flow — later feature",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx — later cleanup"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "AI SDK v6 tool parts use type 'tool-${name}' (here 'tool-sendMessage') with state machine input-streaming -> input-available -> output-available (output) or output-error (errorText). Output shape for this tool: {success:true,message} or {success:false,error}.",
+          "TypeScript can't narrow ToolUIPart (tool-${string}) to a literal 'tool-sendMessage' shape, so a double cast through unknown is used (documented in a code comment).",
+          "Orchestrator verified the full flow with a mocked /api/chat stream using the exact v6 tool chunks (tool-input-start/-available, tool-output-available) — preview renders cleanly, '✓ message sent' shows in prompt-green, and the rate-limit failure shows '→ You've reached the email limit…' in terminal-red with no raw JSON. No real email was sent."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (ok)",
+          "conventional commit feat(terminal):",
+          "only terminal.tsx and terminal.module.css staged",
+          "no backend files modified (api/chat, server/, tRPC routers untouched)",
+          "no new dependencies; no mission-internal codes in code, comments, or commit message",
+          "orchestrator verified the email rendering with the Playwright MCP (mocked tool stream) before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F6.md"
+      }
+    },
+    {
+      "id": "F7",
+      "title": "Playwright-suite herschreven naar de nieuwe UI",
+      "milestone": "M3",
+      "vc_ids": [
+        "VC-14",
+        "VC-16"
+      ],
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "96a4908c701c6f3a1697f5209468305bcc7eb055",
+      "started_at": "2026-06-30T16:51:09Z",
+      "completed_at": "2026-06-30T16:51:09Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Rewrote tests/helpers/api-mocks.ts to the AI SDK v6 UI-message-stream SSE format (text-delta + tool chunks); old 0:/9:/a: format removed",
+          "Rewrote tests/helpers/session.ts: sendCommand (slash, no assistant-message wait), sendAIMessage (free text, waits for assistant-message + loading gone)",
+          "Rewrote tests/fixtures/command-outputs.ts and mock-responses.ts to the exact terminal-commands.ts copy, using unique substrings to avoid Playwright strict-mode double matches",
+          "Rewrote all four specs (commands, chat-streaming, email-flow, rate-limiting) and added two 375px mobile-viewport tests; covers client-static commands, AI stream, email success + rate-limit, 429 handling, and mobile no-overflow",
+          "Simplified tests/global-setup.ts (no OPENAI key check — all mocked) and made playwright.config.ts mkdir the SQLite test-DB directory before the server starts"
+        ],
+        "left_undone": [
+          "Unused tests/helpers/assertions.ts and tests/fixtures/test-sessions.ts / error-messages.ts not deleted (harmless; F8 cleanup)",
+          "SKIP_LIVE_TESTS in .env.test is now a no-op"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm test:e2e",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          ".env.test DATABASE_URL pointed at tmp/db/ which didn't exist; @libsql/client doesn't create parent dirs so the server failed to boot. Fixed via mkdirSync in playwright.config.ts (no .env.test change).",
+          "The speciality bullet texts appear twice (static intro + /services feed), tripping Playwright strict mode; resolved by asserting on unique substrings.",
+          "No product bug found; the [AI Chat Error] console.error during rate-limit tests is an intended debug log (UI shows the clean message)."
+        ],
+        "procedures_followed": [
+          "risky-scan clean (after unstaging .env.test)",
+          "conventional commit test(e2e):",
+          "no product component changes — only tests, helpers, fixtures, playwright.config.ts",
+          "no mission-internal codes in code or commit",
+          "orchestrator independently re-ran pnpm test:e2e: 27 passed (31.6s)"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F7.md"
+      }
+    },
+    {
+      "id": "F8",
+      "title": "Dode code verwijderd, check en build groen",
+      "milestone": "M3",
+      "vc_ids": [
+        "VC-15",
+        "VC-16"
+      ],
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "a2cde0589c7569160946f773465cf36a4d216d31",
+      "started_at": "2026-06-30T16:58:02Z",
+      "completed_at": "2026-06-30T16:58:02Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Deleted src/app/_components/chat-terminal.tsx (old chat UI, no importers)",
+          "Deleted src/app/_components/code-block.tsx (only used by chat-terminal)",
+          "Deleted src/app/api/commands/route.ts and the now-empty src/app/api/commands/ directory",
+          "Deleted src/server/services/command-executor.ts (only used by the command route)",
+          "Deleted src/config/commands.ts and the now-empty src/config/ directory",
+          "Deleted unused tests/helpers/assertions.ts, tests/fixtures/test-sessions.ts, tests/fixtures/error-messages.ts"
+        ],
+        "left_undone": [],
+        "commands": [
+          {
+            "command": "pnpm check",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm test:e2e",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "Stale .next contained a generated validator.ts referencing the deleted command route (TS2307); rm -rf .next before re-running pnpm check resolved it.",
+          "CLAUDE.md still documents the old architecture (server-side /api/commands, command-executor, config/commands). Not source code and not in the validation contract, so left unchanged — flagged for a deliberate docs update."
+        ],
+        "procedures_followed": [
+          "grepped every candidate dead file for live importers before deleting; verified the full chat-terminal -> commands route -> executor -> config chain",
+          "risky-scan clean (ok)",
+          "conventional commit chore(cleanup):",
+          "orchestrator confirmed no lingering references to the deleted modules in src/"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F8.md"
+      }
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "title": "Statische terminal (pixel-exact, mobiel-net)",
+      "feature_ids": [
+        "F1",
+        "F2",
+        "F3",
+        "F4"
+      ],
+      "validation_status": "passed",
+      "validated_at": "2026-06-30T14:21:12Z",
+      "gate_results": [
+        {
+          "id": "G1",
+          "command": "pnpm run typecheck",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G2",
+          "command": "pnpm run lint",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G3",
+          "command": "pnpm run build",
+          "exit_code": 0,
+          "passed": true
+        }
+      ],
+      "vc_results": [
+        {
+          "id": "VC-1",
+          "passed": true,
+          "evidence": "Intro present at full opacity on load (no fade-in): prompt, wordmark 'HeadingFWD ››—›', subtitle, value-prop, 4 specialities, tip, status '18 lines · /help'; input focused after ~650ms.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-usertest.md"
+        },
+        {
+          "id": "VC-2",
+          "passed": true,
+          "evidence": "accent #2ee6f6, backdrop #0bd3e6, prompt #5be6a0, window #0a0e11, radius 13px, the three-layer box-shadow, and the clamp sizes all match the Design Tokens.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-review.md"
+        },
+        {
+          "id": "VC-3",
+          "passed": true,
+          "evidence": "Slash-commands echo + print exact output; /clear empties the feed back to '18 lines'; ArrowUp recalls history; clicking the body refocuses the input.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-usertest.md"
+        },
+        {
+          "id": "VC-4",
+          "passed": true,
+          "evidence": "/portfolio opens the overlay with the ASCII FWD banner and four projects; keyboard ↑↓↵←→esc and mouse hover/click both navigate; placeholder visual + 'work with me →' CTA present; backspace→list, esc→terminal.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-usertest.md"
+        },
+        {
+          "id": "VC-5",
+          "passed": true,
+          "evidence": "terminal-projects.ts: one documented data file with a fill-in template; the detail view branches on optional image and caseUrl so editing the data file alone activates them — data-driven, no component change.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-review.md"
+        },
+        {
+          "id": "VC-6",
+          "passed": true,
+          "evidence": "375px: no horizontal overflow (scrollWidth=clientWidth=375) on terminal and portfolio; full tap-only flow (tip /portfolio → row → next → exit) works without a keyboard.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-usertest.md"
+        },
+        {
+          "id": "VC-7",
+          "passed": true,
+          "evidence": "@container page (max-width:560px): specialities grid → 1 column, window full-height (radius 14px per the reference), title bar + prompt shortened, brand label hidden.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-review.md"
+        },
+        {
+          "id": "VC-8",
+          "passed": true,
+          "evidence": "Grep of src/ for mission codes (VC-/F#/M#/milestone/pre-F) is clean in product files; the feat/fix commit messages are standalone-readable.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-review.md"
+        }
+      ],
+      "walkthrough_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-walkthrough.md"
+    },
+    {
+      "id": "M2",
+      "title": "AI-chat in de shell",
+      "feature_ids": [
+        "F5",
+        "F6"
+      ],
+      "validation_status": "passed",
+      "validated_at": "2026-06-30T16:24:03Z",
+      "gate_results": [
+        {
+          "id": "G1",
+          "command": "pnpm run typecheck",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G2",
+          "command": "pnpm run lint",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G3",
+          "command": "pnpm run build",
+          "exit_code": 0,
+          "passed": true
+        }
+      ],
+      "vc_results": [
+        {
+          "id": "VC-9",
+          "passed": true,
+          "evidence": "/help works with no overlay/session; free text shows the restyled CAPTCHA overlay (verified live with Cloudflare Turnstile test keys, screenshotted); with the auto-pass test key the full chain runs end-to-end: overlay -> verify -> tRPC session -> held message sent to the AI.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-usertest.md"
+        },
+        {
+          "id": "VC-10",
+          "passed": true,
+          "evidence": "Mocked UI-message stream renders markdown in the body style (h2 #eafbfe, body #cfe2e7, accent inline-code/links, list, code block); 'Thinking…' shows while waiting; blinking cursor via CSS keyframe; a mocked 429 shows '→ You've reached the email limit…' in terminal-red, no raw JSON.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-usertest.md"
+        },
+        {
+          "id": "VC-11",
+          "passed": true,
+          "evidence": "Full email flow mocked with the exact v6 tool chunks: preview renders cleanly (━ separators fixed), 'yes' yields '✓ message sent to bas@headingfwd.com' in prompt-green plus the AI confirmation, and a third attempt shows the rate-limit message in terminal-red. No real email sent.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-usertest.md"
+        },
+        {
+          "id": "VC-12",
+          "passed": true,
+          "evidence": "Backend untouched (no src/app/api, src/server, tRPC, schema changes); client reuses useChat->/api/chat and tRPC chat.initSession; only NEXT_PUBLIC_* public values in client code (no OpenAI/Resend/Turnstile secret); the sole AI call site dispatchAiMessage is guarded by sessionIdRef.current so no AI request fires before a valid session.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-review.md"
+        },
+        {
+          "id": "VC-13",
+          "passed": true,
+          "evidence": "Grep of changed product files for mission codes returned only a false-positive ('submission'); feat/fix commit messages are standalone changelog prose with no F/M/VC IDs.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-review.md"
+        }
+      ],
+      "walkthrough_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M2-walkthrough.md"
+    },
+    {
+      "id": "M3",
+      "title": "Tests en opruimen",
+      "feature_ids": [
+        "F7",
+        "F8"
+      ],
+      "validation_status": "passed",
+      "validated_at": "2026-06-30T17:02:08Z",
+      "gate_results": [
+        {
+          "id": "G1",
+          "command": "pnpm run typecheck",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G2",
+          "command": "pnpm run lint",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G3",
+          "command": "pnpm run build",
+          "exit_code": 0,
+          "passed": true
+        }
+      ],
+      "vc_results": [
+        {
+          "id": "VC-14",
+          "passed": true,
+          "evidence": "pnpm test:e2e run independently by the orchestrator: 27 passed (31.6s), 1 worker. Covers client-static commands, mocked AI stream, email success + rate-limit, 429 handling, and two 375px mobile-viewport tests. All external calls mocked with the AI SDK v6 stream format; no real OpenAI/Resend call.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M3-usertest.md"
+        },
+        {
+          "id": "VC-15",
+          "passed": true,
+          "evidence": "All 8 dead files deleted (status D); tree-wide grep finds no remaining references to the removed modules (the new terminal-commands.ts is the only 'commands' match); still-used files (captcha-overlay, memoized-markdown, email/rate-limiter/turnstile services, /api/chat, /api/health) all present; after rm -rf .next, pnpm check and pnpm build pass and the route table no longer lists /api/commands.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M3-review.md"
+        },
+        {
+          "id": "VC-16",
+          "passed": true,
+          "evidence": "Grep of the changed files and the two in-scope commit messages (test(e2e), chore(cleanup)) finds no mission-internal codes; comments are standalone-readable.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M3-review.md"
+        }
+      ],
+      "walkthrough_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M3-walkthrough.md"
+    }
+  ],
+  "circuit_breaker": {
+    "consecutive_failures": 0
+  },
+  "decisions": [
+    {
+      "timestamp": "2026-06-30T12:51:34Z",
+      "situation": "Reference HTML container query sets the mobile window border-radius to 14px, while the narrow-screen criterion describes a 'smaller' radius than the 13px base; the two conflict.",
+      "action": "Followed the reference HTML literally (14px under 560px) because the handoff README names the reference HTML as the source of truth for exact values; the discrepancy is noted so review judges against the reference.",
+      "feature": "F1"
+    }
+  ]
+}
