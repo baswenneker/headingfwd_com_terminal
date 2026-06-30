@@ -181,12 +181,6 @@
   color: var(--accent);
 }
 
-/* The decorative arrows are lighter weight than the wordmark letters */
-.wordmarkArrows {
-  color: var(--accent);
-  font-weight: 500;
-}
-
 /* Subtitle under the wordmark */
 .subtitle {
   margin-top: 6px;

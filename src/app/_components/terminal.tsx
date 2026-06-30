@@ -394,13 +394,10 @@ export function Terminal() {
           {/* Shell prompt that precedes the intro */}
           <div className={styles.promptLine}>bas@headingfwd:~$ ./hello --who</div>
 
-          {/* Wordmark: "Heading" white, "FWD" + arrows in accent */}
+          {/* Wordmark: "Heading" in white, "FWD" in accent */}
           <div className={styles.wordmark}>
             Heading
             <span className={styles.wordmarkAccent}>FWD</span>
-            <span className={styles.wordmarkArrows}>
-              {" "}&gt;&gt;
-            </span>
           </div>
 
           {/* Tagline */}
