@@ -299,12 +299,55 @@
         "VC-12",
         "VC-13"
       ],
-      "status": "pending",
-      "attempts": 0,
-      "commit_sha": null,
-      "started_at": null,
-      "completed_at": null,
-      "error": null
+      "status": "done",
+      "attempts": 1,
+      "commit_sha": "0fe8114028005d5465e38a74bab98eafe87a7ec3",
+      "started_at": "2026-06-30T16:04:54Z",
+      "completed_at": "2026-06-30T16:04:54Z",
+      "error": null,
+      "handoff": {
+        "implemented": [
+          "Deferred CAPTCHA flow: first free-text message holds the input in a ref, shows the restyled CaptchaOverlay, and after verification calls tRPC initSession then sends the held message; no AI request fires before a valid session (dispatchAiMessage guards sessionIdRef)",
+          "Dev/test bypass when NEXT_PUBLIC_DISABLE_CAPTCHA=true: overlay skipped, session created with a bypass token the server accepts",
+          "AI streaming in one chronological feed: ordered command blocks + AI turn blocks; useChat + DefaultChatTransport with sessionId in the request body; assistant answer renders as markdown in terminal body style with a Thinking indicator, a blinking cursor (CSS keyframe), and terminal-red error lines",
+          "CaptchaOverlay and MemoizedMarkdown restyled to the terminal color theme (dark panel + window shadow, accent links/inline-code, body text colors); backend untouched, no secrets in client",
+          "User-directed: wordmark suffix removed entirely — wordmark now reads 'HeadingFWD' (deliberate deviation from the reference's arrows); dead .wordmarkArrows CSS removed",
+          "User-directed: readableError() helper unwraps the API error JSON so visitors see a clean message instead of raw JSON"
+        ],
+        "left_undone": [
+          "Email tool preview/confirmation/send redesign — next feature (F6)",
+          "Playwright E2E suite updates — later feature",
+          "Removal of legacy chat-terminal.tsx / code-block.tsx — later cleanup"
+        ],
+        "commands": [
+          {
+            "command": "pnpm typecheck",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm lint",
+            "exit_code": 0
+          },
+          {
+            "command": "pnpm build",
+            "exit_code": 0
+          }
+        ],
+        "issues_discovered": [
+          "NEXT_PUBLIC_* vars are inlined by Turbopack at compile time, so toggling NEXT_PUBLIC_DISABLE_CAPTCHA via a new .env.local required clearing .next before the dev server picked it up.",
+          "Orchestrator verified the AI stream by mocking /api/chat (UI message stream SSE: text-delta chunks) via a window.fetch override — no OpenAI key needed; styling confirmed pixel-consistent.",
+          "Orchestrator tested the CAPTCHA live with Cloudflare Turnstile test keys: the restyled overlay appears on first free-text and the auto-pass key drives overlay->verify->session->AI end-to-end; test keys and .env.local removed afterwards.",
+          "The plain `pnpm run build` (as gate G3 runs it) exits 0; the coder's SKIP_ENV_VALIDATION was unnecessary caution."
+        ],
+        "procedures_followed": [
+          "risky-scan clean across the feature and the two follow-up commits",
+          "three conventional commits: feat(terminal) core, then two fix(terminal) for the wordmark + error-message tweaks",
+          "backend files (/api/chat, tRPC routers, services, schema) left completely untouched",
+          "no mission-internal codes in code, comments, or commit messages",
+          "orchestrator verified the running UI (AI styling, Thinking, error, and the live CAPTCHA overlay) with the Playwright MCP before recording"
+        ],
+        "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/F5.md"
+      }
     },
     {
       "id": "F6",
