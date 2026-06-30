@@ -363,10 +363,78 @@
         "F3",
         "F4"
       ],
-      "validation_status": "pending",
-      "validated_at": null,
-      "gate_results": [],
-      "vc_results": []
+      "validation_status": "passed",
+      "validated_at": "2026-06-30T14:21:12Z",
+      "gate_results": [
+        {
+          "id": "G1",
+          "command": "pnpm run typecheck",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G2",
+          "command": "pnpm run lint",
+          "exit_code": 0,
+          "passed": true
+        },
+        {
+          "id": "G3",
+          "command": "pnpm run build",
+          "exit_code": 0,
+          "passed": true
+        }
+      ],
+      "vc_results": [
+        {
+          "id": "VC-1",
+          "passed": true,
+          "evidence": "Intro present at full opacity on load (no fade-in): prompt, wordmark 'HeadingFWD ››—›', subtitle, value-prop, 4 specialities, tip, status '18 lines · /help'; input focused after ~650ms.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-usertest.md"
+        },
+        {
+          "id": "VC-2",
+          "passed": true,
+          "evidence": "accent #2ee6f6, backdrop #0bd3e6, prompt #5be6a0, window #0a0e11, radius 13px, the three-layer box-shadow, and the clamp sizes all match the Design Tokens.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-review.md"
+        },
+        {
+          "id": "VC-3",
+          "passed": true,
+          "evidence": "Slash-commands echo + print exact output; /clear empties the feed back to '18 lines'; ArrowUp recalls history; clicking the body refocuses the input.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-usertest.md"
+        },
+        {
+          "id": "VC-4",
+          "passed": true,
+          "evidence": "/portfolio opens the overlay with the ASCII FWD banner and four projects; keyboard ↑↓↵←→esc and mouse hover/click both navigate; placeholder visual + 'work with me →' CTA present; backspace→list, esc→terminal.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-usertest.md"
+        },
+        {
+          "id": "VC-5",
+          "passed": true,
+          "evidence": "terminal-projects.ts: one documented data file with a fill-in template; the detail view branches on optional image and caseUrl so editing the data file alone activates them — data-driven, no component change.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-review.md"
+        },
+        {
+          "id": "VC-6",
+          "passed": true,
+          "evidence": "375px: no horizontal overflow (scrollWidth=clientWidth=375) on terminal and portfolio; full tap-only flow (tip /portfolio → row → next → exit) works without a keyboard.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-usertest.md"
+        },
+        {
+          "id": "VC-7",
+          "passed": true,
+          "evidence": "@container page (max-width:560px): specialities grid → 1 column, window full-height (radius 14px per the reference), title bar + prompt shortened, brand label hidden.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-review.md"
+        },
+        {
+          "id": "VC-8",
+          "passed": true,
+          "evidence": "Grep of src/ for mission codes (VC-/F#/M#/milestone/pre-F) is clean in product files; the feat/fix commit messages are standalone-readable.",
+          "report_path": ".claude/missions/headingfwd-terminal-redesign/handoffs/M1-review.md"
+        }
+      ]
     },
     {
       "id": "M2",
