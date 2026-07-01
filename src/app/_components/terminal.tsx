@@ -369,7 +369,7 @@ export function Terminal({ initialMode = "terminal" }: TerminalProps = {}) {
   // ── JSX ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className={styles.page}>
+    <main className={styles.page}>
       {/* Faint repeating dot grid — sits behind the terminal window */}
       <div className={styles.grid} aria-hidden="true" />
 
@@ -406,11 +406,12 @@ export function Terminal({ initialMode = "terminal" }: TerminalProps = {}) {
           {/* Shell prompt that precedes the intro */}
           <div className={styles.promptLine}>bas@headingfwd:~$ ./hello --who</div>
 
-          {/* Wordmark: "Heading" in white, "FWD" in accent */}
-          <div className={styles.wordmark}>
+          {/* Wordmark: "Heading" in white, "FWD" in accent. The site's single
+              level-one heading — names the brand for assistive tech and search. */}
+          <h1 className={styles.wordmark}>
             Heading
             <span className={styles.wordmarkAccent}>FWD</span>
-          </div>
+          </h1>
 
           {/* Tagline */}
           <div className={styles.subtitle}>
@@ -704,6 +705,7 @@ export function Terminal({ initialMode = "terminal" }: TerminalProps = {}) {
               ref={inputRef}
               className={styles.input}
               type="text"
+              aria-label="Terminal command input — type a command like /help or ask a question"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -791,6 +793,6 @@ export function Terminal({ initialMode = "terminal" }: TerminalProps = {}) {
           onExit={exitPortfolio}
         />
       )}
-    </div>
+    </main>
   );
 }

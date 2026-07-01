@@ -143,8 +143,12 @@ export function PortfolioOverlay({
         </button>
       </div>
 
-      {/* ASCII "FWD" banner */}
-      <pre className={styles.asciiBanner}>{ASCII_BANNER}</pre>
+      {/* ASCII "FWD" banner — decorative art (the brand is conveyed by the path
+          label and subhead), hidden from assistive tech. aria-hidden also keeps
+          this horizontally-scrollable <pre> out of the keyboard tab order. */}
+      <pre className={styles.asciiBanner} aria-hidden="true">
+        {ASCII_BANNER}
+      </pre>
       <div className={styles.subhead}>
         {'// selected work — AI engineering & product design'}
       </div>

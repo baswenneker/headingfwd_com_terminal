@@ -295,7 +295,10 @@
 }
 
 .input::placeholder {
-  color: rgba(220, 240, 245, 0.32);
+  /* Muted but AA-legible (~5:1) so the placeholder hint is readable while still
+     clearly dimmer than typed input (#eafbfe). */
+  color: #7a8488;
+  opacity: 1;
 }
 
 /* ─── Status bar ─────────────────────────────────────────────────────── */
@@ -308,7 +311,9 @@
   background: #0d1115;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   font-size: 11px;
-  color: rgba(200, 218, 222, 0.5);
+  /* Solid muted tone ~5:1 on the status-bar background (WCAG AA). The previous
+     semi-transparent value resolved to ~4.05:1 and failed. */
+  color: #7a8488;
 }
 
 .statusOnline {
@@ -434,9 +439,10 @@
   color: #cfe2e7;
 }
 
-/* Subdued helper / hint text */
+/* Subdued helper / hint text — solid muted tone (~5:1 on the body background).
+   The previous 0.6-alpha value resolved to ~3.79:1 and failed WCAG AA. */
 .feedDim {
-  color: rgba(160, 178, 182, 0.6);
+  color: #7a8488;
 }
 
 /* Bullet line base — body text color; the mark is added as a child span */
@@ -554,7 +560,7 @@
  * token or while content is streaming in). Disappears when streaming ends.
  */
 .aiThinking {
-  color: rgba(160, 178, 182, 0.6);
+  color: #7a8488;
   font-size: 14px;
   line-height: 1.72;
 }
@@ -601,7 +607,7 @@
  * without drawing attention away from the surrounding text.
  */
 .toolSending {
-  color: rgba(160, 178, 182, 0.6);
+  color: #7a8488;
   font-size: 14px;
   line-height: 1.72;
 }
