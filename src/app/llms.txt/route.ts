@@ -10,9 +10,9 @@
  *
  * Because everything is derived from those sources, the file can never drift
  * from what visitors see. In particular the cases come from `visibleCases()` —
- * the very same list that drives `/work` and the `/portfolio` overlay, so a
- * `hidden` case is absent here too and a `coming-soon` case is marked as such
- * (via `caseToAgentMarkdown`). The route is statically rendered at build time
+ * the very same list that drives the `/portfolio` overlay, so a `hidden` case
+ * is absent here too and a `coming-soon` case is marked as such (via
+ * `caseToAgentMarkdown`). The route is statically rendered at build time
  * (`force-static`) and served as a static asset — no work happens per request.
  */
 

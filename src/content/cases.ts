@@ -2,8 +2,7 @@
  * Canonical case data — THE single source of truth for HeadingFWD's portfolio.
  *
  * Every surface that shows a case derives from this one array:
- *   - `/work`      (terminal list)      → name + one-line `kind`
- *   - `/portfolio` (fullscreen overlay) → metadata + full Markdown `body`
+ *   - `/portfolio` (fullscreen overlay) → list (name + `kind`) and detail (`body`)
  *   - `/llms.txt`  (agent file)         → `caseToAgentMarkdown` per case
  *   - `cases/*.md` (generated archive)  → `pnpm gen:cases` re-emits them
  *
@@ -25,12 +24,12 @@ export type CaseStatus = "live" | "demo" | "experiment" | "concept";
  * `published` (full teaser), `coming-soon` (placeholder), or `hidden`.
  *
  *   - "published"   — appears everywhere with its full write-up (the default).
- *   - "coming-soon" — stays in the `/work` list and the `/portfolio` list with a
- *                     "coming soon" badge, but its detail view shows a
- *                     placeholder panel instead of the write-up. Marked as such
- *                     in `/llms.txt` and the generated archive.
+ *   - "coming-soon" — stays in the `/portfolio` list with a "coming soon" badge,
+ *                     but its detail view shows a placeholder panel instead of
+ *                     the write-up. Marked as such in `/llms.txt` and the
+ *                     generated archive.
  *   - "hidden"      — excluded from every public surface as if it did not exist:
- *                     `/work`, `/portfolio`, `/llms.txt` and `cases/*.md`.
+ *                     `/portfolio`, `/llms.txt` and `cases/*.md`.
  *
  * All surfaces derive their list from `visibleCases()`, so flipping one field
  * updates them in lockstep — the same no-drift guarantee as the rest of CASES.
@@ -38,11 +37,33 @@ export type CaseStatus = "live" | "demo" | "experiment" | "concept";
 export type CaseVisibility = "published" | "coming-soon" | "hidden";
 
 /**
+ * A demo/reference video for a case.
+ *
+ * Single source for both the click-to-play preview in the `/portfolio` overlay
+ * (thumbnail from the YouTube `id`, embedded on click) and the plain Markdown
+ * link emitted on the agent/archive surfaces (`/llms.txt`, `cases/*.md`), which
+ * can't play video. Populate `videos` instead of hand-writing links in `body`.
+ */
+export interface CaseVideo {
+  /** YouTube video id — drives the thumbnail and the embedded player. */
+  id: string;
+  /** Canonical watch URL, honoured verbatim on the link surfaces. */
+  url: string;
+  /** Short label shown beneath the preview. */
+  title: string;
+  /** Optional one-line caption. */
+  note?: string;
+  /** Optional outcome marker: a failed (❌) vs. working (✅) attempt. */
+  result?: "fail" | "success";
+}
+
+/**
  * A single portfolio case with all of its details in one place.
  *
  * Required fields drive the visible surfaces; the optional metadata fields
- * (`role`, `client`, `links`, `sources`, `updated`, `image`, `caseUrl`) are
- * preserved for provenance and future UI without being required everywhere.
+ * (`role`, `client`, `links`, `sources`, `updated`, `image`, `caseUrl`,
+ * `videos`) are preserved for provenance and future UI without being required
+ * everywhere.
  */
 export interface Case {
   /** URL-safe identifier; also the generated Markdown filename. */
@@ -51,7 +72,7 @@ export interface Case {
   n: string;
   /** Case title, shown prominently in the list and detail views. */
   title: string;
-  /** One-line outcome/role summary — list subtitle and `/work` description. */
+  /** One-line outcome/role summary — the `/portfolio` list subtitle. */
   kind: string;
   /** Sector / domain label. */
   sector: string;
@@ -81,6 +102,8 @@ export interface Case {
   image?: { src: string; alt: string };
   /** Optional external "read the full case" URL. */
   caseUrl?: string;
+  /** Demo/reference videos, shown as click-to-play previews in the overlay. */
+  videos?: CaseVideo[];
   /** Full write-up as Markdown (no frontmatter, no leading H1). */
   body: string;
 }
@@ -430,6 +453,34 @@ die hun brieven toegankelijker willen maken.
     links: ["https://www.linkedin.com/posts/baswenneker_kan-chatgpt-een-personal-trainer-vervangen-activity-7330482395533430785-CqxF/", "https://www.linkedin.com/feed/update/urn:li:activity:7338437372616826883/"],
     sources: ["headingfwd-demo-playground/src/app/showcase/ai-personal-trainer/page.tsx"],
     updated: "2025-06-19",
+    videos: [
+      {
+        id: "rrvgrcJ_v0M",
+        url: "https://www.youtube.com/watch?v=rrvgrcJ_v0M",
+        result: "fail",
+        title: "Poging 1 — ChatGPT kan geen video analyseren",
+        note: "ChatGPT kan de video niet analyseren en geeft generieke adviezen die niet aansluiten bij de werkelijke uitvoering.",
+      },
+      {
+        id: "9YoU4e1Ow3Q",
+        url: "https://youtube.com/shorts/9YoU4e1Ow3Q",
+        result: "success",
+        title: "Poging 2 — Maatwerk AI Personal Trainer",
+        note: "Met maatwerk software analyseert de AI bewegingen real-time en geeft specifieke, technische feedback met visuele annotaties.",
+      },
+      {
+        id: "3GeEfHs6dTo",
+        url: "https://www.youtube.com/watch?v=3GeEfHs6dTo",
+        title: "Demo 1 — Squat Clean-analyse",
+        note: "Real-time analyse van een clean met directe visuele feedback.",
+      },
+      {
+        id: "lgP9zCadeLo",
+        url: "https://www.youtube.com/watch?v=lgP9zCadeLo",
+        title: "Demo 2 — Hang Squat Snatch-analyse",
+        note: "Gedetailleerde techniekanalyse van de snatch-beweging.",
+      },
+    ],
     body: `
 ## In het kort
 
@@ -449,8 +500,9 @@ afbeeldingen.
 
 ## Aanpak
 
-Daarom bouwde ik een maatwerk-oplossing: een AI personal trainer die zich voordoet als de
-wereldberoemde weightlifting-coach [Bob Takano](https://www.takanoweightlifting.com/).
+Daarom bouwde ik een maatwerk-oplossing: een AI-gestuurde virtuele Olympische coach die
+zich voordoet als de wereldberoemde weightlifting-coach
+[Bob Takano](https://www.takanoweightlifting.com/).
 
 - **Prompt engineering** gebaseerd op de methodiek van een topcoach weightlifting
 - **Google Gemini 2.5 Pro** voor frame-by-frame bewegingsanalyse
@@ -459,20 +511,15 @@ wereldberoemde weightlifting-coach [Bob Takano](https://www.takanoweightlifting.
 
 ### ChatGPT vs. Maatwerk
 
-| ChatGPT (faalt) | Maatwerk (slaagt) |
+| ChatGPT — faalt bij video-analyse van sportbewegingen | Maatwerk — AI-gestuurde virtuele Olympische coach |
 |---|---|
-| Geen model analyseert bewegingen accuraat | Prompt engineering o.b.v. methodiek topcoach |
-| Generieke, niet-specifieke feedback | Gemini 2.5 Pro voor frame-by-frame analyse |
-| Genereert irrelevante afbeeldingen bij visuele feedback | Python-tool voor vertraging + visuele overlay |
+| Geen enkel beschikbaar model kan bewegingen accuraat analyseren | Prompt engineering gebaseerd op methodiek topcoach weightlifting |
+| Feedback is generiek en niet-specifiek voor de getoonde techniek | Google Gemini 2.5 Pro voor frame-by-frame bewegingsanalyse |
+| Bij verzoek om visuele feedback genereert het irrelevante afbeeldingen | Python-tool voor video-vertraging en visuele feedback-overlay |
 | Bewegingsherkenning ontbreekt volledig | Technisch accurate, gepersonaliseerde coaching |
 
-## Resultaten
-
-- **Demo 1 — Squat Clean-analyse**: real-time analyse van een clean met directe visuele feedback.
-- **Demo 2 — Hang Squat Snatch-analyse**: gedetailleerde techniekanalyse van de snatch-beweging.
-
-Demovideo's (YouTube): poging 1 (ChatGPT) \`rrvgrcJ_v0M\` · maatwerk \`9YoU4e1Ow3Q\` ·
-squat clean \`3GeEfHs6dTo\` · hang squat snatch \`lgP9zCadeLo\`.
+De twee pogingen (poging 1 met ChatGPT, poging 2 met de maatwerk-coach) en twee
+techniekanalyses staan als afspeelbare video's onderaan deze case.
 
 ## Tech & stack
 
@@ -586,9 +633,9 @@ export function isComingSoonCase(c: Case): boolean {
 /**
  * The cases shown on public surfaces: everything except `hidden` ones.
  *
- * `/work`, the `/portfolio` overlay, `/llms.txt` and the generated `cases/*.md`
- * archive all derive their list from this, so a `hidden` case disappears from
- * every surface at once — the same single-source guarantee as CASES itself.
+ * The `/portfolio` overlay, `/llms.txt` and the generated `cases/*.md` archive
+ * all derive their list from this, so a `hidden` case disappears from every
+ * surface at once — the same single-source guarantee as CASES itself.
  */
 export function visibleCases(cases: Case[] = CASES): Case[] {
   return cases.filter((c) => !isHiddenCase(c));
@@ -630,5 +677,13 @@ export function caseToAgentMarkdown(c: Case): string {
     );
   }
   lines.push("", demoteHeadings(c.body));
+  if (c.videos && c.videos.length > 0) {
+    lines.push("", "### Video's");
+    for (const v of c.videos) {
+      const mark = v.result === "fail" ? "❌ " : v.result === "success" ? "✅ " : "";
+      const note = v.note ? ` — ${v.note}` : "";
+      lines.push(`- ${mark}[${v.title}](${v.url})${note}`);
+    }
+  }
   return lines.join("\n");
 }

@@ -489,48 +489,6 @@
   color: rgba(207, 226, 231, 0.78);
 }
 
-/* Engagement / project row */
-.feedJob {
-  display: flex;
-  gap: 14px;
-}
-
-/* Project index number ("01"–"04") — accent, bold */
-.feedJobNum {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-/* Project name — bright white, medium weight, never wraps */
-.feedJobName {
-  color: #eafbfe;
-  font-weight: 500;
-  min-width: max-content;
-}
-
-/* Project description — dim, prefixed with "— " by the renderer */
-.feedJobDesc {
-  color: rgba(160, 178, 182, 0.7);
-}
-
-/*
- * "coming soon" badge on a /work row — small uppercase pill in accent,
- * signalling a teaser case whose write-up is not published yet.
- */
-.feedJobSoon {
-  align-self: center;
-  flex: 0 0 auto;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-  padding: 1px 7px;
-  border: 1px solid rgba(46, 230, 246, 0.4);
-  border-radius: 999px;
-  background: rgba(46, 230, 246, 0.08);
-}
-
 /* Clickable link row — same two-column structure as feedRow */
 .feedLink {
   display: flex;
@@ -688,19 +646,6 @@
 
   .specialitiesGrid {
     grid-template-columns: 1fr;
-  }
-
-  /*
-   * Job rows: allow contents to wrap so a long project name or description
-   * does not force the row wider than the viewport. Removing min-width from
-   * feedJobName lets it shrink and wrap rather than pushing the layout.
-   */
-  .feedJob {
-    flex-wrap: wrap;
-  }
-
-  .feedJobName {
-    min-width: 0;
   }
 
   /*

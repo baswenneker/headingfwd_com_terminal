@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { marked } from "marked";
-import { type Case, isComingSoonCase } from "~/content/cases";
+import { type Case, type CaseVideo, isComingSoonCase } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
 import styles from "./portfolio-overlay.module.css";
 
@@ -152,6 +152,21 @@ export function PortfolioOverlay({
       <div className={styles.subhead}>
         {'// selected work — AI engineering & product design'}
       </div>
+
+      {/*
+       * Secondary pointer to the LinkedIn profile. stopPropagation keeps the
+       * overlay's click-to-refocus handler from firing when the link is clicked,
+       * so the anchor navigates instead of just re-focusing the overlay.
+       */}
+      <a
+        href={CONTACT.linkedin}
+        target="_blank"
+        rel="noreferrer"
+        className={styles.subheadLink}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {'→ or view my LinkedIn profile'}
+      </a>
 
       {/* Render list or detail depending on navigation state */}
       {!pfDetail ? (
@@ -334,6 +349,15 @@ function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailVi
         />
       )}
 
+      {/*
+       * Click-to-play video previews — rendered from the structured `videos`
+       * field (not the Markdown body) so the overlay can show real thumbnails
+       * and embed players. Keyed by slug so play state resets per case.
+       */}
+      {!comingSoon && caseItem.videos && caseItem.videos.length > 0 && (
+        <VideoPreviews key={caseItem.slug} videos={caseItem.videos} />
+      )}
+
       {/* Button row — prev/next navigation + CTA + optional case link */}
       <div className={styles.detailButtons}>
         <button className={styles.outlineBtn} onClick={onPrev}>
@@ -371,5 +395,85 @@ function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailVi
         </a>
       </div>
     </div>
+  );
+}
+
+// ── Video previews ───────────────────────────────────────────────────────────
+
+/**
+ * Click-to-play YouTube previews for a case.
+ *
+ * Each video renders as a lightweight facade: just its thumbnail plus a play
+ * button. Clicking swaps in the real YouTube iframe for that one video — loaded
+ * paused, never autoplaying, so the visitor stays in control — and no YouTube
+ * script loads until then, keeping the detail view fast. The parent keys this
+ * component by case slug, so the loaded state resets when switching cases.
+ */
+function VideoPreviews({ videos }: { videos: CaseVideo[] }) {
+  const [playing, setPlaying] = useState<string | null>(null);
+
+  return (
+    <section className={styles.videoSection}>
+      <div className={styles.videoSectionTitle}>
+        {"// video — zie het in actie"}
+      </div>
+      <div className={styles.videoGrid}>
+        {videos.map((v) => (
+          <figure key={v.id} className={styles.videoCard}>
+            <div className={styles.videoFrame}>
+              {playing === v.id ? (
+                <iframe
+                  className={styles.videoIframe}
+                  src={`https://www.youtube.com/embed/${v.id}?rel=0`}
+                  title={v.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : (
+                <button
+                  type="button"
+                  className={styles.videoThumb}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPlaying(v.id);
+                  }}
+                  aria-label={`Speel video af: ${v.title}`}
+                >
+                  {/* External YouTube thumbnail (facade). A plain <img> avoids
+                      next/image remote-pattern config for a decorative preview. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className={styles.videoThumbImg}
+                    src={`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`}
+                    alt=""
+                    loading="lazy"
+                  />
+                  <span className={styles.videoPlay} aria-hidden="true">
+                    ▶
+                  </span>
+                  {v.result && (
+                    <span className={styles.videoBadge} aria-hidden="true">
+                      {v.result === "fail" ? "❌" : "✅"}
+                    </span>
+                  )}
+                </button>
+              )}
+            </div>
+            <figcaption className={styles.videoCaption}>
+              <a
+                href={v.url}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.videoTitle}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {v.title}
+              </a>
+              {v.note && <span className={styles.videoNote}>{v.note}</span>}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
   );
 }

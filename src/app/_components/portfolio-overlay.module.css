@@ -137,6 +137,22 @@
   color: rgba(160, 178, 182, 0.78);
 }
 
+/* "→ or view my LinkedIn profile" — accent link under the subheading */
+.subheadLink {
+  position: relative;
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.subheadLink:hover {
+  border-bottom-color: var(--accent);
+}
+
 /* ─── List view ──────────────────────────────────────────────────────────── */
 
 .listView {
@@ -679,5 +695,153 @@
    */
   .detailBody {
     max-width: 100%;
+  }
+}
+
+/* ─── Video previews (detail view) ───────────────────────────────────────── */
+/*
+ * Click-to-play YouTube previews rendered from a case's `videos` field. Each
+ * card is a facade — thumbnail + ▶ button — that swaps in an iframe on click.
+ */
+.videoSection {
+  margin-top: 30px;
+}
+
+.videoSectionTitle {
+  margin-bottom: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: rgba(198, 220, 225, 0.55);
+}
+
+.videoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.videoCard {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.videoFrame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #05070a;
+}
+
+/* Thumbnail button fills the frame; the image sits under the play/badge marks. */
+.videoThumb {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.videoThumbImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.videoThumb:hover .videoThumbImg,
+.videoThumb:focus-visible .videoThumbImg {
+  transform: scale(1.04);
+  filter: brightness(1.08);
+}
+
+/* Centered play affordance — accent ring over a translucent disc. */
+.videoPlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  padding-left: 3px; /* optically centre the ▶ triangle */
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: rgba(4, 12, 14, 0.6);
+  color: var(--accent);
+  font-size: 18px;
+  box-shadow: 0 0 22px rgba(46, 230, 246, 0.35);
+  pointer-events: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.videoThumb:hover .videoPlay,
+.videoThumb:focus-visible .videoPlay {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: rgba(4, 12, 14, 0.78);
+}
+
+/* Outcome marker (❌ failed attempt / ✅ working one) in the top-left corner. */
+.videoBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: rgba(4, 12, 14, 0.72);
+  font-size: 15px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.videoIframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.videoCaption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.videoTitle {
+  color: #eafbfe;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.videoTitle:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.videoNote {
+  color: rgba(198, 220, 225, 0.75);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/* Single column on narrow containers. */
+@container page (max-width: 560px) {
+  .videoGrid {
+    grid-template-columns: 1fr;
   }
 }

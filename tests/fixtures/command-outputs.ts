@@ -24,7 +24,6 @@ export const COMMAND_TEXT = {
     commands: [
       "/about",
       "/services",
-      "/work",
       "/portfolio",
       "/stack",
       "/contact",
@@ -59,25 +58,6 @@ export const COMMAND_TEXT = {
     ],
   },
 
-  /** /work — numbered list of cases, derived from src/content/cases.ts */
-  WORK: {
-    /** Section header. */
-    header: "selected engagements",
-    /**
-     * Distinctive substrings of each case title shown in the /work list.
-     * Substrings (not full titles) keep the getByText assertions unambiguous.
-     */
-    jobs: [
-      "AI Schrijfhulp",
-      "Hintsay",
-      "MyWorq",
-      "BriefWijzer",
-      "AI Personal Trainer",
-      "Vraagbaak",
-      "Podcast transcriptie",
-    ],
-  },
-
   /** /stack — technology list */
   STACK: {
     /** Section header. */
@@ -100,7 +80,7 @@ export const COMMAND_TEXT = {
   WHOAMI: "guest@headingfwd",
 
   /** /ls alias — fake directory listing */
-  LS: "about/  services/  work/  stack/  contact/",
+  LS: "about/  services/  stack/  contact/",
 };
 
 /** Regex patterns for looser matching against the full terminal page text. */
@@ -108,7 +88,6 @@ export const COMMAND_PATTERNS = {
   HELP: /available commands/i,
   ABOUT: /Bas Wenneker/,
   SERVICES: /what I help teams with/i,
-  WORK: /selected engagements/i,
   STACK: /\/\/ stack/i,
   CONTACT: /let's talk/i,
 };

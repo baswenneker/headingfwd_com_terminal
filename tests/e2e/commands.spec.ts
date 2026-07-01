@@ -63,17 +63,6 @@ test.describe("Terminal slash commands", () => {
     }
   });
 
-  test("/work renders the engagements header and all case names", async ({
-    page,
-  }) => {
-    await sendCommand(page, "/work");
-
-    await expect(page.getByText(COMMAND_TEXT.WORK.header)).toBeVisible();
-    for (const job of COMMAND_TEXT.WORK.jobs) {
-      await expect(page.getByText(job, { exact: false })).toBeVisible();
-    }
-  });
-
   test("/stack renders the stack header and the technology list", async ({
     page,
   }) => {

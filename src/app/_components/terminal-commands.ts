@@ -8,7 +8,6 @@
  */
 
 import { ABOUT, CONTACT, SPECIALTIES, STACK } from "~/content/site-content";
-import { isComingSoonCase, visibleCases } from "~/content/cases";
 
 // ── Discriminated-union line model ──────────────────────────────────────────
 
@@ -37,20 +36,6 @@ export type BulletLine = { kind: "bullet"; text: string };
 export type RowLine = { kind: "row"; label: string; desc: string };
 
 /**
- * Engagement / project row.
- * Number is in accent; name is bright white with min-width: max-content;
- * description is prefixed with `— ` and rendered in a dim color.
- * When `soon` is set, a small "coming soon" badge is shown after the name.
- */
-export type JobLine = {
-  kind: "job";
-  num: string;
-  name: string;
-  desc: string;
-  soon?: boolean;
-};
-
-/**
  * Clickable link row.
  * Label is dim, min-width 96px; the anchor is underlined accent text.
  * The anchor's onClick MUST stopPropagation so it does not trigger the
@@ -71,7 +56,6 @@ export type FeedLine =
   | DimLine
   | BulletLine
   | RowLine
-  | JobLine
   | LinkLine;
 
 // ── Command result ───────────────────────────────────────────────────────────
@@ -99,7 +83,6 @@ function helpLines(): FeedLine[] {
     { kind: "head", text: "available commands" },
     { kind: "row", label: "/about",     desc: "who I am & how I work" },
     { kind: "row", label: "/services",  desc: "what I help teams with" },
-    { kind: "row", label: "/work",      desc: "selected engagements" },
     { kind: "row", label: "/portfolio", desc: "browse my work in fullscreen ↵" },
     { kind: "row", label: "/stack",     desc: "tools, models & tech" },
     { kind: "row", label: "/contact",   desc: "how to reach me" },
@@ -123,25 +106,6 @@ function servicesLines(): FeedLine[] {
     ...SPECIALTIES.map(
       (s): FeedLine => ({ kind: "bullet", text: `${s.title} — ${s.blurb}` }),
     ),
-  ];
-}
-
-function workLines(): FeedLine[] {
-  // Derived from the single source of truth (visibleCases) so /work, the
-  // fullscreen /portfolio overlay and /llms.txt can never list different work.
-  // Hidden cases drop out here; coming-soon cases stay, tagged with a badge.
-  return [
-    { kind: "head", text: "selected engagements" },
-    ...visibleCases().map(
-      (c): FeedLine => ({
-        kind: "job",
-        num: c.n,
-        name: c.title,
-        desc: c.kind,
-        soon: isComingSoonCase(c),
-      }),
-    ),
-    { kind: "dim", text: "type /portfolio to browse the full cases ↵" },
   ];
 }
 
@@ -179,13 +143,12 @@ const COMMANDS: Record<string, () => FeedLine[]> = {
   help:     helpLines,
   about:    aboutLines,
   services: servicesLines,
-  work:     workLines,
   stack:    stackLines,
   contact:  contactLines,
   agents:   agentsLines,
   llms:     agentsLines,
   whoami:   () => [{ kind: "out", text: "guest@headingfwd — welcome :)" }],
-  ls:       () => [{ kind: "out", text: "about/  services/  work/  stack/  contact/" }],
+  ls:       () => [{ kind: "out", text: "about/  services/  stack/  contact/" }],
 };
 
 /**

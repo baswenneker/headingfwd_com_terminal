@@ -34,8 +34,9 @@ afbeeldingen.
 
 ## Aanpak
 
-Daarom bouwde ik een maatwerk-oplossing: een AI personal trainer die zich voordoet als de
-wereldberoemde weightlifting-coach [Bob Takano](https://www.takanoweightlifting.com/).
+Daarom bouwde ik een maatwerk-oplossing: een AI-gestuurde virtuele Olympische coach die
+zich voordoet als de wereldberoemde weightlifting-coach
+[Bob Takano](https://www.takanoweightlifting.com/).
 
 - **Prompt engineering** gebaseerd op de methodiek van een topcoach weightlifting
 - **Google Gemini 2.5 Pro** voor frame-by-frame bewegingsanalyse
@@ -44,20 +45,15 @@ wereldberoemde weightlifting-coach [Bob Takano](https://www.takanoweightlifting.
 
 ### ChatGPT vs. Maatwerk
 
-| ChatGPT (faalt) | Maatwerk (slaagt) |
+| ChatGPT — faalt bij video-analyse van sportbewegingen | Maatwerk — AI-gestuurde virtuele Olympische coach |
 |---|---|
-| Geen model analyseert bewegingen accuraat | Prompt engineering o.b.v. methodiek topcoach |
-| Generieke, niet-specifieke feedback | Gemini 2.5 Pro voor frame-by-frame analyse |
-| Genereert irrelevante afbeeldingen bij visuele feedback | Python-tool voor vertraging + visuele overlay |
+| Geen enkel beschikbaar model kan bewegingen accuraat analyseren | Prompt engineering gebaseerd op methodiek topcoach weightlifting |
+| Feedback is generiek en niet-specifiek voor de getoonde techniek | Google Gemini 2.5 Pro voor frame-by-frame bewegingsanalyse |
+| Bij verzoek om visuele feedback genereert het irrelevante afbeeldingen | Python-tool voor video-vertraging en visuele feedback-overlay |
 | Bewegingsherkenning ontbreekt volledig | Technisch accurate, gepersonaliseerde coaching |
 
-## Resultaten
-
-- **Demo 1 — Squat Clean-analyse**: real-time analyse van een clean met directe visuele feedback.
-- **Demo 2 — Hang Squat Snatch-analyse**: gedetailleerde techniekanalyse van de snatch-beweging.
-
-Demovideo's (YouTube): poging 1 (ChatGPT) `rrvgrcJ_v0M` · maatwerk `9YoU4e1Ow3Q` ·
-squat clean `3GeEfHs6dTo` · hang squat snatch `lgP9zCadeLo`.
+De twee pogingen (poging 1 met ChatGPT, poging 2 met de maatwerk-coach) en twee
+techniekanalyses staan als afspeelbare video's onderaan deze case.
 
 ## Tech & stack
 
@@ -72,3 +68,10 @@ squat clean `3GeEfHs6dTo` · hang squat snatch `lgP9zCadeLo`.
 **Experiment** — eigen R&D, gedeeld via LinkedIn met demovideo's. Toont aan dat generieke
 multimodale modellen tekortschieten voor bewegingsanalyse, terwijl een maatwerk-aanpak
 met Gemini 2.5 Pro + een Python-pijplijn wél werkt.
+
+## Video's
+
+- ❌ [Poging 1 — ChatGPT kan geen video analyseren](https://www.youtube.com/watch?v=rrvgrcJ_v0M) — ChatGPT kan de video niet analyseren en geeft generieke adviezen die niet aansluiten bij de werkelijke uitvoering.
+- ✅ [Poging 2 — Maatwerk AI Personal Trainer](https://youtube.com/shorts/9YoU4e1Ow3Q) — Met maatwerk software analyseert de AI bewegingen real-time en geeft specifieke, technische feedback met visuele annotaties.
+- [Demo 1 — Squat Clean-analyse](https://www.youtube.com/watch?v=3GeEfHs6dTo) — Real-time analyse van een clean met directe visuele feedback.
+- [Demo 2 — Hang Squat Snatch-analyse](https://www.youtube.com/watch?v=lgP9zCadeLo) — Gedetailleerde techniekanalyse van de snatch-beweging.

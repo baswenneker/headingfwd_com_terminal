@@ -68,7 +68,15 @@ function caseToFileMarkdown(c: Case): string {
   }
   fm.push("---");
 
-  return `${fm.join("\n")}\n\n# ${c.title}\n\n${c.body.trim()}\n`;
+  const base = `${fm.join("\n")}\n\n# ${c.title}\n\n${c.body.trim()}\n`;
+  if (!c.videos || c.videos.length === 0) return base;
+
+  const vids = c.videos.map((v) => {
+    const mark = v.result === "fail" ? "❌ " : v.result === "success" ? "✅ " : "";
+    const note = v.note ? ` — ${v.note}` : "";
+    return `- ${mark}[${v.title}](${v.url})${note}`;
+  });
+  return `${base}\n## Video's\n\n${vids.join("\n")}\n`;
 }
 
 /** Build the README overview table + status legend from the visible cases. */

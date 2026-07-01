@@ -9,7 +9,7 @@
  * surfaces at once — so the agent file never drifts from what visitors see.
  *
  * Portfolio cases live separately in `cases.ts` (the single source of truth
- * for `/work`, the fullscreen `/portfolio` overlay and the agent file alike).
+ * for the fullscreen `/portfolio` overlay and the agent file alike).
  * The `/cases/*.md` files are generated from that module (`pnpm gen:cases`).
  */
 
