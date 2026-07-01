@@ -111,6 +111,7 @@ export function renderFeedLine(
         <div key={key} className={`${styles.feedLine} ${styles.feedJob}`}>
           <span className={styles.feedJobNum}>{line.num}</span>
           <span className={styles.feedJobName}>{line.name}</span>
+          {line.soon && <span className={styles.feedJobSoon}>coming soon</span>}
           <span className={styles.feedJobDesc}>{"— " + line.desc}</span>
         </div>
       );

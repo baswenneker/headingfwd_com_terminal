@@ -3,6 +3,7 @@ title: "Chatbot: Vraagbaak voor je team"
 slug: chatbot-vraagbaak
 sector: Overheid
 status: concept
+visibility: coming-soon
 tags: [RAG, LLM, Chatbot, Marketing]
 stack: []
 updated: 2025-06-19

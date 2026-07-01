@@ -9,9 +9,18 @@ import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
 import { PortfolioOverlay } from "./portfolio-overlay";
-import { CASES } from "~/content/cases";
+import { visibleCases } from "~/content/cases";
 import { CaptchaOverlay } from "./captcha-overlay";
 import { MemoizedMarkdown } from "./memoized-markdown";
+
+/**
+ * Cases shown in the fullscreen portfolio overlay: everything except `hidden`
+ * ones. Computed once at module load (case data is static) so the overlay
+ * receives a stable array reference across renders — no extra re-renders and no
+ * index churn while navigating. Coming-soon cases stay in the list; the overlay
+ * renders their detail as a placeholder.
+ */
+const PORTFOLIO_CASES = visibleCases();
 
 // ── Feed block model ────────────────────────────────────────────────────────
 //
@@ -785,7 +794,7 @@ export function Terminal({ initialMode = "terminal" }: TerminalProps = {}) {
        */}
       {mode === "portfolio" && (
         <PortfolioOverlay
-          cases={CASES}
+          cases={PORTFOLIO_CASES}
           pfIndex={pfIndex}
           pfDetail={pfDetail}
           onSetPfIndex={setPfIndex}

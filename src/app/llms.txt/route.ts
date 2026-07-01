@@ -9,9 +9,10 @@
  *   - Portfolio cases (incl. full write-ups) → `~/content/cases` (CASES)
  *
  * Because everything is derived from those sources, the file can never drift
- * from what visitors see. In particular the cases are rendered from the very
- * same `CASES` array that drives `/work` and the `/portfolio` overlay, via
- * `caseToAgentMarkdown`. The route is statically rendered at build time
+ * from what visitors see. In particular the cases come from `visibleCases()` —
+ * the very same list that drives `/work` and the `/portfolio` overlay, so a
+ * `hidden` case is absent here too and a `coming-soon` case is marked as such
+ * (via `caseToAgentMarkdown`). The route is statically rendered at build time
  * (`force-static`) and served as a static asset — no work happens per request.
  */
 
@@ -22,7 +23,7 @@ import {
   SPECIALTIES,
   STACK,
 } from "~/content/site-content";
-import { CASES, caseToAgentMarkdown } from "~/content/cases";
+import { caseToAgentMarkdown, visibleCases } from "~/content/cases";
 
 export const dynamic = "force-static";
 
@@ -76,7 +77,7 @@ function buildAgentsTxt(): string {
       "> Detailed write-ups of selected work. Source language: Dutch.",
     ].join("\n"),
   );
-  for (const c of CASES) {
+  for (const c of visibleCases()) {
     blocks.push(caseToAgentMarkdown(c));
   }
 

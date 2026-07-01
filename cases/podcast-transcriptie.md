@@ -3,6 +3,7 @@ title: Podcast transcriptie en segmentering
 slug: podcast-transcriptie
 sector: Media
 status: concept
+visibility: coming-soon
 tags: [Transcriptie, LLM, Audio]
 stack: []
 sources:

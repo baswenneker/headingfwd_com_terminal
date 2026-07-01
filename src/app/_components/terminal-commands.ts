@@ -8,7 +8,7 @@
  */
 
 import { ABOUT, CONTACT, SPECIALTIES, STACK } from "~/content/site-content";
-import { CASES } from "~/content/cases";
+import { isComingSoonCase, visibleCases } from "~/content/cases";
 
 // ── Discriminated-union line model ──────────────────────────────────────────
 
@@ -40,8 +40,15 @@ export type RowLine = { kind: "row"; label: string; desc: string };
  * Engagement / project row.
  * Number is in accent; name is bright white with min-width: max-content;
  * description is prefixed with `— ` and rendered in a dim color.
+ * When `soon` is set, a small "coming soon" badge is shown after the name.
  */
-export type JobLine = { kind: "job"; num: string; name: string; desc: string };
+export type JobLine = {
+  kind: "job";
+  num: string;
+  name: string;
+  desc: string;
+  soon?: boolean;
+};
 
 /**
  * Clickable link row.
@@ -120,12 +127,19 @@ function servicesLines(): FeedLine[] {
 }
 
 function workLines(): FeedLine[] {
-  // Derived from the single source of truth (CASES) so /work, the fullscreen
-  // /portfolio overlay and /llms.txt can never list different work.
+  // Derived from the single source of truth (visibleCases) so /work, the
+  // fullscreen /portfolio overlay and /llms.txt can never list different work.
+  // Hidden cases drop out here; coming-soon cases stay, tagged with a badge.
   return [
     { kind: "head", text: "selected engagements" },
-    ...CASES.map(
-      (c): FeedLine => ({ kind: "job", num: c.n, name: c.title, desc: c.kind }),
+    ...visibleCases().map(
+      (c): FeedLine => ({
+        kind: "job",
+        num: c.n,
+        name: c.title,
+        desc: c.kind,
+        soon: isComingSoonCase(c),
+      }),
     ),
     { kind: "dim", text: "type /portfolio to browse the full cases ↵" },
   ];

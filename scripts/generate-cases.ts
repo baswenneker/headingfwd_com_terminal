@@ -11,11 +11,19 @@
  * in package.json. No build step or extra dependency required.
  */
 
-import { writeFileSync } from "node:fs";
+import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { CASES, type Case, type CaseStatus } from "../src/content/cases.ts";
+import {
+  CASES,
+  caseVisibility,
+  isComingSoonCase,
+  isHiddenCase,
+  visibleCases,
+  type Case,
+  type CaseStatus,
+} from "../src/content/cases.ts";
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const CASES_DIR = join(ROOT, "cases");
@@ -47,6 +55,8 @@ function caseToFileMarkdown(c: Case): string {
     `sector: ${yamlScalar(c.sector)}`,
     `status: ${c.status}`,
   ];
+  // Only surface visibility when it differs from the default ("published").
+  if (caseVisibility(c) !== "published") fm.push(`visibility: ${caseVisibility(c)}`);
   if (c.role) fm.push(`rol: ${yamlScalar(c.role)}`);
   if (c.client) fm.push(`klant: ${yamlScalar(c.client)}`);
   fm.push(`tags: [${c.tags.join(", ")}]`);
@@ -61,18 +71,21 @@ function caseToFileMarkdown(c: Case): string {
   return `${fm.join("\n")}\n\n# ${c.title}\n\n${c.body.trim()}\n`;
 }
 
-/** Build the README overview table + status legend from the cases. */
+/** Build the README overview table + status legend from the visible cases. */
 function buildReadme(): string {
-  const rows = CASES.map(
-    (c) =>
-      `| ${c.n} | ${c.title} | ${c.sector} | ${STATUS_EMOJI[c.status]} ${c.status} | ${c.tags.join(", ")} | [${c.slug}.md](./${c.slug}.md) |`,
-  );
+  const rows = visibleCases().map((c) => {
+    const status = isComingSoonCase(c)
+      ? `${STATUS_EMOJI[c.status]} ${c.status} · 🔜 coming soon`
+      : `${STATUS_EMOJI[c.status]} ${c.status}`;
+    return `| ${c.n} | ${c.title} | ${c.sector} | ${status} | ${c.tags.join(", ")} | [${c.slug}.md](./${c.slug}.md) |`;
+  });
 
   return [
     "# Cases",
     "",
     "> Gegenereerd uit `src/content/cases.ts` met `pnpm gen:cases`.",
     "> **Niet handmatig bewerken** — wijzig de bron en genereer opnieuw.",
+    "> Verborgen cases (`visibility: hidden`) staan hier niet in.",
     "",
     "## Overzicht",
     "",
@@ -86,19 +99,31 @@ function buildReadme(): string {
     "- 🔵 **demo** — werkende showcase / productconcept met demo",
     "- 🟡 **experiment** — eigen R&D, gedeeld als experiment",
     "- ⚪ **concept** — idee/teaser, nog niet uitgewerkt",
+    "- 🔜 **coming soon** — zichtbaar als teaser, uitwerking volgt (`visibility: coming-soon`)",
     "",
   ].join("\n");
 }
 
 function main(): void {
+  let written = 0;
   for (const c of CASES) {
     const file = join(CASES_DIR, `${c.slug}.md`);
+    // Hidden cases are pulled from the archive: remove any previously-generated
+    // file so a case can't linger on disk after being hidden in the source.
+    if (isHiddenCase(c)) {
+      if (existsSync(file)) {
+        rmSync(file);
+        console.log(`removed cases/${c.slug}.md (hidden)`);
+      }
+      continue;
+    }
     writeFileSync(file, caseToFileMarkdown(c), "utf8");
     console.log(`wrote cases/${c.slug}.md`);
+    written++;
   }
   writeFileSync(join(CASES_DIR, "README.md"), buildReadme(), "utf8");
   console.log("wrote cases/README.md");
-  console.log(`\nGenerated ${CASES.length} case files from src/content/cases.ts.`);
+  console.log(`\nGenerated ${written} case files from src/content/cases.ts.`);
 }
 
 main();

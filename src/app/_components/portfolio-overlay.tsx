@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { marked } from "marked";
-import { type Case } from "~/content/cases";
+import { type Case, isComingSoonCase } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
 import styles from "./portfolio-overlay.module.css";
 
@@ -211,7 +211,12 @@ function ListView({ cases, selectedIndex, onHover, onOpen }: ListViewProps) {
           >
             <span className={styles.listRowIndex}>{c.n}</span>
             <div>
-              <div className={styles.listRowName}>{c.title}</div>
+              <div className={styles.listRowName}>
+                {c.title}
+                {isComingSoonCase(c) && (
+                  <span className={styles.listRowBadge}>coming soon</span>
+                )}
+              </div>
               <div className={styles.listRowKind}>{c.kind}</div>
               <div className={styles.listRowTags}>{c.tags.join(TAG_SEP)}</div>
             </div>
@@ -257,8 +262,12 @@ function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailVi
     [caseItem.body],
   );
 
+  // Coming-soon cases are teasers: the write-up is replaced by a placeholder.
+  const comingSoon = isComingSoonCase(caseItem);
+
   // Compact metadata line: sector · status · role (role only when present).
-  const meta = [caseItem.sector, caseItem.status];
+  // Coming-soon cases surface that state instead of their lifecycle status.
+  const meta = [caseItem.sector, comingSoon ? "coming soon" : caseItem.status];
   if (caseItem.role) meta.push(caseItem.role);
 
   return (
@@ -304,11 +313,26 @@ function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailVi
         </div>
       )}
 
-      {/* Full case write-up, rendered from the Markdown body */}
-      <div
-        className={styles.caseBody}
-        dangerouslySetInnerHTML={{ __html: bodyHtml }}
-      />
+      {/*
+       * Write-up region. Published cases render their full Markdown body;
+       * coming-soon cases render a placeholder panel instead — the same case
+       * still shows its title, kind, meta and tags above, so it reads as a
+       * proper teaser rather than an empty page.
+       */}
+      {comingSoon ? (
+        <div className={styles.comingSoon}>
+          <div className={styles.comingSoonMark}>🚧 coming soon</div>
+          <p className={styles.comingSoonText}>
+            Deze case wordt binnenkort uitgewerkt. Wil je nu al meer weten of
+            iets soortgelijks bouwen? Neem gerust contact op.
+          </p>
+        </div>
+      ) : (
+        <div
+          className={styles.caseBody}
+          dangerouslySetInnerHTML={{ __html: bodyHtml }}
+        />
+      )}
 
       {/* Button row — prev/next navigation + CTA + optional case link */}
       <div className={styles.detailButtons}>

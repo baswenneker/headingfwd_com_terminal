@@ -20,6 +20,24 @@
 export type CaseStatus = "live" | "demo" | "experiment" | "concept";
 
 /**
+ * Publication state — controls where and how a case surfaces, independent of
+ * its lifecycle `status`. The two are orthogonal: a `concept` case can be
+ * `published` (full teaser), `coming-soon` (placeholder), or `hidden`.
+ *
+ *   - "published"   — appears everywhere with its full write-up (the default).
+ *   - "coming-soon" — stays in the `/work` list and the `/portfolio` list with a
+ *                     "coming soon" badge, but its detail view shows a
+ *                     placeholder panel instead of the write-up. Marked as such
+ *                     in `/llms.txt` and the generated archive.
+ *   - "hidden"      — excluded from every public surface as if it did not exist:
+ *                     `/work`, `/portfolio`, `/llms.txt` and `cases/*.md`.
+ *
+ * All surfaces derive their list from `visibleCases()`, so flipping one field
+ * updates them in lockstep — the same no-drift guarantee as the rest of CASES.
+ */
+export type CaseVisibility = "published" | "coming-soon" | "hidden";
+
+/**
  * A single portfolio case with all of its details in one place.
  *
  * Required fields drive the visible surfaces; the optional metadata fields
@@ -39,6 +57,12 @@ export interface Case {
   sector: string;
   /** Lifecycle status. */
   status: CaseStatus;
+  /**
+   * Publication state; omitted means "published". Flip to "coming-soon" to
+   * tease a case without a write-up, or "hidden" to pull it from every surface.
+   * See {@link CaseVisibility}.
+   */
+  visibility?: CaseVisibility;
   /** My role on the engagement (frontmatter `rol`). */
   role?: string;
   /** Client name, when not anonymised (frontmatter `klant`). */
@@ -472,6 +496,7 @@ met Gemini 2.5 Pro + een Python-pijplijn wél werkt.
     kind: "Chatten met je handleidingen in plaats van zoeken",
     sector: "Overheid",
     status: "concept",
+    visibility: "coming-soon",
     tags: ["RAG", "LLM", "Chatbot", "Marketing"],
     stack: [],
     sources: ["headingfwd-demo-playground/src/data/projects.json (entry \"Chatbot: Vraagbaak voor je team\")", "headingfwd-demo-playground/src/app/showcase/coming-soon/page.tsx"],
@@ -501,6 +526,7 @@ handleidingen.
     kind: "Podcasts automatisch transcriberen en segmenteren met tijdcodes",
     sector: "Media",
     status: "concept",
+    visibility: "coming-soon",
     tags: ["Transcriptie", "LLM", "Audio"],
     stack: [],
     sources: ["headingfwd-com/src/data/index/page.json (teaser \"Podcast transcriptie en segmentering\")", "whisperfwd (gerelateerde, echte transcriptie-tech)"],
@@ -542,6 +568,32 @@ product uitgewerkt.
   },
 ];
 
+/** Resolve a case's publication state, treating an omitted field as published. */
+export function caseVisibility(c: Case): CaseVisibility {
+  return c.visibility ?? "published";
+}
+
+/** True when the case must not appear on any public surface. */
+export function isHiddenCase(c: Case): boolean {
+  return caseVisibility(c) === "hidden";
+}
+
+/** True when the case is a teaser: still listed, but with a placeholder detail. */
+export function isComingSoonCase(c: Case): boolean {
+  return caseVisibility(c) === "coming-soon";
+}
+
+/**
+ * The cases shown on public surfaces: everything except `hidden` ones.
+ *
+ * `/work`, the `/portfolio` overlay, `/llms.txt` and the generated `cases/*.md`
+ * archive all derive their list from this, so a `hidden` case disappears from
+ * every surface at once — the same single-source guarantee as CASES itself.
+ */
+export function visibleCases(cases: Case[] = CASES): Case[] {
+  return cases.filter((c) => !isHiddenCase(c));
+}
+
 /**
  * Demote the Markdown heading levels inside a case body by one, so its `##`
  * sections nest under the `##` case heading in the generated agent file.
@@ -571,6 +623,12 @@ export function caseToAgentMarkdown(c: Case): string {
   ];
   if (c.stack.length > 0) lines.push(`Stack: ${c.stack.join(", ")}`);
   if (c.links && c.links.length > 0) lines.push(`Links: ${c.links.join(" · ")}`);
+  if (isComingSoonCase(c)) {
+    lines.push(
+      "",
+      "> Coming soon — de volledige uitwerking van deze case volgt binnenkort.",
+    );
+  }
   lines.push("", demoteHeadings(c.body));
   return lines.join("\n");
 }
