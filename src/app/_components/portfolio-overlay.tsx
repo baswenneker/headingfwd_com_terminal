@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
-import { type Project } from "./terminal-projects";
+import { marked } from "marked";
+import { type Case } from "~/content/cases";
+import { CONTACT } from "~/content/site-content";
 import styles from "./portfolio-overlay.module.css";
 
 /**
@@ -22,8 +24,8 @@ const ASCII_BANNER = `██████  ██   ██  █████
 const TAG_SEP = "    ·    ";
 
 interface PortfolioOverlayProps {
-  projects: Project[];
-  /** Zero-based index of the currently highlighted / open project. */
+  cases: Case[];
+  /** Zero-based index of the currently highlighted / open case. */
   pfIndex: number;
   /** Whether the detail view is open (true) or the list is shown (false). */
   pfDetail: boolean;
@@ -37,20 +39,21 @@ interface PortfolioOverlayProps {
  * Fullscreen portfolio browser overlay.
  *
  * Renders on top of the terminal window when the visitor opens the portfolio.
- * Supports two views: a project list (pfDetail=false) and a project detail
- * page (pfDetail=true). Navigation works by keyboard (arrow keys, Enter, Esc)
- * and by mouse (hover selects, click opens, buttons work on click).
+ * Supports two views: a case list (pfDetail=false) and a case detail page
+ * (pfDetail=true). Navigation works by keyboard (arrow keys, Enter, Esc) and
+ * by mouse (hover selects, click opens, buttons work on click).
  *
  * The overlay takes keyboard focus on mount so arrow keys work immediately.
  * Clicking inside the overlay re-focuses it to restore keyboard nav after
  * mouse interaction.
  *
- * Project data is purely prop-driven. Two optional fields on each project
- * (image and caseUrl) are rendered automatically when provided — no code
- * change is needed, only editing the data file.
+ * Case data is purely prop-driven — the array comes from `~/content/cases`
+ * (the single source of truth). The detail view renders each case's full
+ * Markdown `body`; two optional fields (`image`, `caseUrl`) unlock extra UI
+ * automatically when present.
  */
 export function PortfolioOverlay({
-  projects,
+  cases,
   pfIndex,
   pfDetail,
   onSetPfIndex,
@@ -76,14 +79,14 @@ export function PortfolioOverlay({
    * List view: ↑/↓ move selection (wraps), ↵ opens the detail, Esc exits
    * to the terminal.
    *
-   * Detail view: ←/→ switch project (wraps), Esc or Backspace returns to the
+   * Detail view: ←/→ switch case (wraps), Esc or Backspace returns to the
    * list. Enter and ↑/↓ are not handled in detail mode.
    *
    * preventDefault is called on every handled key to stop the browser from
    * scrolling the page or triggering other default behaviours.
    */
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
-    const n = projects.length;
+    const n = cases.length;
 
     if (pfDetail) {
       if (e.key === "Escape" || e.key === "Backspace") {
@@ -114,9 +117,9 @@ export function PortfolioOverlay({
     }
   }
 
-  // Clamp pfIndex to valid range in case projects array changes.
-  const safeIndex = Math.max(0, Math.min(pfIndex, projects.length - 1));
-  const current = projects[safeIndex]!;
+  // Clamp pfIndex to valid range in case the cases array changes.
+  const safeIndex = Math.max(0, Math.min(pfIndex, cases.length - 1));
+  const current = cases[safeIndex]!;
 
   return (
     <div
@@ -149,7 +152,7 @@ export function PortfolioOverlay({
       {/* Render list or detail depending on navigation state */}
       {!pfDetail ? (
         <ListView
-          projects={projects}
+          cases={cases}
           selectedIndex={safeIndex}
           onHover={onSetPfIndex}
           onOpen={(i) => {
@@ -159,12 +162,12 @@ export function PortfolioOverlay({
         />
       ) : (
         <DetailView
-          project={current}
+          caseItem={current}
           index={safeIndex}
-          total={projects.length}
+          total={cases.length}
           onBack={() => onSetPfDetail(false)}
-          onPrev={() => onSetPfIndex((safeIndex - 1 + projects.length) % projects.length)}
-          onNext={() => onSetPfIndex((safeIndex + 1) % projects.length)}
+          onPrev={() => onSetPfIndex((safeIndex - 1 + cases.length) % cases.length)}
+          onNext={() => onSetPfIndex((safeIndex + 1) % cases.length)}
         />
       )}
     </div>
@@ -174,26 +177,26 @@ export function PortfolioOverlay({
 // ── List view ────────────────────────────────────────────────────────────────
 
 interface ListViewProps {
-  projects: Project[];
+  cases: Case[];
   selectedIndex: number;
   onHover: (i: number) => void;
   onOpen: (i: number) => void;
 }
 
 /**
- * Shows all projects as a scannable list.
+ * Shows all cases as a scannable list.
  *
  * Hovering a row highlights it (updates the keyboard selection in sync).
- * Clicking a row opens the detail view for that project.
+ * Clicking a row opens the detail view for that case.
  * The selected row carries a 2px accent left border and a faint background.
  */
-function ListView({ projects, selectedIndex, onHover, onOpen }: ListViewProps) {
+function ListView({ cases, selectedIndex, onHover, onOpen }: ListViewProps) {
   return (
     <>
       <div className={styles.listView}>
-        {projects.map((project, i) => (
+        {cases.map((c, i) => (
           <div
-            key={project.n}
+            key={c.slug}
             className={
               i === selectedIndex
                 ? `${styles.listRow} ${styles.listRowSelected}`
@@ -202,18 +205,18 @@ function ListView({ projects, selectedIndex, onHover, onOpen }: ListViewProps) {
             onMouseEnter={() => onHover(i)}
             onClick={() => onOpen(i)}
           >
-            <span className={styles.listRowIndex}>{project.n}</span>
+            <span className={styles.listRowIndex}>{c.n}</span>
             <div>
-              <div className={styles.listRowName}>{project.name}</div>
-              <div className={styles.listRowKind}>{project.kind}</div>
-              <div className={styles.listRowTags}>{project.tags.join(TAG_SEP)}</div>
+              <div className={styles.listRowName}>{c.title}</div>
+              <div className={styles.listRowKind}>{c.kind}</div>
+              <div className={styles.listRowTags}>{c.tags.join(TAG_SEP)}</div>
             </div>
           </div>
         ))}
         <div className={styles.listDivider} />
       </div>
       <div className={styles.listHelper}>
-        {'↑ ↓ navigate · ↵ open · or click a project · esc returns to terminal'}
+        {'↑ ↓ navigate · ↵ open · or click a case · esc returns to terminal'}
       </div>
     </>
   );
@@ -222,7 +225,7 @@ function ListView({ projects, selectedIndex, onHover, onOpen }: ListViewProps) {
 // ── Detail view ──────────────────────────────────────────────────────────────
 
 interface DetailViewProps {
-  project: Project;
+  caseItem: Case;
   index: number;
   total: number;
   onBack: () => void;
@@ -231,16 +234,29 @@ interface DetailViewProps {
 }
 
 /**
- * Shows the full detail for a single project.
+ * Shows the full detail for a single case.
  *
- * Renders tag chips, body paragraphs, and a visual box. The visual box shows
- * a real image when project.image is set, or a striped placeholder otherwise.
- * A "read the case study →" link appears when project.caseUrl is set.
+ * Renders a compact metadata line, tag chips, an optional hero image, and the
+ * case's full write-up — the Markdown `body` from the single source of truth,
+ * converted to HTML with `marked` and styled by the `.caseBody` rules. The
+ * body is trusted static content (it ships in `~/content/cases`, never user
+ * input), so rendering it via dangerouslySetInnerHTML is safe and lets the
+ * terminal aesthetic style every element (incl. tables and quotes).
  *
- * ← prev / next → buttons cycle through projects without returning to the
- * list. Esc or Backspace (handled by the parent overlay) returns to the list.
+ * ← prev / next → buttons cycle through cases without returning to the list.
+ * Esc or Backspace (handled by the parent overlay) returns to the list.
  */
-function DetailView({ project, index, total, onBack, onPrev, onNext }: DetailViewProps) {
+function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailViewProps) {
+  // Convert the Markdown body to HTML once per case (memoised on the body).
+  const bodyHtml = useMemo(
+    () => marked.parse(caseItem.body) as string,
+    [caseItem.body],
+  );
+
+  // Compact metadata line: sector · status · role (role only when present).
+  const meta = [caseItem.sector, caseItem.status];
+  if (caseItem.role) meta.push(caseItem.role);
+
   return (
     <div className={styles.detailView}>
       {/* Return to list */}
@@ -248,55 +264,47 @@ function DetailView({ project, index, total, onBack, onPrev, onNext }: DetailVie
         ← back to all work
       </button>
 
-      {/* Project index + position counter */}
+      {/* Case index + position counter */}
       <div className={styles.detailCounter}>
-        <span className={styles.detailCounterN}>{project.n}</span>
+        <span className={styles.detailCounterN}>{caseItem.n}</span>
         <span className={styles.detailCounterLabel}>{index + 1} / {total}</span>
       </div>
 
-      {/* Title and kind */}
-      <h2 className={styles.detailTitle}>{project.name}</h2>
-      <div className={styles.detailKind}>{project.kind}</div>
+      {/* Title, one-line kind and metadata */}
+      <h2 className={styles.detailTitle}>{caseItem.title}</h2>
+      <div className={styles.detailKind}>{caseItem.kind}</div>
+      <div className={styles.detailMeta}>{meta.join("  ·  ")}</div>
 
       {/* Tag chips */}
       <div className={styles.detailTags}>
-        {project.tags.map((tag) => (
+        {caseItem.tags.map((tag) => (
           <span key={tag} className={styles.detailTag}>
             {tag}
           </span>
         ))}
       </div>
 
-      {/* Body paragraphs */}
-      <div className={styles.detailBody}>
-        {project.detail.map((para, i) => (
-          <p key={i} className={styles.detailPara}>
-            {para}
-          </p>
-        ))}
-      </div>
-
       {/*
-       * Visual box — shows a real image when project.image is provided,
-       * otherwise falls back to the striped placeholder. No component change
-       * is needed to activate the image: add the `image` field in
-       * terminal-projects.ts and it appears here automatically.
+       * Optional hero image — rendered only when caseItem.image is set. With no
+       * image the detail jumps straight to the write-up (no placeholder box).
        */}
-      {project.image ? (
+      {caseItem.image && (
         <div className={styles.detailVisualImage}>
           <Image
-            src={project.image.src}
-            alt={project.image.alt}
+            src={caseItem.image.src}
+            alt={caseItem.image.alt}
             fill
             sizes="(max-width: 800px) 100vw, 800px"
             style={{ objectFit: "cover" }}
           />
         </div>
-      ) : (
-        <div className={styles.detailVisual}>
-          {'[ project visual / case study — drop one in on request ]'}
-        </div>
       )}
+
+      {/* Full case write-up, rendered from the Markdown body */}
+      <div
+        className={styles.caseBody}
+        dangerouslySetInnerHTML={{ __html: bodyHtml }}
+      />
 
       {/* Button row — prev/next navigation + CTA + optional case link */}
       <div className={styles.detailButtons}>
@@ -308,13 +316,13 @@ function DetailView({ project, index, total, onBack, onPrev, onNext }: DetailVie
         </button>
 
         {/*
-         * "read the case study →" appears only when project.caseUrl is set.
-         * Add caseUrl in terminal-projects.ts to activate this button —
-         * no changes to this component are needed.
+         * "read the case study →" appears only when caseItem.caseUrl is set.
+         * Add caseUrl in cases.ts to activate this button — no changes to this
+         * component are needed.
          */}
-        {project.caseUrl && (
+        {caseItem.caseUrl && (
           <a
-            href={project.caseUrl}
+            href={caseItem.caseUrl}
             target="_blank"
             rel="noreferrer"
             className={styles.outlineBtn}
@@ -325,7 +333,9 @@ function DetailView({ project, index, total, onBack, onPrev, onNext }: DetailVie
         )}
 
         <a
-          href="mailto:bas@headingfwd.com"
+          href={CONTACT.linkedin}
+          target="_blank"
+          rel="noreferrer"
           className={styles.ctaBtn}
           onClick={(e) => e.stopPropagation()}
         >

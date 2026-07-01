@@ -26,8 +26,6 @@ en wordt gebruikt door duizenden medewerkers in de tuinbouw.
 
 ## Het verhaal
 
-> Bron: `myworq-intro.tsx`.
-
 Met mijn Westlandse roots was de opdracht bij MyWorq een thuiswedstrijd. Ik werd gevraagd
 om als product manager het Data-team van **bQurius** te helpen een innovatieve
 medewerkersapp te ontwikkelen, specifiek voor de tuinbouwsector.
@@ -41,8 +39,6 @@ is inmiddels live en wordt gebruikt door duizenden medewerkers in de tuinbouwsec
 Trots op dit project!
 
 ## Probleem
-
-> Bron: `page.tsx` (ProblemSolutionSection).
 
 De tuinbouwsector kampt met specifieke uitdagingen rond personeelsmanagement:
 
@@ -64,8 +60,6 @@ Een gebruiksvriendelijke medewerkersapp, specifiek ontworpen voor de tuinbouw:
 
 ## Werkwijze
 
-> Bron: `process-ticker.tsx` ("Mijn werkwijze").
-
 1. 🔍 **Onderzoek** — gesprekken met klanten om behoeftes en pijnpunten te begrijpen
 2. ✏️ **Schetsen** — schetsen hoe een nieuwe feature eruit kan zien
 3. 🎨 **Ontwerpen** — met een UX/UI-designer het idee uitwerken in een prototype
@@ -85,7 +79,3 @@ te vermelden.
 
 **Live** — de app is in productie en wordt gebruikt door duizenden medewerkers in de
 tuinbouwsector. Rol na 2 jaar overgedragen. Demovideo: YouTube `G3QL3dCgkOg`.
-
-## Bronnen
-
-- `headingfwd-demo-playground/src/app/showcase/myworq/` (showcase, intro, werkwijze-ticker)

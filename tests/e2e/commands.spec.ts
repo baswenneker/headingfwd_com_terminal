@@ -63,7 +63,7 @@ test.describe("Terminal slash commands", () => {
     }
   });
 
-  test("/work renders the engagements header and all four job names", async ({
+  test("/work renders the engagements header and all case names", async ({
     page,
   }) => {
     await sendCommand(page, "/work");

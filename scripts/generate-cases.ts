@@ -1,0 +1,104 @@
+/**
+ * Generate the `cases/*.md` archive (and its README) from the single source of
+ * truth, `src/content/cases.ts`.
+ *
+ * The Markdown files are derived artifacts — never hand-edit them. Edit a case
+ * in `cases.ts` and run `pnpm gen:cases` to re-emit the files. The same `CASES`
+ * array also drives `/work`, the `/portfolio` overlay and `/llms.txt`, so all
+ * four surfaces stay in lockstep.
+ *
+ * Runs on plain Node via type stripping (Node 24): see the `gen:cases` script
+ * in package.json. No build step or extra dependency required.
+ */
+
+import { writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { CASES, type Case, type CaseStatus } from "../src/content/cases.ts";
+
+const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
+const CASES_DIR = join(ROOT, "cases");
+
+/** Emoji used in the README status legend, matching the original cases README. */
+const STATUS_EMOJI: Record<CaseStatus, string> = {
+  live: "🟢",
+  demo: "🔵",
+  experiment: "🟡",
+  concept: "⚪",
+};
+
+/** Quote a YAML scalar only when it contains characters that need it. */
+function yamlScalar(value: string): string {
+  return /[:#"]/.test(value) ? JSON.stringify(value) : value;
+}
+
+/** Render a YAML block list ("key:\n  - item\n  - item"). */
+function yamlBlockList(key: string, items: string[]): string {
+  return [`${key}:`, ...items.map((i) => `  - ${i}`)].join("\n");
+}
+
+/** Reconstruct one case as a full Markdown file (frontmatter + H1 + body). */
+function caseToFileMarkdown(c: Case): string {
+  const fm: string[] = [
+    "---",
+    `title: ${yamlScalar(c.title)}`,
+    `slug: ${c.slug}`,
+    `sector: ${yamlScalar(c.sector)}`,
+    `status: ${c.status}`,
+  ];
+  if (c.role) fm.push(`rol: ${yamlScalar(c.role)}`);
+  if (c.client) fm.push(`klant: ${yamlScalar(c.client)}`);
+  fm.push(`tags: [${c.tags.join(", ")}]`);
+  fm.push(`stack: [${c.stack.join(", ")}]`);
+  if (c.updated) fm.push(`updated: ${c.updated}`);
+  if (c.links && c.links.length > 0) fm.push(yamlBlockList("links", c.links));
+  if (c.sources && c.sources.length > 0) {
+    fm.push(yamlBlockList("sources", c.sources));
+  }
+  fm.push("---");
+
+  return `${fm.join("\n")}\n\n# ${c.title}\n\n${c.body.trim()}\n`;
+}
+
+/** Build the README overview table + status legend from the cases. */
+function buildReadme(): string {
+  const rows = CASES.map(
+    (c) =>
+      `| ${c.n} | ${c.title} | ${c.sector} | ${STATUS_EMOJI[c.status]} ${c.status} | ${c.tags.join(", ")} | [${c.slug}.md](./${c.slug}.md) |`,
+  );
+
+  return [
+    "# Cases",
+    "",
+    "> Gegenereerd uit `src/content/cases.ts` met `pnpm gen:cases`.",
+    "> **Niet handmatig bewerken** — wijzig de bron en genereer opnieuw.",
+    "",
+    "## Overzicht",
+    "",
+    "| # | Case | Sector | Status | Tags | Bestand |",
+    "|---|------|--------|--------|------|---------|",
+    ...rows,
+    "",
+    "## Status-legenda",
+    "",
+    "- 🟢 **live** — in productie / echt in gebruik",
+    "- 🔵 **demo** — werkende showcase / productconcept met demo",
+    "- 🟡 **experiment** — eigen R&D, gedeeld als experiment",
+    "- ⚪ **concept** — idee/teaser, nog niet uitgewerkt",
+    "",
+  ].join("\n");
+}
+
+function main(): void {
+  for (const c of CASES) {
+    const file = join(CASES_DIR, `${c.slug}.md`);
+    writeFileSync(file, caseToFileMarkdown(c), "utf8");
+    console.log(`wrote cases/${c.slug}.md`);
+  }
+  writeFileSync(join(CASES_DIR, "README.md"), buildReadme(), "utf8");
+  console.log("wrote cases/README.md");
+  console.log(`\nGenerated ${CASES.length} case files from src/content/cases.ts.`);
+}
+
+main();

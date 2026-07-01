@@ -8,6 +8,7 @@
  */
 
 import { ABOUT, CONTACT, SPECIALTIES, STACK } from "~/content/site-content";
+import { CASES } from "~/content/cases";
 
 // ── Discriminated-union line model ──────────────────────────────────────────
 
@@ -119,12 +120,14 @@ function servicesLines(): FeedLine[] {
 }
 
 function workLines(): FeedLine[] {
+  // Derived from the single source of truth (CASES) so /work, the fullscreen
+  // /portfolio overlay and /llms.txt can never list different work.
   return [
     { kind: "head", text: "selected engagements" },
-    { kind: "job",  num: "01", name: "Next-best-message engine", desc: "proactive customer comms at scale · idea → MVP" },
-    { kind: "job",  num: "02", name: "Knowledge platform",       desc: "200+ users rate, discuss & share research" },
-    { kind: "job",  num: "03", name: "Privacy data masking",     desc: "ML to protect medical & sensitive records" },
-    { kind: "job",  num: "04", name: "Benchmarket",              desc: "smart matching for city-centre businesses" },
+    ...CASES.map(
+      (c): FeedLine => ({ kind: "job", num: c.n, name: c.title, desc: c.kind }),
+    ),
+    { kind: "dim", text: "type /portfolio to browse the full cases ↵" },
   ];
 }
 

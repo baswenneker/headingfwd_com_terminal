@@ -9,6 +9,9 @@
     "moduleDetection": "force",
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
+    /* Allow `import "./x.ts"` in standalone Node scripts (e.g. scripts/generate-cases.ts,
+       run via `node --experimental-strip-types`). Safe here because noEmit is set. */
+    "allowImportingTsExtensions": true,
     /* Strictness */
     "strict": true,
     "noUncheckedIndexedAccess": true,

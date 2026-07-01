@@ -59,16 +59,22 @@ export const COMMAND_TEXT = {
     ],
   },
 
-  /** /work — numbered list of past engagements */
+  /** /work — numbered list of cases, derived from src/content/cases.ts */
   WORK: {
     /** Section header. */
     header: "selected engagements",
-    /** Job name column text for each engagement. */
+    /**
+     * Distinctive substrings of each case title shown in the /work list.
+     * Substrings (not full titles) keep the getByText assertions unambiguous.
+     */
     jobs: [
-      "Next-best-message engine",
-      "Knowledge platform",
-      "Privacy data masking",
-      "Benchmarket",
+      "AI Schrijfhulp",
+      "Hintsay",
+      "MyWorq",
+      "BriefWijzer",
+      "AI Personal Trainer",
+      "Vraagbaak",
+      "Podcast transcriptie",
     ],
   },
 

@@ -9,7 +9,7 @@ import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
 import { PortfolioOverlay } from "./portfolio-overlay";
-import { PROJECTS } from "./terminal-projects";
+import { CASES } from "~/content/cases";
 import { CaptchaOverlay } from "./captcha-overlay";
 import { MemoizedMarkdown } from "./memoized-markdown";
 
@@ -84,7 +84,19 @@ function readableError(err: unknown): string {
  * widget is skipped entirely and the session is initialised immediately with
  * a placeholder token that the server accepts in bypass mode.
  */
-export function Terminal() {
+/**
+ * Props for the terminal.
+ *
+ * `initialMode` lets a route open the terminal straight into a given view.
+ * The `/portfolio` route renders `<Terminal initialMode="portfolio" />` so the
+ * fullscreen portfolio overlay is shown immediately; exiting it (Esc) drops
+ * back to the normal terminal underneath. Defaults to the normal terminal.
+ */
+interface TerminalProps {
+  initialMode?: "terminal" | "portfolio";
+}
+
+export function Terminal({ initialMode = "terminal" }: TerminalProps = {}) {
   const [inputValue, setInputValue] = useState("");
   const [blocks, setBlocks] = useState<FeedBlock[]>([]);
   const [history, setHistory] = useState<string[]>([]);
@@ -92,7 +104,7 @@ export function Terminal() {
 
   // Portfolio overlay state — all three are reset when the overlay opens so
   // each visit starts at the first project in list view.
-  const [mode, setMode] = useState<"terminal" | "portfolio">("terminal");
+  const [mode, setMode] = useState<"terminal" | "portfolio">(initialMode);
   const [pfIndex, setPfIndex] = useState(0);
   const [pfDetail, setPfDetail] = useState(false);
 
@@ -771,7 +783,7 @@ export function Terminal() {
        */}
       {mode === "portfolio" && (
         <PortfolioOverlay
-          projects={PROJECTS}
+          cases={CASES}
           pfIndex={pfIndex}
           pfDetail={pfDetail}
           onSetPfIndex={setPfIndex}

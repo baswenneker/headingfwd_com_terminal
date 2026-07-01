@@ -274,6 +274,14 @@
   font-size: 15px;
 }
 
+/* Compact metadata line — sector · status · role, faint and small */
+.detailMeta {
+  margin-top: 10px;
+  color: rgba(160, 178, 182, 0.78);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+}
+
 /* Container for tag chips */
 .detailTags {
   margin-top: 16px;
@@ -302,6 +310,158 @@
   margin-bottom: 14px;
   color: #c6dce1;
   line-height: 1.72;
+}
+
+/* ─── Case write-up (rendered from the Markdown body) ────────────────────── */
+/*
+ * Styles the HTML produced by `marked` from a case's `body`. Every element is
+ * themed to the terminal aesthetic so the full write-up — including GFM tables
+ * and blockquotes, which the chat Markdown renderer does not style — reads as
+ * part of the overlay rather than a generic article.
+ */
+.caseBody {
+  margin-top: 26px;
+  color: #c6dce1;
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+.caseBody h2 {
+  margin: 30px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 18px;
+  font-weight: 700;
+  color: #eafbfe;
+}
+
+.caseBody h3 {
+  margin: 22px 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #eafbfe;
+}
+
+.caseBody p {
+  margin: 0 0 14px;
+}
+
+.caseBody ul,
+.caseBody ol {
+  margin: 0 0 14px;
+}
+
+.caseBody li {
+  margin-bottom: 6px;
+}
+
+/*
+ * Ordered lists keep decimal numbering (Tailwind's base reset strips markers,
+ * so list-style-type must be set explicitly). The ::marker is tinted accent so
+ * the numbers stand out from the body text.
+ */
+.caseBody ol {
+  list-style-type: decimal;
+  padding-left: 22px;
+}
+
+.caseBody ol > li::marker {
+  color: var(--accent);
+}
+
+/*
+ * Unordered lists use a bold accent asterisk marker to match the "*" bullets
+ * used everywhere else in the terminal (hero specialities, /services) instead
+ * of a round disc. Rendered via ::before with a hanging indent so it works in
+ * every browser and can be bolded (which a ::marker string cannot reliably do).
+ */
+.caseBody ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.caseBody ul > li {
+  position: relative;
+  padding-left: 1.5em;
+}
+
+.caseBody ul > li::before {
+  content: "*";
+  position: absolute;
+  left: 0.25em;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.caseBody strong {
+  color: #eafbfe;
+  font-weight: 700;
+}
+
+.caseBody a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.caseBody a:hover {
+  filter: brightness(1.2);
+}
+
+/* Inline code / labels — accent text on a faint accent wash */
+.caseBody code {
+  font-family: inherit;
+  font-size: 12.5px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(46, 230, 246, 0.08);
+  color: var(--accent);
+}
+
+.caseBody blockquote {
+  margin: 0 0 16px;
+  padding: 8px 16px;
+  border-left: 2px solid var(--accent);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(214, 230, 234, 0.85);
+  font-style: italic;
+}
+
+.caseBody blockquote p {
+  margin: 0;
+}
+
+.caseBody hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 22px 0;
+}
+
+/*
+ * Tables (GFM). display:block + overflow-x:auto lets a wide table scroll
+ * horizontally on narrow screens instead of overflowing the overlay.
+ */
+.caseBody table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 6px 0 18px;
+  font-size: 13px;
+}
+
+.caseBody th,
+.caseBody td {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.caseBody th {
+  background: rgba(255, 255, 255, 0.04);
+  color: #eafbfe;
+  font-weight: 600;
 }
 
 /*

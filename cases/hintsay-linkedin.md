@@ -26,8 +26,6 @@ enkele minuten, met behoud van je eigen stem en stijl.
 
 ## Probleem
 
-> Bron: `cases/hintsay/page.tsx` (ProblemSolutionSection).
-
 Professionals worstelen met consistente, engaging content op LinkedIn:
 
 - Gebrek aan tijd voor regelmatige contentcreatie
@@ -46,7 +44,7 @@ Een slimme schrijfassistent die contentcreatie versnelt én verbetert:
 - Ondersteuning voor Engels en Nederlands
 - Behoud van persoonlijke stem en stijl
 
-**UX-designproces** (uit `page.tsx`):
+**UX-designproces:**
 
 | Fase | Activiteiten |
 |---|---|
@@ -76,8 +74,6 @@ Een slimme schrijfassistent die contentcreatie versnelt én verbetert:
 
 ## Impact & resultaten
 
-> Productclaims zoals getoond in de showcase (`page.tsx`), niet onafhankelijk geverifieerd.
-
 | Cijfer | Betekenis |
 |---|---|
 | 10× | Sneller content creëren |
@@ -87,14 +83,10 @@ Een slimme schrijfassistent die contentcreatie versnelt én verbetert:
 
 ## Tech & stack
 
-> Bron: `page.tsx` ("Technische Architectuur") — op hoofdlijnen.
-
 - **Frontend & UX**: moderne React-interface, real-time content preview, responsive design, snelle laadtijden
 - **AI & Backend**: advanced language models, continuous learning pipeline, secure API-architectuur, schaalbare cloud-infrastructuur
 
 ## Key takeaways
-
-> Bron: `page.tsx` ("Key Takeaways").
 
 1. **AI als assistent, niet als vervanging** — gebruikers willen controle houden over hun content.
 2. **Snelheid is essentieel** — professionals hebben weinig tijd; elke seconde telt.
@@ -104,13 +96,3 @@ Een slimme schrijfassistent die contentcreatie versnelt én verbetert:
 ## Status
 
 **Live** — SaaS-product, bereikbaar via [hintsay.com](https://hintsay.com).
-
-## Bronnen
-
-- `headingfwd-demo-playground/src/app/cases/hintsay/page.tsx` (uitgewerkte case)
-- [hintsay.com](https://hintsay.com) — officiële website
-- `headingfwd-com/src/data/index/page.json` — oorspronkelijke teaser "LinkedIn Schrijfhulp"
-
-> Aanname / gerelateerd: `vibes-chrome-li-extension` is een **los** experiment — een
-> Chrome-extensie die LinkedIn *comments* genereert (OpenAI/Anthropic), niet posts.
-> Verwant thema (AI-schrijfhulp voor LinkedIn), maar niet hetzelfde product als Hintsay.

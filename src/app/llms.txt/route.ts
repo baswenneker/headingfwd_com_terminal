@@ -6,17 +6,14 @@
  *
  * The file is generated from the same content the terminal renders:
  *   - About / specialities / stack / contact → `~/content/site-content`
- *   - Portfolio projects                     → `terminal-projects` (PROJECTS)
- *   - Detailed case studies                  → the Markdown files in `/cases`
+ *   - Portfolio cases (incl. full write-ups) → `~/content/cases` (CASES)
  *
  * Because everything is derived from those sources, the file can never drift
- * from what visitors see. The route is statically rendered at build time
- * (`force-static`), so the Markdown files are read from disk during the build
- * and the result is served as a static asset — no work happens per request.
+ * from what visitors see. In particular the cases are rendered from the very
+ * same `CASES` array that drives `/work` and the `/portfolio` overlay, via
+ * `caseToAgentMarkdown`. The route is statically rendered at build time
+ * (`force-static`) and served as a static asset — no work happens per request.
  */
-
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 
 import {
   ABOUT,
@@ -25,24 +22,9 @@ import {
   SPECIALTIES,
   STACK,
 } from "~/content/site-content";
-import { PROJECTS } from "~/app/_components/terminal-projects";
+import { CASES, caseToAgentMarkdown } from "~/content/cases";
 
 export const dynamic = "force-static";
-
-/** Read the detailed case write-ups (`/cases/*.md`, excluding the README). */
-function readCases(): string[] {
-  const dir = join(process.cwd(), "cases");
-  let files: string[];
-  try {
-    files = readdirSync(dir)
-      .filter((f) => f.endsWith(".md") && f.toLowerCase() !== "readme.md")
-      .sort();
-  } catch {
-    // No cases directory available at build time — skip the section gracefully.
-    return [];
-  }
-  return files.map((f) => readFileSync(join(dir, f), "utf8").trim());
-}
 
 function buildAgentsTxt(): string {
   const blocks: string[] = [];
@@ -84,32 +66,18 @@ function buildAgentsTxt(): string {
   // ── Tech stack ──────────────────────────────────────────────────────────
   blocks.push(["## Tech stack", "", ...STACK.map((s) => `- ${s}`)].join("\n"));
 
-  // ── Portfolio ───────────────────────────────────────────────────────────
-  const portfolio = ["## Portfolio / selected work"];
-  for (const p of PROJECTS) {
-    portfolio.push(
+  // ── Portfolio / cases ─────────────────────────────────────────────────────
+  // The section intro is one block; each case is its own top-level block so the
+  // horizontal-rule join below separates them cleanly.
+  blocks.push(
+    [
+      "## Portfolio / cases",
       "",
-      `### ${p.n} — ${p.name}`,
-      `**${p.kind}.**`,
-      `Tags: ${p.tags.join(", ")}`,
-      "",
-      p.detail.join("\n\n"),
-    );
-  }
-  blocks.push(portfolio.join("\n"));
-
-  // ── Detailed case studies ───────────────────────────────────────────────
-  const cases = readCases();
-  if (cases.length > 0) {
-    blocks.push(
-      [
-        "## Detailed case studies",
-        "",
-        "> The following case write-ups are in Dutch (source: HeadingFWD portfolio).",
-        "",
-        cases.join("\n\n---\n\n"),
-      ].join("\n"),
-    );
+      "> Detailed write-ups of selected work. Source language: Dutch.",
+    ].join("\n"),
+  );
+  for (const c of CASES) {
+    blocks.push(caseToAgentMarkdown(c));
   }
 
   // ── Contact ─────────────────────────────────────────────────────────────

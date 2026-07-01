@@ -219,9 +219,11 @@
   max-width: 70ch;
 }
 
-/* Accent bullet character before each speciality */
+/* Accent bullet character before each speciality — bold accent so the mark
+ * reads as a distinct marker, clearly set apart from the body text color. */
 .specialityBullet {
   color: var(--accent);
+  font-weight: 700;
   margin-right: 0.5em;
 }
 
@@ -442,9 +444,11 @@
   color: #cfe2e7;
 }
 
-/* The "* " bullet character shown before the bullet body */
+/* The "* " bullet character shown before the bullet body — bold accent so the
+ * mark stands out clearly from the body text color. */
 .feedBulletMark {
   color: var(--accent);
+  font-weight: 700;
 }
 
 /* Two-column command-list row */

@@ -8,10 +8,9 @@
  * renders the same values as plain text. Editing the copy here updates both
  * surfaces at once — so the agent file never drifts from what visitors see.
  *
- * Portfolio projects live separately in `terminal-projects.ts` (already the
- * single source of truth for the fullscreen portfolio); the agent file reads
- * that array directly. The detailed case write-ups live as Markdown in
- * `/cases` and are inlined into the agent file at build time.
+ * Portfolio cases live separately in `cases.ts` (the single source of truth
+ * for `/work`, the fullscreen `/portfolio` overlay and the agent file alike).
+ * The `/cases/*.md` files are generated from that module (`pnpm gen:cases`).
  */
 
 /** One-sentence value proposition, mirrored by the hero paragraph. */

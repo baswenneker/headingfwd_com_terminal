@@ -25,8 +25,6 @@ video analyseren en er technische, gepersonaliseerde coaching op geven.
 
 ## Probleem
 
-> Bron: `page.tsx` (intro).
-
 Ik was benieuwd hoe ver de multimodale kwaliteiten van de huidige LLMs reiken — modellen
 die tekst, geluid, afbeeldingen én video begrijpen. Hiervoor gebruikte ik video's die ik
 eerder aan mijn eigen personal trainer stuurde. Na het uploaden in ChatGPT kreeg ik
@@ -35,8 +33,6 @@ accuraat analyseren; bij een verzoek om visuele feedback genereerde het irreleva
 afbeeldingen.
 
 ## Aanpak
-
-> Bron: `page.tsx` (comparison "Maatwerk").
 
 Daarom bouwde ik een maatwerk-oplossing: een AI personal trainer die zich voordoet als de
 wereldberoemde weightlifting-coach [Bob Takano](https://www.takanoweightlifting.com/).
@@ -57,8 +53,6 @@ wereldberoemde weightlifting-coach [Bob Takano](https://www.takanoweightlifting.
 
 ## Resultaten
 
-> Bron: `page.tsx` (results) — gedemonstreerd met video.
-
 - **Demo 1 — Squat Clean-analyse**: real-time analyse van een clean met directe visuele feedback.
 - **Demo 2 — Hang Squat Snatch-analyse**: gedetailleerde techniekanalyse van de snatch-beweging.
 
@@ -66,8 +60,6 @@ Demovideo's (YouTube): poging 1 (ChatGPT) `rrvgrcJ_v0M` · maatwerk `9YoU4e1Ow3Q
 squat clean `3GeEfHs6dTo` · hang squat snatch `lgP9zCadeLo`.
 
 ## Tech & stack
-
-> Geverifieerd uit `page.tsx` ("Gebruikte tech").
 
 - 💬 **ChatGPT** — macOS app (eerste, mislukte poging)
 - 🤖 **Google AI Studio** — Gemini 2.5 Pro (multimodale video-analyse)
@@ -80,9 +72,3 @@ squat clean `3GeEfHs6dTo` · hang squat snatch `lgP9zCadeLo`.
 **Experiment** — eigen R&D, gedeeld via LinkedIn met demovideo's. Toont aan dat generieke
 multimodale modellen tekortschieten voor bewegingsanalyse, terwijl een maatwerk-aanpak
 met Gemini 2.5 Pro + een Python-pijplijn wél werkt.
-
-## Bronnen
-
-- `headingfwd-demo-playground/src/app/showcase/ai-personal-trainer/page.tsx`
-- LinkedIn: ["Kan ChatGPT een personal trainer vervangen?"](https://www.linkedin.com/posts/baswenneker_kan-chatgpt-een-personal-trainer-vervangen-activity-7330482395533430785-CqxF/)
-- LinkedIn: ["Een maatwerk AI Personal Trainer"](https://www.linkedin.com/feed/update/urn:li:activity:7338437372616826883/)

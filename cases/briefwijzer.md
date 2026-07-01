@@ -27,8 +27,6 @@ je ze kunt verbeteren — en je verlaagt de contactdruk op je klantenservice.
 
 ## Probleem
 
-> Bron: `page.tsx` (ProblemSolutionSection).
-
 Communicatie is voor een groot deel van Nederland niet begrijpelijk:
 
 - 2 miljoen mensen in Nederland zijn laaggeletterd
@@ -39,8 +37,6 @@ Communicatie is voor een groot deel van Nederland niet begrijpelijk:
 
 ## Aanpak
 
-> Bron: `page.tsx` (solution) + `briefwijzer-intro.tsx`.
-
 BriefWijzer is een digitale leeshulp die brieven leesbaar maakt voor iedereen, zónder
 extra werk voor de afzender:
 
@@ -50,8 +46,6 @@ extra werk voor de afzender:
 - Inzicht voor de afzender in welke brieven als onleesbaar worden ervaren
 
 ## Hoe het werkt
-
-> Bron: `how-it-works.tsx`.
 
 **Jouw klant…**
 
@@ -67,26 +61,15 @@ extra werk voor de afzender:
 
 ## Tech & stack
 
-> Geverifieerd uit `page.tsx` ("Gebruikte tech").
-
 - 🐍 **Python** — backend processing
 - 👁️ **Google Vision** — OCR en documentanalyse
 - 🤖 **Claude Code** — AI development assistant
 - 💻 **VSCode** — IDE
 
-De tags `RAG` en `OCR` (uit `projects.json`) bevestigen de pijplijn: OCR leest de
-brief, RAG/LLM vat samen en beantwoordt vragen binnen de context van de brief.
-
-> Aanname / herkomst: in `headingfwd_toolkit` verwijst een promptfoo-test naar
-> briefwijzer — waarschijnlijk zijn hier prompts voor de samenvatting getest.
+De pijplijn: OCR leest de brief, RAG/LLM vat samen en beantwoordt vragen binnen de
+context van de brief.
 
 ## Status
 
-**Demo** — werkende showcase/productconcept. Gepositioneerd als app voor bedrijven en
-overheden die hun brieven toegankelijker willen maken.
-
-## Bronnen
-
-- `headingfwd-demo-playground/src/app/showcase/briefwijzer/` (showcase, intro, how-it-works)
-- `headingfwd-com/src/data/index/page.json` — oorspronkelijke teaser
-- `headingfwd_toolkit/tests/promptfoo/` — promptfoo-test met verwijzing naar briefwijzer
+**Demo** — werkend productconcept. Gepositioneerd als app voor bedrijven en overheden
+die hun brieven toegankelijker willen maken.

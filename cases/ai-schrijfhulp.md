@@ -26,8 +26,6 @@ data binnen de eigen omgeving blijft.
 
 ## Probleem
 
-> Bron: `schrijfhulp-demo.tsx` (intro) + comparison-sectie in `page.tsx`.
-
 Bij een organisatie met een van de meest bezochte websites van Nederland, die jaarlijks
 miljoenen brieven verstuurt, is schrijven een kerntaak. Redacteuren moeten teksten
 opleveren die voldoen aan een schrijfwijzer, woordenlijsten, stijlregels en
@@ -40,14 +38,12 @@ toegankelijkheidseisen. Generieke AI-tools (ChatGPT, Copilot) schieten daarvoor 
 
 ## Aanpak
 
-> Bron: `schrijfhulp-demo.tsx` (intro-tekst).
-
 Ik heb aan de wieg gestaan van een maatwerk AI-schrijfhulp. We werkten in nauwe
 co-creatie met leden van de redactie. In het begin was er argwaan en weerstand;
 naarmate we nauwer samenwerkten en resultaten boekten, groeide het vertrouwen en de
 acceptatie.
 
-De oplossing draait in de eigen omgeving (de demo verwijst naar een interne URL
+De oplossing draait in de eigen omgeving van de organisatie (een interne URL zoals
 `schrijfhulp.intranet.nl`), zodat ook bedrijfsgevoelige en persoonsdata de organisatie
 niet verlaat.
 
@@ -67,7 +63,7 @@ herschreven versie met opmerkingen. Voorbeelden uit de demo (origineel → hersc
 De output verschijnt als tabel met drie kolommen: **Originele zin · Herschreven zin ·
 Opmerkingen**.
 
-**Voordelen** (uit `page.tsx`):
+**Voordelen:**
 
 | Voordeel | Toelichting |
 |---|---|
@@ -83,28 +79,12 @@ Opmerkingen**.
 
 ## Tech & stack
 
-> Geverifieerd uit `page.tsx` ("Gebruikte tech").
-
 - ☁️ **Azure OpenAI LLMs** — LLM API-provider
 - 🐍 **Python** — backend
 - 🤖 **Agentic programming** — AI-architectuurpatroon
 - 💻 **VSCode** — IDE
-
-De tag `VectorDB` (uit `projects.json`) wijst op het gebruik van een vectordatabase voor
-het ontsluiten van schrijfwijzer/woordenlijsten.
-
-> Aanname / gerelateerd: de repo `dspy-writing-style` ("Using DSPy to copy someone's
-> writing style based on examples"; Python 3.12, uv, DSPy) is een los R&D-experiment dat
-> dezelfde techniek verkent (schrijfstijl leren uit voorbeelden). Het is niet bevestigd
-> dezelfde codebase als de client-oplossing.
+- 🔎 **Vectordatabase** — ontsluit de schrijfwijzer en woordenlijsten voor de tool
 
 ## Status
 
-**Live** — maatwerk client-project bij een grote publieke organisatie, met een
-interactieve demo in de showcase.
-
-## Bronnen
-
-- `headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/` (showcase + interactieve demo)
-- `headingfwd-com/src/data/index/page.json` — oorspronkelijke teaser
-- `dspy-writing-style/` — gerelateerd experiment (schrijfstijl met DSPy)
+**Live** — maatwerk client-project bij een grote publieke organisatie.

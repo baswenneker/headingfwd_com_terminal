@@ -29,15 +29,9 @@ makkelijk te navigeren.
 
 ## Status
 
-**Concept.** Deze case bestaat als teaser op de oude website (`headingfwd-com`). Er is
-binnen de bronnen geen aparte, uitgewerkte showcase of repo specifiek voor de
-podcast-segmentering gevonden.
+**Concept.** Dit idee is nog niet uitgewerkt tot een demo.
 
-## Gerelateerde, echte techniek: WhisperFWD
-
-> Bron: `whisperfwd/README.md`. **Let op:** WhisperFWD is een ándere applicatie
-> (vergaderingen, geen podcasts), maar demonstreert wel de onderliggende
-> transcriptie-capaciteit.
+## Gerelateerde techniek: WhisperFWD
 
 WhisperFWD is een macOS-menubalk-app voor het opnemen van vergaderingen, **lokale**
 transcriptie en AI-samenvattingen:
@@ -51,8 +45,3 @@ transcriptie en AI-samenvattingen:
 Dit toont aan dat de transcriptie-component van de podcast-case technisch haalbaar en
 beproefd is; de podcast-specifieke segmentering met tijdcodes is (nog) niet als los
 product uitgewerkt.
-
-## Bronnen
-
-- `headingfwd-com/src/data/index/page.json` — teaser "Podcast transcriptie en segmentering"
-- `whisperfwd/` — gerelateerde, werkende transcriptie-app (vergaderingen)
