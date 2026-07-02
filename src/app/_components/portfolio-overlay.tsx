@@ -338,8 +338,8 @@ function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailVi
         <div className={styles.comingSoon}>
           <div className={styles.comingSoonMark}>🚧 coming soon</div>
           <p className={styles.comingSoonText}>
-            Deze case wordt binnenkort uitgewerkt. Wil je nu al meer weten of
-            iets soortgelijks bouwen? Neem gerust contact op.
+            This case is being written up soon. Want to know more now, or build
+            something similar? Feel free to get in touch.
           </p>
         </div>
       ) : (
@@ -415,7 +415,7 @@ function VideoPreviews({ videos }: { videos: CaseVideo[] }) {
   return (
     <section className={styles.videoSection}>
       <div className={styles.videoSectionTitle}>
-        {"// video — zie het in actie"}
+        {"// video — see it in action"}
       </div>
       <div className={styles.videoGrid}>
         {videos.map((v) => (
@@ -437,7 +437,7 @@ function VideoPreviews({ videos }: { videos: CaseVideo[] }) {
                     e.stopPropagation();
                     setPlaying(v.id);
                   }}
-                  aria-label={`Speel video af: ${v.title}`}
+                  aria-label={`Play video: ${v.title}`}
                 >
                   {/* External YouTube thumbnail (facade). A plain <img> avoids
                       next/image remote-pattern config for a decorative preview. */}

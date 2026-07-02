@@ -1,81 +1,83 @@
 ---
-title: "MyWorq: medewerkersapp voor de tuinbouw"
+title: "MyWorq: employee app for horticulture"
 slug: myworq
-sector: Tuinbouw
+sector: Horticulture
 status: live
-rol: Product Manager
-klant: bQurius
-tags: [Mobiele App, Product Management, Design Thinking]
+role: Product Manager
+client: bQurius
+tags: [Mobile App, Product Management, Design Thinking]
 stack: []
 updated: 2025-06-19
-links:
-  - https://www.youtube.com/watch?v=G3QL3dCgkOg
 sources:
   - headingfwd-demo-playground/src/app/showcase/myworq/page.tsx
   - headingfwd-demo-playground/src/app/showcase/myworq/myworq-intro.tsx
   - headingfwd-demo-playground/src/app/showcase/myworq/process-ticker.tsx
 ---
 
-# MyWorq: medewerkersapp voor de tuinbouw
+# MyWorq: employee app for horticulture
 
-## In het kort
+## In short
 
-Een medewerkersapp voor de tuinbouwsector, met focus op medewerkertevredenheid,
-productiviteit en samenwerking. Mijn rol: **product manager**. De app is inmiddels live
-en wordt gebruikt door duizenden medewerkers in de tuinbouw.
+An employee app for the horticulture sector, focused on employee satisfaction,
+productivity and collaboration. My role: **product manager**. The app is now live and
+used by thousands of workers in horticulture.
 
-## Het verhaal
+## The story
 
-Met mijn Westlandse roots was de opdracht bij MyWorq een thuiswedstrijd. Ik werd gevraagd
-om als product manager het Data-team van **bQurius** te helpen een innovatieve
-medewerkersapp te ontwikkelen, specifiek voor de tuinbouwsector.
+With my roots in the Westland region, the MyWorq assignment was a home game. I was asked
+to join the Data team of **bQurius** as product manager, to help develop an innovative
+employee app specifically for the horticulture sector.
 
-Ik werkte nauw samen met een collega om de behoeftes van gebruikers in kaart te brengen:
-de teamleiders in de kassen en de mensen die in de kas werken. Nadat we de contouren van
-de app hadden uitgewerkt, zochten we een software-agency die de app kon bouwen.
+I worked closely with a colleague to map users' needs: the team leaders in the greenhouses
+and the people working in them. Once we had outlined the app, we looked for a software
+agency to build it.
 
-Na 2 jaar heb ik de rol overgedragen aan de collega met wie ik al die tijd optrok. De app
-is inmiddels live en wordt gebruikt door duizenden medewerkers in de tuinbouwsector.
-Trots op dit project!
+After 2 years I handed the role over to the colleague I had worked with all along. The app
+is now live and used by thousands of workers in the horticulture sector. Proud of this
+project!
 
-## Probleem
+## Problem
 
-De tuinbouwsector kampt met specifieke uitdagingen rond personeelsmanagement:
+The horticulture sector faces specific challenges around workforce management:
 
-- Hoog personeelsverloop en moeilijk vindbaar personeel
-- Complexe planning door seizoensgebonden werk
-- Taalbarrières bij internationale werknemers
-- Gebrek aan digitale tools voor werknemers in het veld
-- Inefficiënte communicatie tussen management en uitvoerend personeel
+- High staff turnover and hard-to-find personnel
+- Complex planning due to seasonal work
+- Language barriers with international workers
+- Lack of digital tools for field workers
+- Inefficient communication between management and operational staff
 
-## Oplossing
+## Solution
 
-Een gebruiksvriendelijke medewerkersapp, specifiek ontworpen voor de tuinbouw:
+A user-friendly employee app, designed specifically for horticulture:
 
-- Intuïtieve interface in meerdere talen
-- Real-time werkplanning en taakbeheer
-- Directe communicatie tussen teams en leidinggevenden
-- Gamification-elementen voor hogere betrokkenheid
-- Integratie met bestaande HR- en planningssystemen
+- Intuitive interface in multiple languages
+- Real-time work planning and task management
+- Direct communication between teams and supervisors
+- Gamification elements for higher engagement
+- Integration with existing HR and planning systems
 
-## Werkwijze
+## Way of working
 
-1. 🔍 **Onderzoek** — gesprekken met klanten om behoeftes en pijnpunten te begrijpen
-2. ✏️ **Schetsen** — schetsen hoe een nieuwe feature eruit kan zien
-3. 🎨 **Ontwerpen** — met een UX/UI-designer het idee uitwerken in een prototype
-4. 💻 **Ontwikkelen** — de software engineers bouwen de feature in de app
-5. 🧪 **Testen** — de nieuwe feature grondig testen
-6. 🚀 **Uitrol** — de bijgewerkte app uitrollen naar gebruikers
-7. 🔄 **Itereer** — data analyseren, feedback verzamelen en het proces begint opnieuw
+1. 🔍 **Research** — conversations with customers to understand needs and pain points
+2. ✏️ **Sketching** — sketching what a new feature could look like
+3. 🎨 **Designing** — working the idea into a prototype with a UX/UI designer
+4. 💻 **Building** — the software engineers build the feature into the app
+5. 🧪 **Testing** — thoroughly testing the new feature
+6. 🚀 **Rollout** — rolling out the updated app to users
+7. 🔄 **Iterate** — analyze data, gather feedback, and the process starts again
 
-## Rol & stack
+## Role & stack
 
-Dit is een **product-managementcase**, geen eigen development-project: de app is gebouwd
-door een externe software-agency. Mijn bijdrage zat in onderzoek, productdefinitie,
-design thinking en het aansturen van het bouwproces. Er is daarom geen eigen tech-stack
-te vermelden.
+This is a **product-management case**, not an in-house development project: the app was
+built by an external software agency. My contribution was in research, product definition,
+design thinking and steering the build process. There is therefore no own tech stack to
+list.
 
 ## Status
 
-**Live** — de app is in productie en wordt gebruikt door duizenden medewerkers in de
-tuinbouwsector. Rol na 2 jaar overgedragen. Demovideo: YouTube `G3QL3dCgkOg`.
+**Live** — the app is in production and used by thousands of workers in the horticulture
+sector. Role handed over after 2 years.
+
+## Videos
+
+- [MyWorq demo video](https://www.youtube.com/watch?v=G3QL3dCgkOg) — A walkthrough of the MyWorq employee app in action.

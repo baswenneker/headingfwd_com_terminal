@@ -1,10 +1,10 @@
 ---
 title: AI Personal Trainer
 slug: ai-personal-trainer
-sector: Sport & Fitness
+sector: Sports & Fitness
 status: experiment
-rol: Maker / AI engineer
-tags: [LLM, Multimodaal, Bewegingsherkenning, Python]
+role: Maker / AI engineer
+tags: [LLM, Multimodal, Motion recognition, Python]
 stack: [Google Gemini 2.5 Pro, Python, ChatGPT, GitHub Copilot, VSCode]
 updated: 2025-06-19
 links:
@@ -16,62 +16,61 @@ sources:
 
 # AI Personal Trainer
 
-## In het kort
+## In short
 
-Software die feedback geeft op fitnessvideo's, net als een coach of personal trainer zou
-doen. De rode draad: een experiment met **ChatGPT als personal trainer faalt**, een
-**maatwerk AI-oplossing slaagt**. Met maatwerk software kun je complexe bewegingen in
-video analyseren en er technische, gepersonaliseerde coaching op geven.
+Software that gives feedback on fitness videos, just like a coach or personal trainer
+would. The throughline: an experiment with **ChatGPT as a personal trainer fails**, while
+a **custom AI solution succeeds**. With custom software you can analyze complex movements
+in video and give technical, personalized coaching on them.
 
-## Probleem
+## Problem
 
-Ik was benieuwd hoe ver de multimodale kwaliteiten van de huidige LLMs reiken — modellen
-die tekst, geluid, afbeeldingen én video begrijpen. Hiervoor gebruikte ik video's die ik
-eerder aan mijn eigen personal trainer stuurde. Na het uploaden in ChatGPT kreeg ik
-alleen algemene en onspecifieke feedback. Geen enkel beschikbaar model kon de bewegingen
-accuraat analyseren; bij een verzoek om visuele feedback genereerde het irrelevante
-afbeeldingen.
+I was curious how far the multimodal capabilities of today's LLMs reach — models that
+understand text, sound, images and video. For this I used videos I had earlier sent to my
+own personal trainer. After uploading them to ChatGPT I only got generic, unspecific
+feedback. No available model could analyze the movements accurately; when asked for visual
+feedback it generated irrelevant images.
 
-## Aanpak
+## Approach
 
-Daarom bouwde ik een maatwerk-oplossing: een AI-gestuurde virtuele Olympische coach die
-zich voordoet als de wereldberoemde weightlifting-coach
+So I built a custom solution: an AI-powered virtual Olympic coach that poses as the
+world-famous weightlifting coach
 [Bob Takano](https://www.takanoweightlifting.com/).
 
-- **Prompt engineering** gebaseerd op de methodiek van een topcoach weightlifting
-- **Google Gemini 2.5 Pro** voor frame-by-frame bewegingsanalyse
-- Een **Python-tool** voor video-vertraging en een visuele feedback-overlay
-- Resultaat: technisch accurate, gepersonaliseerde coaching
+- **Prompt engineering** based on the methodology of a top weightlifting coach
+- **Google Gemini 2.5 Pro** for frame-by-frame movement analysis
+- A **Python tool** for slowing down the video and a visual feedback overlay
+- Result: technically accurate, personalized coaching
 
-### ChatGPT vs. Maatwerk
+### ChatGPT vs. custom
 
-| ChatGPT — faalt bij video-analyse van sportbewegingen | Maatwerk — AI-gestuurde virtuele Olympische coach |
+| ChatGPT — fails at video analysis of sports movements | Custom — AI-powered virtual Olympic coach |
 |---|---|
-| Geen enkel beschikbaar model kan bewegingen accuraat analyseren | Prompt engineering gebaseerd op methodiek topcoach weightlifting |
-| Feedback is generiek en niet-specifiek voor de getoonde techniek | Google Gemini 2.5 Pro voor frame-by-frame bewegingsanalyse |
-| Bij verzoek om visuele feedback genereert het irrelevante afbeeldingen | Python-tool voor video-vertraging en visuele feedback-overlay |
-| Bewegingsherkenning ontbreekt volledig | Technisch accurate, gepersonaliseerde coaching |
+| No available model can analyze movements accurately | Prompt engineering based on a top weightlifting coach's methodology |
+| Feedback is generic and not specific to the technique shown | Google Gemini 2.5 Pro for frame-by-frame movement analysis |
+| When asked for visual feedback it generates irrelevant images | Python tool for slowing down the video and a visual feedback overlay |
+| Movement recognition is missing entirely | Technically accurate, personalized coaching |
 
-De twee pogingen (poging 1 met ChatGPT, poging 2 met de maatwerk-coach) en twee
-techniekanalyses staan als afspeelbare video's onderaan deze case.
+The two attempts (attempt 1 with ChatGPT, attempt 2 with the custom coach) and two
+technique analyses are shown as playable videos at the bottom of this case.
 
 ## Tech & stack
 
-- 💬 **ChatGPT** — macOS app (eerste, mislukte poging)
-- 🤖 **Google AI Studio** — Gemini 2.5 Pro (multimodale video-analyse)
+- 💬 **ChatGPT** — macOS app (first, failed attempt)
+- 🤖 **Google AI Studio** — Gemini 2.5 Pro (multimodal video analysis)
 - 🧑‍💻 **GitHub Copilot** — coding agent
 - 💻 **VSCode** — IDE
-- 🐍 **Python** — tool voor video-vertraging en feedback-overlay
+- 🐍 **Python** — tool for slowing down video and the feedback overlay
 
 ## Status
 
-**Experiment** — eigen R&D, gedeeld via LinkedIn met demovideo's. Toont aan dat generieke
-multimodale modellen tekortschieten voor bewegingsanalyse, terwijl een maatwerk-aanpak
-met Gemini 2.5 Pro + een Python-pijplijn wél werkt.
+**Experiment** — my own R&D, shared via LinkedIn with demo videos. It shows that generic
+multimodal models fall short for movement analysis, while a custom approach with Gemini
+2.5 Pro + a Python pipeline does work.
 
-## Video's
+## Videos
 
-- ❌ [Poging 1 — ChatGPT kan geen video analyseren](https://www.youtube.com/watch?v=rrvgrcJ_v0M) — ChatGPT kan de video niet analyseren en geeft generieke adviezen die niet aansluiten bij de werkelijke uitvoering.
-- ✅ [Poging 2 — Maatwerk AI Personal Trainer](https://youtube.com/shorts/9YoU4e1Ow3Q) — Met maatwerk software analyseert de AI bewegingen real-time en geeft specifieke, technische feedback met visuele annotaties.
-- [Demo 1 — Squat Clean-analyse](https://www.youtube.com/watch?v=3GeEfHs6dTo) — Real-time analyse van een clean met directe visuele feedback.
-- [Demo 2 — Hang Squat Snatch-analyse](https://www.youtube.com/watch?v=lgP9zCadeLo) — Gedetailleerde techniekanalyse van de snatch-beweging.
+- ❌ [Attempt 1 — ChatGPT can't analyze video](https://www.youtube.com/watch?v=rrvgrcJ_v0M) — ChatGPT can't analyze the video and gives generic advice that doesn't match the actual execution.
+- ✅ [Attempt 2 — Custom AI Personal Trainer](https://youtube.com/shorts/9YoU4e1Ow3Q) — With custom software the AI analyzes movements in real time and gives specific, technical feedback with visual annotations.
+- [Demo 1 — Squat Clean analysis](https://www.youtube.com/watch?v=3GeEfHs6dTo) — Real-time analysis of a clean with direct visual feedback.
+- [Demo 2 — Hang Squat Snatch analysis](https://www.youtube.com/watch?v=lgP9zCadeLo) — Detailed technique analysis of the snatch movement.

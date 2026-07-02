@@ -1,9 +1,9 @@
 ---
 title: BriefWijzer
 slug: briefwijzer
-sector: Communicatie
+sector: Communication
 status: demo
-rol: AI engineer
+role: AI engineer
 tags: [RAG, OCR, LLM, Marketing]
 stack: [Python, Google Vision, Claude Code, VSCode]
 updated: 2025-07-03
@@ -17,59 +17,60 @@ sources:
 
 # BriefWijzer
 
-## In het kort
+## In short
 
-BriefWijzer maakt onleesbare (overheids)brieven begrijpelijk. Jouw klant maakt een foto
-van de brief, en de app doet de rest: een korte, begrijpelijke samenvatting, een direct
-klikbare call-to-action en een AI-gedreven chat om vragen over de brief te stellen.
-Als bonus zie je als afzender welke van je brieven als onleesbaar worden ervaren, zodat
-je ze kunt verbeteren — en je verlaagt de contactdruk op je klantenservice.
+BriefWijzer makes unreadable (government) letters understandable. Your customer takes a
+photo of the letter, and the app does the rest: a short, understandable summary, a
+directly clickable call-to-action, and an AI-driven chat to ask questions about the
+letter. As a bonus, you as the sender see which of your letters are experienced as
+unreadable, so you can improve them — and you lower the contact load on your customer
+service.
 
-## Probleem
+## Problem
 
-Communicatie is voor een groot deel van Nederland niet begrijpelijk:
+Communication is not understandable for a large part of the Netherlands:
 
-- 2 miljoen mensen in Nederland zijn laaggeletterd
-- Mensen met beperkt doenvermogen pakken de telefoon om te vragen waar het over gaat
-- Dit legt druk op contactcenters
-- De dienstverlening sluit niet aan op deze doelgroep
-- Ingewikkelde brieven leiden tot frustratie en onbegrip
+- 2 million people in the Netherlands are low-literate
+- People who struggle to act on official mail pick up the phone to ask what it's about
+- This puts pressure on contact centers
+- Services don't match the needs of this audience
+- Complicated letters lead to frustration and confusion
 
-## Aanpak
+## Approach
 
-BriefWijzer is een digitale leeshulp die brieven leesbaar maakt voor iedereen, zónder
-extra werk voor de afzender:
+BriefWijzer is a digital reading aid that makes letters readable for everyone, without
+extra work for the sender:
 
-- Korte, begrijpelijke samenvatting van de belangrijkste punten (maximaal 5 bullets)
-- De call-to-action wordt direct (online) klikbaar
-- Interactieve chat-functie die antwoordt binnen de context van de brief
-- Inzicht voor de afzender in welke brieven als onleesbaar worden ervaren
+- Short, understandable summary of the key points (max. 5 bullets)
+- The call-to-action becomes directly (online) clickable
+- Interactive chat function that answers within the context of the letter
+- Insight for the sender into which letters are experienced as unreadable
 
-## Hoe het werkt
+## How it works
 
-**Jouw klant…**
+**Your customer…**
 
-1. 📨 …ontvangt jouw brief — maar begrijpt niet wat er staat.
-2. 📱 …scant de BriefWijzer-QR — de app hoeft niet gedownload te worden, maar opent in de browser.
-3. 📷 …maakt een foto — meerdere pagina's uploaden kan.
+1. 📨 …receives your letter — but doesn't understand what it says.
+2. 📱 …scans the BriefWijzer QR — no app download needed, it opens in the browser.
+3. 📷 …takes a photo — uploading multiple pages is possible.
 
-**BriefWijzer gaat aan de slag en…**
+**BriefWijzer gets to work and…**
 
-- 📋 …vat de brief samen in begrijpelijke, eenvoudige taal (max. 5 bullets).
-- 👆 …maakt acties direct klikbaar — jij configureert de call-to-actions die getoond worden.
-- 💬 …beantwoordt vragen direct via chat.
+- 📋 …summarizes the letter in understandable, simple language (max. 5 bullets).
+- 👆 …makes actions directly clickable — you configure the call-to-actions shown.
+- 💬 …answers questions directly via chat.
 
 ## Tech & stack
 
 - 🐍 **Python** — backend processing
-- 👁️ **Google Vision** — OCR en documentanalyse
+- 👁️ **Google Vision** — OCR and document analysis
 - 🤖 **Claude Code** — AI development assistant
 - 💻 **VSCode** — IDE
 
-De pijplijn: OCR leest de brief, RAG/LLM vat samen en beantwoordt vragen binnen de
-context van de brief.
+The pipeline: OCR reads the letter, RAG/LLM summarizes and answers questions within the
+context of the letter.
 
 ## Status
 
-**Demo** — werkend productconcept. Gepositioneerd als app voor bedrijven en overheden
-die hun brieven toegankelijker willen maken.
+**Demo** — working product concept. Positioned as an app for companies and government
+bodies that want to make their letters more accessible.

@@ -57,8 +57,8 @@ function caseToFileMarkdown(c: Case): string {
   ];
   // Only surface visibility when it differs from the default ("published").
   if (caseVisibility(c) !== "published") fm.push(`visibility: ${caseVisibility(c)}`);
-  if (c.role) fm.push(`rol: ${yamlScalar(c.role)}`);
-  if (c.client) fm.push(`klant: ${yamlScalar(c.client)}`);
+  if (c.role) fm.push(`role: ${yamlScalar(c.role)}`);
+  if (c.client) fm.push(`client: ${yamlScalar(c.client)}`);
   fm.push(`tags: [${c.tags.join(", ")}]`);
   fm.push(`stack: [${c.stack.join(", ")}]`);
   if (c.updated) fm.push(`updated: ${c.updated}`);
@@ -76,7 +76,7 @@ function caseToFileMarkdown(c: Case): string {
     const note = v.note ? ` — ${v.note}` : "";
     return `- ${mark}[${v.title}](${v.url})${note}`;
   });
-  return `${base}\n## Video's\n\n${vids.join("\n")}\n`;
+  return `${base}\n## Videos\n\n${vids.join("\n")}\n`;
 }
 
 /** Build the README overview table + status legend from the visible cases. */
@@ -91,23 +91,23 @@ function buildReadme(): string {
   return [
     "# Cases",
     "",
-    "> Gegenereerd uit `src/content/cases.ts` met `pnpm gen:cases`.",
-    "> **Niet handmatig bewerken** — wijzig de bron en genereer opnieuw.",
-    "> Verborgen cases (`visibility: hidden`) staan hier niet in.",
+    "> Generated from `src/content/cases.ts` with `pnpm gen:cases`.",
+    "> **Do not edit by hand** — change the source and regenerate.",
+    "> Hidden cases (`visibility: hidden`) are not listed here.",
     "",
-    "## Overzicht",
+    "## Overview",
     "",
-    "| # | Case | Sector | Status | Tags | Bestand |",
-    "|---|------|--------|--------|------|---------|",
+    "| # | Case | Sector | Status | Tags | File |",
+    "|---|------|--------|--------|------|------|",
     ...rows,
     "",
-    "## Status-legenda",
+    "## Status legend",
     "",
-    "- 🟢 **live** — in productie / echt in gebruik",
-    "- 🔵 **demo** — werkende showcase / productconcept met demo",
-    "- 🟡 **experiment** — eigen R&D, gedeeld als experiment",
-    "- ⚪ **concept** — idee/teaser, nog niet uitgewerkt",
-    "- 🔜 **coming soon** — zichtbaar als teaser, uitwerking volgt (`visibility: coming-soon`)",
+    "- 🟢 **live** — in production / actually in use",
+    "- 🔵 **demo** — working showcase / product concept with a demo",
+    "- 🟡 **experiment** — own R&D, shared as an experiment",
+    "- ⚪ **concept** — idea/teaser, not yet built out",
+    "- 🔜 **coming soon** — visible as a teaser, write-up to follow (`visibility: coming-soon`)",
     "",
   ].join("\n");
 }

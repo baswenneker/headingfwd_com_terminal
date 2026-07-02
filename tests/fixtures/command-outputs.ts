@@ -52,9 +52,9 @@ export const COMMAND_TEXT = {
      */
     bullets: [
       "agents that do real work",
-      "where AI pays off",
-      "measure quality before you ship",
-      "production-ready, not just demos",
+      "hands-on, your stack",
+      "grounded & stateful",
+      "where AI pays off, where it won't",
     ],
   },
 

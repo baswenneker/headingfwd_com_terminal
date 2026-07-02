@@ -151,6 +151,74 @@ const COMMANDS: Record<string, () => FeedLine[]> = {
   ls:       () => [{ kind: "out", text: "about/  services/  stack/  contact/" }],
 };
 
+// ── Command deep-link pages ──────────────────────────────────────────────────
+
+/** A slash-command that also exists as a shareable URL (e.g. `/help`). */
+export interface CommandPage {
+  /** Command token — also the URL path segment (`help` → `/help`). */
+  token: string;
+  /** SEO page title; the root layout's template appends " — HeadingFWD". */
+  title: string;
+  /** SEO meta description for the command's page. */
+  description: string;
+}
+
+/**
+ * The commands that get their own shareable URL, in /help order. Single
+ * source of truth for those pages: `src/app/[command]/page.tsx` derives its
+ * routes + metadata from this array and `src/app/sitemap.ts` its sitemap
+ * entries, so adding one entry here publishes a new URL everywhere at once.
+ *
+ * Deliberately absent: `/clear` and `/cls` (they only mutate feed state —
+ * there is no state to deep-link), the `/whoami`, `/ls` and `/llms`
+ * easter-egg aliases, and `/portfolio`, which has a real route of its own
+ * (`src/app/portfolio/`).
+ */
+export const COMMAND_PAGES: CommandPage[] = [
+  {
+    token: "help",
+    title: "Help — terminal commands",
+    description:
+      "All commands of the HeadingFWD terminal: /about, /services, " +
+      "/portfolio, /stack, /contact and /agents.",
+  },
+  {
+    token: "about",
+    title: "About Bas Wenneker",
+    description:
+      "Bas Wenneker — AI Lead / Engineer @ HeadingFWD. 15+ years shipping " +
+      "software, 5+ years coaching 60+ product & innovation teams.",
+  },
+  {
+    token: "services",
+    title: "Services — what I help teams with",
+    description:
+      "Agentic workflow development, agentic coding training for dev teams, " +
+      "AI techniques (RAG, graphs, memory) and AI strategy & consulting.",
+  },
+  {
+    token: "stack",
+    title: "Stack — tools, models & tech",
+    description:
+      "The HeadingFWD stack: LLMs, agents, RAG, evals, prompt + context " +
+      "engineering · Python, TypeScript, React, Ruby on Rails, Docker.",
+  },
+  {
+    token: "contact",
+    title: "Contact",
+    description:
+      `Get in touch with Bas Wenneker / HeadingFWD — email ${CONTACT.email} ` +
+      "or connect on LinkedIn.",
+  },
+  {
+    token: "agents",
+    title: "For AI agents — llms.txt",
+    description:
+      "A plain-text, machine-readable version of everything on " +
+      "headingfwd.com, so AI agents and crawlers can read the source directly.",
+  },
+];
+
 /**
  * Fallback response for input that is not a recognised slash-command.
  * Points the visitor toward /help and the contact email.

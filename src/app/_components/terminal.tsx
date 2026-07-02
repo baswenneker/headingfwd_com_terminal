@@ -52,6 +52,21 @@ function prefersAutoFocus(): boolean {
 }
 
 /**
+ * Build the initial feed for a command deep-link URL (e.g. `/help`).
+ *
+ * Runs the command through the same registry as typed input, so a deep link
+ * and typing `/help` produce identical feeds. runCommand is deterministic,
+ * which keeps the server render and client hydration in agreement.
+ */
+function initialCommandBlocks(command?: string): FeedBlock[] {
+  if (!command) return [];
+  const result = runCommand(`/${command}`);
+  return result.action === "lines"
+    ? [{ type: "cmd", lines: result.lines }]
+    : [];
+}
+
+/**
  * Extracts a human-readable sentence from an error thrown by the AI chat route.
  *
  * The /api/chat endpoint returns errors as JSON bodies of the shape
@@ -96,26 +111,49 @@ function readableError(err: unknown): string {
 /**
  * Props for the terminal.
  *
- * `initialMode` lets a route open the terminal straight into a given view.
- * The `/portfolio` route renders `<Terminal initialMode="portfolio" />` so the
- * fullscreen portfolio overlay is shown immediately; exiting it (Esc) drops
- * back to the normal terminal underneath. Defaults to the normal terminal.
+ * Each prop lets a route open the terminal straight into a given state, so
+ * every state has a shareable URL:
+ *
+ *   - `initialMode="portfolio"` — `/portfolio` — fullscreen overlay, list view.
+ *   - `initialCaseSlug`         — `/portfolio/<slug>` — overlay, case detail.
+ *   - `initialCommand`          — `/help`, `/about`, … — terminal with that
+ *     command already executed in the feed.
+ *
+ * Exiting the overlay (Esc) drops back to the normal terminal underneath.
+ * Defaults to the normal terminal with an empty feed.
  */
 interface TerminalProps {
   initialMode?: "terminal" | "portfolio";
+  /** Command token (without the slash) to pre-execute into the feed on load. */
+  initialCommand?: string;
+  /** Slug of the case to open in detail view; implies portfolio mode. */
+  initialCaseSlug?: string;
 }
 
-export function Terminal({ initialMode = "terminal" }: TerminalProps = {}) {
+export function Terminal({
+  initialMode = "terminal",
+  initialCommand,
+  initialCaseSlug,
+}: TerminalProps = {}) {
   const [inputValue, setInputValue] = useState("");
-  const [blocks, setBlocks] = useState<FeedBlock[]>([]);
+  const [blocks, setBlocks] = useState<FeedBlock[]>(() =>
+    initialCommandBlocks(initialCommand),
+  );
   const [history, setHistory] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
 
   // Portfolio overlay state — all three are reset when the overlay opens so
-  // each visit starts at the first project in list view.
-  const [mode, setMode] = useState<"terminal" | "portfolio">(initialMode);
-  const [pfIndex, setPfIndex] = useState(0);
-  const [pfDetail, setPfDetail] = useState(false);
+  // each visit starts at the first project in list view. A case deep link
+  // (`initialCaseSlug`) instead starts inside the overlay on that case's
+  // detail view; an unknown slug falls back to plain initialMode behaviour.
+  const initialCaseIndex = initialCaseSlug
+    ? PORTFOLIO_CASES.findIndex((c) => c.slug === initialCaseSlug)
+    : -1;
+  const [mode, setMode] = useState<"terminal" | "portfolio">(
+    initialCaseIndex >= 0 ? "portfolio" : initialMode,
+  );
+  const [pfIndex, setPfIndex] = useState(Math.max(initialCaseIndex, 0));
+  const [pfDetail, setPfDetail] = useState(initialCaseIndex >= 0);
 
   // Session state for the AI chat.
   // sessionIdRef is the single source of truth read at request time by the
@@ -348,12 +386,39 @@ export function Terminal({ initialMode = "terminal" }: TerminalProps = {}) {
   // ── Portfolio overlay ───────────────────────────────────────────────────
 
   /**
+   * Keep the address bar in sync with the overlay while it is open:
+   * `/portfolio` for the list, `/portfolio/<slug>` for a detail view — so
+   * "what I'm looking at" is always shareable. Browsing (arrow keys,
+   * prev/next, opening a case) rewrites the URL via history.replaceState:
+   * shallow, so no reload, no history spam and no App Router round-trip.
+   *
+   * Terminal mode is deliberately left alone: the feed can hold many command
+   * outputs, so no single URL can represent it — and rewriting would destroy
+   * a command deep link like `/help` right after it loads. exitPortfolio()
+   * resets the URL to `/` when the visitor leaves the overlay.
+   */
+  useEffect(() => {
+    if (mode !== "portfolio") return;
+    const clamped = Math.max(0, Math.min(pfIndex, PORTFOLIO_CASES.length - 1));
+    const current = PORTFOLIO_CASES[clamped];
+    const path =
+      pfDetail && current ? `/portfolio/${current.slug}` : "/portfolio";
+    if (window.location.pathname !== path) {
+      window.history.replaceState(null, "", path);
+    }
+  }, [mode, pfIndex, pfDetail]);
+
+  /**
    * Close the portfolio overlay and, on fine-pointer devices, return keyboard
    * focus to the terminal input. The 40ms delay gives React time to finish
    * the re-render so the input is visible before focus() is called.
    */
   function exitPortfolio() {
     setMode("terminal");
+    // The overlay URL (/portfolio or /portfolio/<slug>) no longer matches
+    // what is on screen; reset to the terminal root. replaceState mirrors how
+    // the sync effect wrote the URL, keeping the history stack untouched.
+    window.history.replaceState(null, "", "/");
     setTimeout(() => {
       if (prefersAutoFocus()) inputRef.current?.focus();
     }, 40);

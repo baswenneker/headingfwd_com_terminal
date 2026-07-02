@@ -110,97 +110,98 @@ export interface Case {
 
 export const CASES: Case[] = [
   {
-    slug: "ai-schrijfhulp",
+    slug: "ai-writing-assistant",
     n: "01",
-    title: "AI Schrijfhulp",
-    kind: "AI-schrijfhulp die de huisstijl bewaakt — data blijft in eigen omgeving",
-    sector: "Overheid",
+    title: "AI Writing Assistant",
+    kind: "AI writing assistant that guards the house style — data stays in-house",
+    sector: "Government",
     status: "live",
-    role: "Initiatiefnemer / AI engineer",
-    tags: ["LLM", "Schrijven", "Marketing", "Python", "VectorDB"],
+    role: "Initiator / AI engineer",
+    tags: ["LLM", "Writing", "Marketing", "Python", "VectorDB"],
     stack: ["Azure OpenAI", "Python", "Agentic programming", "VSCode"],
     sources: ["headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/page.tsx", "headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/schrijfhulp-demo.tsx", "headingfwd-com/src/data/index/page.json (teaser \"AI Schrijfhulp\")", "dspy-writing-style (gerelateerd R&D-experiment)"],
     updated: "2025-06-19",
     body: `
-## In het kort
+## In short
 
-Een AI-gestuurde schrijfhulp voor de redactie van een grote publieke organisatie.
-De tool herschrijft teksten naar een heldere, foutloze boodschap die voldoet aan de
-schrijfwijzer, woordenlijsten, stijlregels en toegankelijkheidseisen (B1-niveau) van de
-organisatie. Eén consistente huisstijl voor het hele redactieteam — terwijl gevoelige
-data binnen de eigen omgeving blijft.
+An AI-powered writing assistant for the editorial team of a large public-sector
+organization. The tool rewrites text into a clear, error-free message that meets the
+organization's style guide, word lists, style rules and accessibility requirements
+(B1 level). One consistent house style for the whole editorial team — while sensitive
+data stays inside the organization's own environment.
 
-## Probleem
+## Problem
 
-Bij een organisatie met een van de meest bezochte websites van Nederland, die jaarlijks
-miljoenen brieven verstuurt, is schrijven een kerntaak. Redacteuren moeten teksten
-opleveren die voldoen aan een schrijfwijzer, woordenlijsten, stijlregels en
-toegankelijkheidseisen. Generieke AI-tools (ChatGPT, Copilot) schieten daarvoor tekort:
+At an organization with one of the most-visited websites in the Netherlands, which sends
+millions of letters a year, writing is a core task. Editors have to deliver text that
+meets a style guide, word lists, style rules and accessibility requirements. Generic AI
+tools (ChatGPT, Copilot) fall short for this:
 
-- Geen kennis van de huisstijl of tone of voice
-- Algemene suggesties zonder context van de organisatie
-- Inconsistente output bij verschillende prompts
-- Privacy-zorgen bij gevoelige bedrijfs- en persoonsdata
+- No knowledge of the house style or tone of voice
+- Generic suggestions without the organization's context
+- Inconsistent output across different prompts
+- Privacy concerns with sensitive company and personal data
 
-## Aanpak
+## Approach
 
-Ik heb aan de wieg gestaan van een maatwerk AI-schrijfhulp. We werkten in nauwe
-co-creatie met leden van de redactie. In het begin was er argwaan en weerstand;
-naarmate we nauwer samenwerkten en resultaten boekten, groeide het vertrouwen en de
-acceptatie.
+I helped shape a custom AI writing assistant from the ground up. We worked in close
+co-creation with members of the editorial team. Early on there was suspicion and
+resistance; as we collaborated more closely and delivered results, trust and adoption
+grew.
 
-De oplossing draait in de eigen omgeving van de organisatie (een interne URL zoals
-\`schrijfhulp.intranet.nl\`), zodat ook bedrijfsgevoelige en persoonsdata de organisatie
-niet verlaat.
+The solution runs inside the organization's own environment (an internal URL like
+\`schrijfhulp.intranet.nl\`), so even commercially sensitive and personal data never
+leaves the organization.
 
-## Hoe het werkt
+## How it works
 
-De gebruiker plakt een tekst; de schrijfhulp analyseert en levert per zin een
-herschreven versie met opmerkingen. Voorbeelden uit de demo (origineel → herschreven):
+The user pastes a text; the assistant analyzes it and returns a rewritten version per
+sentence, with remarks. Examples from the demo — a Dutch-language tool (original →
+rewritten):
 
 - "Door de afgelopen week ben ik beezig geweest met het ontwikelen van een nieuwe
   AI-gestuerde schrijfhulp tool." → "Vorige week werkte ik aan het maken van een nieuwe
-  AI-gestuurde schrijfhulptool." (eenvoudiger, B1, spelfouten, samenstelling)
-- "…zodat je profesioneler overkomt in je communicatie." → losgetrokken in twee zinnen,
-  "professioneler" gecorrigeerd (duidelijkheid + spelling)
+  AI-gestuurde schrijfhulptool." (simpler, B1, spelling fixes, compound word)
+- "…zodat je profesioneler overkomt in je communicatie." → split into two sentences,
+  "professioneler" corrected (clarity + spelling)
 - "Vervolgens geeft hij suggesties…" → "Vervolgens geeft de tool suggesties…"
-  (duidelijkere verwijzing)
+  (clearer reference)
 
-De output verschijnt als tabel met drie kolommen: **Originele zin · Herschreven zin ·
-Opmerkingen**.
+The output appears as a table with three columns: **Original sentence · Rewritten
+sentence · Remarks**.
 
-**Voordelen:**
+**Benefits:**
 
-| Voordeel | Toelichting |
+| Benefit | Explanation |
 |---|---|
-| 🔒 Data­veiligheid | Ook voor bedrijfsgevoelige en persoonsdata; alles blijft in de eigen omgeving |
-| ⚡ Efficiëntie | Direct resultaat, klaar terwijl je wacht |
-| 🎯 Consistentie | Een schrijfwijzer wordt door iedereen anders geïnterpreteerd; AI doet dat consistent |
-| 📚 Woordenlijsten | Jargon afdwingen óf juist vermijden |
-| 👥 B1-niveau | Schrijven zodat de gemiddelde Nederlander het goed kan volgen |
-| ✨ Iedereen kan het | Maakt van elke medewerker een goede schrijver |
+| 🔒 Data security | Also for commercially sensitive and personal data; everything stays in your own environment |
+| ⚡ Efficiency | Instant result, ready while you wait |
+| 🎯 Consistency | A style guide is interpreted differently by everyone; AI does it consistently |
+| 📚 Word lists | Enforce jargon — or deliberately avoid it |
+| 👥 B1 level | Write so the average reader can follow it easily |
+| ✨ Everyone can do it | Turns every employee into a good writer |
 
-> "Door steeds nieuwe suggesties te krijgen, helpt het me in het creatieve proces en
-> voldoet het gelijk aan de schrijfregels die we hanteren!" — Redacteur
+> "By constantly getting new suggestions, it helps me in the creative process and it
+> instantly meets the writing rules we follow!" — Editor
 
 ## Tech & stack
 
-- ☁️ **Azure OpenAI LLMs** — LLM API-provider
+- ☁️ **Azure OpenAI LLMs** — LLM API provider
 - 🐍 **Python** — backend
-- 🤖 **Agentic programming** — AI-architectuurpatroon
+- 🤖 **Agentic programming** — AI architecture pattern
 - 💻 **VSCode** — IDE
-- 🔎 **Vectordatabase** — ontsluit de schrijfwijzer en woordenlijsten voor de tool
+- 🔎 **Vector database** — surfaces the style guide and word lists for the tool
 
 ## Status
 
-**Live** — maatwerk client-project bij een grote publieke organisatie.
+**Live** — custom client project at a large public-sector organization.
 `,
   },
   {
     slug: "hintsay-linkedin",
     n: "02",
-    title: "Hintsay: AI-schrijfassistent voor LinkedIn",
-    kind: "Maanden aan LinkedIn-content in minuten, in je eigen stem",
+    title: "Hintsay: AI writing assistant for LinkedIn",
+    kind: "Months of LinkedIn content in minutes, in your own voice",
     sector: "Marketing",
     status: "live",
     role: "Maker / AI engineer",
@@ -210,171 +211,178 @@ Opmerkingen**.
     sources: ["headingfwd-demo-playground/src/app/cases/hintsay/page.tsx", "headingfwd-com/src/data/index/page.json (teaser \"LinkedIn Schrijfhulp\")", "vibes-chrome-li-extension (gerelateerd, los experiment)"],
     updated: "2025-06-19",
     body: `
-## In het kort
+## In short
 
-Hintsay is een AI-powered schrijfassistent die professionals helpt om engaging
-LinkedIn-content te maken en hun personal brand te versterken. De belofte:
-*"Generate months of LinkedIn content in minutes."* Genereer maanden aan content in
-enkele minuten, met behoud van je eigen stem en stijl.
+Hintsay is an AI-powered writing assistant that helps professionals create engaging
+LinkedIn content and strengthen their personal brand. The promise:
+*"Generate months of LinkedIn content in minutes."* Produce months of content in just a
+few minutes, while keeping your own voice and style.
 
-## Probleem
+## Problem
 
-Professionals worstelen met consistente, engaging content op LinkedIn:
+Professionals struggle with consistent, engaging content on LinkedIn:
 
-- Gebrek aan tijd voor regelmatige contentcreatie
-- Writer's block en gebrek aan inspiratie
-- Onzekerheid over wat resoneert met de doelgroep
-- Moeite met het vinden van de juiste tone of voice
-- Inconsistente posting-frequentie schaadt de zichtbaarheid
+- Lack of time for regular content creation
+- Writer's block and lack of inspiration
+- Uncertainty about what resonates with the audience
+- Difficulty finding the right tone of voice
+- Inconsistent posting frequency hurts visibility
 
-## Aanpak
+## Approach
 
-Een slimme schrijfassistent die contentcreatie versnelt én verbetert:
+A smart writing assistant that speeds up and improves content creation:
 
-- AI-gegenereerde content op basis van bewezen templates
-- Topic-suggesties vanuit keywords
-- Personalisatie op basis van het LinkedIn-profiel
-- Ondersteuning voor Engels en Nederlands
-- Behoud van persoonlijke stem en stijl
+- AI-generated content based on proven templates
+- Topic suggestions from keywords
+- Personalization based on the LinkedIn profile
+- Support for English and Dutch
+- Preserves your personal voice and style
 
-**UX-designproces:**
+**UX design process:**
 
-| Fase | Activiteiten |
+| Phase | Activities |
 |---|---|
-| Research & Discovery | Analyse van LinkedIn posting-patterns, user interviews met content creators, competitive analysis, performance-data |
-| Design & Prototyping | Minimalistisch/clean design, focus op snelheid, iteratieve UI/UX, A/B-testing van features |
-| AI Integration | Training op succesvolle posts, continue modelverbetering, personalisatie-algoritmes, quality assurance |
+| Research & Discovery | Analysis of LinkedIn posting patterns, user interviews with content creators, competitive analysis, performance data |
+| Design & Prototyping | Minimalist/clean design, focus on speed, iterative UI/UX, A/B testing of features |
+| AI Integration | Training on successful posts, continuous model improvement, personalization algorithms, quality assurance |
 
-## Hoe het werkt
+## How it works
 
-**Content Generatie**
+**Content generation**
 
-- AI-gegenereerde posts op basis van keywords
-- Bewezen templates voor verschillende content types
-- Personalisatie op basis van LinkedIn-profiel
-- Aanpasbare tone of voice
-- Meertalige ondersteuning (EN/NL)
-- Real-time preview en editing
+- AI-generated posts based on keywords
+- Proven templates for different content types
+- Personalization based on the LinkedIn profile
+- Adjustable tone of voice
+- Multilingual support (EN/NL)
+- Real-time preview and editing
 
-**Content Strategie**
+**Content strategy**
 
-- Topic-suggesties en brainstorming
-- Content-kalenderplanning
+- Topic suggestions and brainstorming
+- Content calendar planning
 - Performance insights *(coming soon)*
 - Audience engagement tracking
-- Best practices en tips
-- Content-diversificatieadvies
+- Best practices and tips
+- Content diversification advice
 
-## Impact & resultaten
+## Impact & results
 
-| Cijfer | Betekenis |
+| Figure | Meaning |
 |---|---|
-| 10× | Sneller content creëren |
-| 7 dagen | Gratis trial-periode |
-| 2 talen | Engels en Nederlands |
-| ∞ | Content-mogelijkheden |
+| 10× | Faster content creation |
+| 7 days | Free trial period |
+| 2 languages | English and Dutch |
+| ∞ | Content possibilities |
 
 ## Tech & stack
 
-- **Frontend & UX**: moderne React-interface, real-time content preview, responsive design, snelle laadtijden
-- **AI & Backend**: advanced language models, continuous learning pipeline, secure API-architectuur, schaalbare cloud-infrastructuur
+- **Frontend & UX**: modern React interface, real-time content preview, responsive design, fast load times
+- **AI & Backend**: advanced language models, continuous learning pipeline, secure API architecture, scalable cloud infrastructure
 
 ## Key takeaways
 
-1. **AI als assistent, niet als vervanging** — gebruikers willen controle houden over hun content.
-2. **Snelheid is essentieel** — professionals hebben weinig tijd; elke seconde telt.
-3. **Context en personalisatie** — generieke content werkt niet; personalisatie is cruciaal.
-4. **Continue verbetering** — LinkedIn-algoritmes veranderen constant; de tool moet meebewegen.
+1. **AI as assistant, not replacement** — users want to stay in control of their content.
+2. **Speed is essential** — professionals have little time; every second counts.
+3. **Context and personalization** — generic content doesn't work; personalization is crucial.
+4. **Continuous improvement** — LinkedIn algorithms change constantly; the tool must keep up.
 
 ## Status
 
-**Live** — SaaS-product, bereikbaar via [hintsay.com](https://hintsay.com).
+**Live** — SaaS product, available at [hintsay.com](https://hintsay.com).
 `,
   },
   {
     slug: "myworq",
     n: "03",
-    title: "MyWorq: medewerkersapp voor de tuinbouw",
-    kind: "Medewerkersapp voor de tuinbouw — live bij duizenden gebruikers",
-    sector: "Tuinbouw",
+    title: "MyWorq: employee app for horticulture",
+    kind: "Employee app for horticulture — live with thousands of users",
+    sector: "Horticulture",
     status: "live",
     role: "Product Manager",
     client: "bQurius",
-    tags: ["Mobiele App", "Product Management", "Design Thinking"],
+    tags: ["Mobile App", "Product Management", "Design Thinking"],
     stack: [],
-    links: ["https://www.youtube.com/watch?v=G3QL3dCgkOg"],
     sources: ["headingfwd-demo-playground/src/app/showcase/myworq/page.tsx", "headingfwd-demo-playground/src/app/showcase/myworq/myworq-intro.tsx", "headingfwd-demo-playground/src/app/showcase/myworq/process-ticker.tsx"],
     updated: "2025-06-19",
+    videos: [
+      {
+        id: "G3QL3dCgkOg",
+        url: "https://www.youtube.com/watch?v=G3QL3dCgkOg",
+        title: "MyWorq demo video",
+        note: "A walkthrough of the MyWorq employee app in action.",
+      },
+    ],
     body: `
-## In het kort
+## In short
 
-Een medewerkersapp voor de tuinbouwsector, met focus op medewerkertevredenheid,
-productiviteit en samenwerking. Mijn rol: **product manager**. De app is inmiddels live
-en wordt gebruikt door duizenden medewerkers in de tuinbouw.
+An employee app for the horticulture sector, focused on employee satisfaction,
+productivity and collaboration. My role: **product manager**. The app is now live and
+used by thousands of workers in horticulture.
 
-## Het verhaal
+## The story
 
-Met mijn Westlandse roots was de opdracht bij MyWorq een thuiswedstrijd. Ik werd gevraagd
-om als product manager het Data-team van **bQurius** te helpen een innovatieve
-medewerkersapp te ontwikkelen, specifiek voor de tuinbouwsector.
+With my roots in the Westland region, the MyWorq assignment was a home game. I was asked
+to join the Data team of **bQurius** as product manager, to help develop an innovative
+employee app specifically for the horticulture sector.
 
-Ik werkte nauw samen met een collega om de behoeftes van gebruikers in kaart te brengen:
-de teamleiders in de kassen en de mensen die in de kas werken. Nadat we de contouren van
-de app hadden uitgewerkt, zochten we een software-agency die de app kon bouwen.
+I worked closely with a colleague to map users' needs: the team leaders in the greenhouses
+and the people working in them. Once we had outlined the app, we looked for a software
+agency to build it.
 
-Na 2 jaar heb ik de rol overgedragen aan de collega met wie ik al die tijd optrok. De app
-is inmiddels live en wordt gebruikt door duizenden medewerkers in de tuinbouwsector.
-Trots op dit project!
+After 2 years I handed the role over to the colleague I had worked with all along. The app
+is now live and used by thousands of workers in the horticulture sector. Proud of this
+project!
 
-## Probleem
+## Problem
 
-De tuinbouwsector kampt met specifieke uitdagingen rond personeelsmanagement:
+The horticulture sector faces specific challenges around workforce management:
 
-- Hoog personeelsverloop en moeilijk vindbaar personeel
-- Complexe planning door seizoensgebonden werk
-- Taalbarrières bij internationale werknemers
-- Gebrek aan digitale tools voor werknemers in het veld
-- Inefficiënte communicatie tussen management en uitvoerend personeel
+- High staff turnover and hard-to-find personnel
+- Complex planning due to seasonal work
+- Language barriers with international workers
+- Lack of digital tools for field workers
+- Inefficient communication between management and operational staff
 
-## Oplossing
+## Solution
 
-Een gebruiksvriendelijke medewerkersapp, specifiek ontworpen voor de tuinbouw:
+A user-friendly employee app, designed specifically for horticulture:
 
-- Intuïtieve interface in meerdere talen
-- Real-time werkplanning en taakbeheer
-- Directe communicatie tussen teams en leidinggevenden
-- Gamification-elementen voor hogere betrokkenheid
-- Integratie met bestaande HR- en planningssystemen
+- Intuitive interface in multiple languages
+- Real-time work planning and task management
+- Direct communication between teams and supervisors
+- Gamification elements for higher engagement
+- Integration with existing HR and planning systems
 
-## Werkwijze
+## Way of working
 
-1. 🔍 **Onderzoek** — gesprekken met klanten om behoeftes en pijnpunten te begrijpen
-2. ✏️ **Schetsen** — schetsen hoe een nieuwe feature eruit kan zien
-3. 🎨 **Ontwerpen** — met een UX/UI-designer het idee uitwerken in een prototype
-4. 💻 **Ontwikkelen** — de software engineers bouwen de feature in de app
-5. 🧪 **Testen** — de nieuwe feature grondig testen
-6. 🚀 **Uitrol** — de bijgewerkte app uitrollen naar gebruikers
-7. 🔄 **Itereer** — data analyseren, feedback verzamelen en het proces begint opnieuw
+1. 🔍 **Research** — conversations with customers to understand needs and pain points
+2. ✏️ **Sketching** — sketching what a new feature could look like
+3. 🎨 **Designing** — working the idea into a prototype with a UX/UI designer
+4. 💻 **Building** — the software engineers build the feature into the app
+5. 🧪 **Testing** — thoroughly testing the new feature
+6. 🚀 **Rollout** — rolling out the updated app to users
+7. 🔄 **Iterate** — analyze data, gather feedback, and the process starts again
 
-## Rol & stack
+## Role & stack
 
-Dit is een **product-managementcase**, geen eigen development-project: de app is gebouwd
-door een externe software-agency. Mijn bijdrage zat in onderzoek, productdefinitie,
-design thinking en het aansturen van het bouwproces. Er is daarom geen eigen tech-stack
-te vermelden.
+This is a **product-management case**, not an in-house development project: the app was
+built by an external software agency. My contribution was in research, product definition,
+design thinking and steering the build process. There is therefore no own tech stack to
+list.
 
 ## Status
 
-**Live** — de app is in productie en wordt gebruikt door duizenden medewerkers in de
-tuinbouwsector. Rol na 2 jaar overgedragen. Demovideo: YouTube \`G3QL3dCgkOg\`.
+**Live** — the app is in production and used by thousands of workers in the horticulture
+sector. Role handed over after 2 years.
 `,
   },
   {
     slug: "briefwijzer",
     n: "04",
     title: "BriefWijzer",
-    kind: "Onleesbare brieven begrijpelijk maken met één foto",
-    sector: "Communicatie",
+    kind: "Make unreadable letters understandable with a single photo",
+    sector: "Communication",
     status: "demo",
     role: "AI engineer",
     tags: ["RAG", "OCR", "LLM", "Marketing"],
@@ -382,73 +390,74 @@ tuinbouwsector. Rol na 2 jaar overgedragen. Demovideo: YouTube \`G3QL3dCgkOg\`.
     sources: ["headingfwd-demo-playground/src/app/showcase/briefwijzer/page.tsx", "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/briefwijzer-intro.tsx", "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/how-it-works.tsx", "headingfwd-com/src/data/index/page.json (teaser \"Briefwijzer\")", "headingfwd_toolkit (promptfoo-test verwijst naar briefwijzer)"],
     updated: "2025-07-03",
     body: `
-## In het kort
+## In short
 
-BriefWijzer maakt onleesbare (overheids)brieven begrijpelijk. Jouw klant maakt een foto
-van de brief, en de app doet de rest: een korte, begrijpelijke samenvatting, een direct
-klikbare call-to-action en een AI-gedreven chat om vragen over de brief te stellen.
-Als bonus zie je als afzender welke van je brieven als onleesbaar worden ervaren, zodat
-je ze kunt verbeteren — en je verlaagt de contactdruk op je klantenservice.
+BriefWijzer makes unreadable (government) letters understandable. Your customer takes a
+photo of the letter, and the app does the rest: a short, understandable summary, a
+directly clickable call-to-action, and an AI-driven chat to ask questions about the
+letter. As a bonus, you as the sender see which of your letters are experienced as
+unreadable, so you can improve them — and you lower the contact load on your customer
+service.
 
-## Probleem
+## Problem
 
-Communicatie is voor een groot deel van Nederland niet begrijpelijk:
+Communication is not understandable for a large part of the Netherlands:
 
-- 2 miljoen mensen in Nederland zijn laaggeletterd
-- Mensen met beperkt doenvermogen pakken de telefoon om te vragen waar het over gaat
-- Dit legt druk op contactcenters
-- De dienstverlening sluit niet aan op deze doelgroep
-- Ingewikkelde brieven leiden tot frustratie en onbegrip
+- 2 million people in the Netherlands are low-literate
+- People who struggle to act on official mail pick up the phone to ask what it's about
+- This puts pressure on contact centers
+- Services don't match the needs of this audience
+- Complicated letters lead to frustration and confusion
 
-## Aanpak
+## Approach
 
-BriefWijzer is een digitale leeshulp die brieven leesbaar maakt voor iedereen, zónder
-extra werk voor de afzender:
+BriefWijzer is a digital reading aid that makes letters readable for everyone, without
+extra work for the sender:
 
-- Korte, begrijpelijke samenvatting van de belangrijkste punten (maximaal 5 bullets)
-- De call-to-action wordt direct (online) klikbaar
-- Interactieve chat-functie die antwoordt binnen de context van de brief
-- Inzicht voor de afzender in welke brieven als onleesbaar worden ervaren
+- Short, understandable summary of the key points (max. 5 bullets)
+- The call-to-action becomes directly (online) clickable
+- Interactive chat function that answers within the context of the letter
+- Insight for the sender into which letters are experienced as unreadable
 
-## Hoe het werkt
+## How it works
 
-**Jouw klant…**
+**Your customer…**
 
-1. 📨 …ontvangt jouw brief — maar begrijpt niet wat er staat.
-2. 📱 …scant de BriefWijzer-QR — de app hoeft niet gedownload te worden, maar opent in de browser.
-3. 📷 …maakt een foto — meerdere pagina's uploaden kan.
+1. 📨 …receives your letter — but doesn't understand what it says.
+2. 📱 …scans the BriefWijzer QR — no app download needed, it opens in the browser.
+3. 📷 …takes a photo — uploading multiple pages is possible.
 
-**BriefWijzer gaat aan de slag en…**
+**BriefWijzer gets to work and…**
 
-- 📋 …vat de brief samen in begrijpelijke, eenvoudige taal (max. 5 bullets).
-- 👆 …maakt acties direct klikbaar — jij configureert de call-to-actions die getoond worden.
-- 💬 …beantwoordt vragen direct via chat.
+- 📋 …summarizes the letter in understandable, simple language (max. 5 bullets).
+- 👆 …makes actions directly clickable — you configure the call-to-actions shown.
+- 💬 …answers questions directly via chat.
 
 ## Tech & stack
 
 - 🐍 **Python** — backend processing
-- 👁️ **Google Vision** — OCR en documentanalyse
+- 👁️ **Google Vision** — OCR and document analysis
 - 🤖 **Claude Code** — AI development assistant
 - 💻 **VSCode** — IDE
 
-De pijplijn: OCR leest de brief, RAG/LLM vat samen en beantwoordt vragen binnen de
-context van de brief.
+The pipeline: OCR reads the letter, RAG/LLM summarizes and answers questions within the
+context of the letter.
 
 ## Status
 
-**Demo** — werkend productconcept. Gepositioneerd als app voor bedrijven en overheden
-die hun brieven toegankelijker willen maken.
+**Demo** — working product concept. Positioned as an app for companies and government
+bodies that want to make their letters more accessible.
 `,
   },
   {
     slug: "ai-personal-trainer",
     n: "05",
     title: "AI Personal Trainer",
-    kind: "Maatwerk-AI die fitnessvideo's analyseert waar ChatGPT faalt",
-    sector: "Sport & Fitness",
+    kind: "Custom AI that analyzes fitness videos where ChatGPT fails",
+    sector: "Sports & Fitness",
     status: "experiment",
     role: "Maker / AI engineer",
-    tags: ["LLM", "Multimodaal", "Bewegingsherkenning", "Python"],
+    tags: ["LLM", "Multimodal", "Motion recognition", "Python"],
     stack: ["Google Gemini 2.5 Pro", "Python", "ChatGPT", "GitHub Copilot", "VSCode"],
     links: ["https://www.linkedin.com/posts/baswenneker_kan-chatgpt-een-personal-trainer-vervangen-activity-7330482395533430785-CqxF/", "https://www.linkedin.com/feed/update/urn:li:activity:7338437372616826883/"],
     sources: ["headingfwd-demo-playground/src/app/showcase/ai-personal-trainer/page.tsx"],
@@ -458,90 +467,89 @@ die hun brieven toegankelijker willen maken.
         id: "rrvgrcJ_v0M",
         url: "https://www.youtube.com/watch?v=rrvgrcJ_v0M",
         result: "fail",
-        title: "Poging 1 — ChatGPT kan geen video analyseren",
-        note: "ChatGPT kan de video niet analyseren en geeft generieke adviezen die niet aansluiten bij de werkelijke uitvoering.",
+        title: "Attempt 1 — ChatGPT can't analyze video",
+        note: "ChatGPT can't analyze the video and gives generic advice that doesn't match the actual execution.",
       },
       {
         id: "9YoU4e1Ow3Q",
         url: "https://youtube.com/shorts/9YoU4e1Ow3Q",
         result: "success",
-        title: "Poging 2 — Maatwerk AI Personal Trainer",
-        note: "Met maatwerk software analyseert de AI bewegingen real-time en geeft specifieke, technische feedback met visuele annotaties.",
+        title: "Attempt 2 — Custom AI Personal Trainer",
+        note: "With custom software the AI analyzes movements in real time and gives specific, technical feedback with visual annotations.",
       },
       {
         id: "3GeEfHs6dTo",
         url: "https://www.youtube.com/watch?v=3GeEfHs6dTo",
-        title: "Demo 1 — Squat Clean-analyse",
-        note: "Real-time analyse van een clean met directe visuele feedback.",
+        title: "Demo 1 — Squat Clean analysis",
+        note: "Real-time analysis of a clean with direct visual feedback.",
       },
       {
         id: "lgP9zCadeLo",
         url: "https://www.youtube.com/watch?v=lgP9zCadeLo",
-        title: "Demo 2 — Hang Squat Snatch-analyse",
-        note: "Gedetailleerde techniekanalyse van de snatch-beweging.",
+        title: "Demo 2 — Hang Squat Snatch analysis",
+        note: "Detailed technique analysis of the snatch movement.",
       },
     ],
     body: `
-## In het kort
+## In short
 
-Software die feedback geeft op fitnessvideo's, net als een coach of personal trainer zou
-doen. De rode draad: een experiment met **ChatGPT als personal trainer faalt**, een
-**maatwerk AI-oplossing slaagt**. Met maatwerk software kun je complexe bewegingen in
-video analyseren en er technische, gepersonaliseerde coaching op geven.
+Software that gives feedback on fitness videos, just like a coach or personal trainer
+would. The throughline: an experiment with **ChatGPT as a personal trainer fails**, while
+a **custom AI solution succeeds**. With custom software you can analyze complex movements
+in video and give technical, personalized coaching on them.
 
-## Probleem
+## Problem
 
-Ik was benieuwd hoe ver de multimodale kwaliteiten van de huidige LLMs reiken — modellen
-die tekst, geluid, afbeeldingen én video begrijpen. Hiervoor gebruikte ik video's die ik
-eerder aan mijn eigen personal trainer stuurde. Na het uploaden in ChatGPT kreeg ik
-alleen algemene en onspecifieke feedback. Geen enkel beschikbaar model kon de bewegingen
-accuraat analyseren; bij een verzoek om visuele feedback genereerde het irrelevante
-afbeeldingen.
+I was curious how far the multimodal capabilities of today's LLMs reach — models that
+understand text, sound, images and video. For this I used videos I had earlier sent to my
+own personal trainer. After uploading them to ChatGPT I only got generic, unspecific
+feedback. No available model could analyze the movements accurately; when asked for visual
+feedback it generated irrelevant images.
 
-## Aanpak
+## Approach
 
-Daarom bouwde ik een maatwerk-oplossing: een AI-gestuurde virtuele Olympische coach die
-zich voordoet als de wereldberoemde weightlifting-coach
+So I built a custom solution: an AI-powered virtual Olympic coach that poses as the
+world-famous weightlifting coach
 [Bob Takano](https://www.takanoweightlifting.com/).
 
-- **Prompt engineering** gebaseerd op de methodiek van een topcoach weightlifting
-- **Google Gemini 2.5 Pro** voor frame-by-frame bewegingsanalyse
-- Een **Python-tool** voor video-vertraging en een visuele feedback-overlay
-- Resultaat: technisch accurate, gepersonaliseerde coaching
+- **Prompt engineering** based on the methodology of a top weightlifting coach
+- **Google Gemini 2.5 Pro** for frame-by-frame movement analysis
+- A **Python tool** for slowing down the video and a visual feedback overlay
+- Result: technically accurate, personalized coaching
 
-### ChatGPT vs. Maatwerk
+### ChatGPT vs. custom
 
-| ChatGPT — faalt bij video-analyse van sportbewegingen | Maatwerk — AI-gestuurde virtuele Olympische coach |
+| ChatGPT — fails at video analysis of sports movements | Custom — AI-powered virtual Olympic coach |
 |---|---|
-| Geen enkel beschikbaar model kan bewegingen accuraat analyseren | Prompt engineering gebaseerd op methodiek topcoach weightlifting |
-| Feedback is generiek en niet-specifiek voor de getoonde techniek | Google Gemini 2.5 Pro voor frame-by-frame bewegingsanalyse |
-| Bij verzoek om visuele feedback genereert het irrelevante afbeeldingen | Python-tool voor video-vertraging en visuele feedback-overlay |
-| Bewegingsherkenning ontbreekt volledig | Technisch accurate, gepersonaliseerde coaching |
+| No available model can analyze movements accurately | Prompt engineering based on a top weightlifting coach's methodology |
+| Feedback is generic and not specific to the technique shown | Google Gemini 2.5 Pro for frame-by-frame movement analysis |
+| When asked for visual feedback it generates irrelevant images | Python tool for slowing down the video and a visual feedback overlay |
+| Movement recognition is missing entirely | Technically accurate, personalized coaching |
 
-De twee pogingen (poging 1 met ChatGPT, poging 2 met de maatwerk-coach) en twee
-techniekanalyses staan als afspeelbare video's onderaan deze case.
+The two attempts (attempt 1 with ChatGPT, attempt 2 with the custom coach) and two
+technique analyses are shown as playable videos at the bottom of this case.
 
 ## Tech & stack
 
-- 💬 **ChatGPT** — macOS app (eerste, mislukte poging)
-- 🤖 **Google AI Studio** — Gemini 2.5 Pro (multimodale video-analyse)
+- 💬 **ChatGPT** — macOS app (first, failed attempt)
+- 🤖 **Google AI Studio** — Gemini 2.5 Pro (multimodal video analysis)
 - 🧑‍💻 **GitHub Copilot** — coding agent
 - 💻 **VSCode** — IDE
-- 🐍 **Python** — tool voor video-vertraging en feedback-overlay
+- 🐍 **Python** — tool for slowing down video and the feedback overlay
 
 ## Status
 
-**Experiment** — eigen R&D, gedeeld via LinkedIn met demovideo's. Toont aan dat generieke
-multimodale modellen tekortschieten voor bewegingsanalyse, terwijl een maatwerk-aanpak
-met Gemini 2.5 Pro + een Python-pijplijn wél werkt.
+**Experiment** — my own R&D, shared via LinkedIn with demo videos. It shows that generic
+multimodal models fall short for movement analysis, while a custom approach with Gemini
+2.5 Pro + a Python pipeline does work.
 `,
   },
   {
-    slug: "chatbot-vraagbaak",
+    slug: "chatbot-qa-hub",
     n: "06",
-    title: "Chatbot: Vraagbaak voor je team",
-    kind: "Chatten met je handleidingen in plaats van zoeken",
-    sector: "Overheid",
+    title: "Chatbot: a Q&A hub for your team",
+    kind: "Chat with your manuals instead of searching them",
+    sector: "Government",
     status: "concept",
     visibility: "coming-soon",
     tags: ["RAG", "LLM", "Chatbot", "Marketing"],
@@ -549,68 +557,68 @@ met Gemini 2.5 Pro + een Python-pijplijn wél werkt.
     sources: ["headingfwd-demo-playground/src/data/projects.json (entry \"Chatbot: Vraagbaak voor je team\")", "headingfwd-demo-playground/src/app/showcase/coming-soon/page.tsx"],
     updated: "2025-06-19",
     body: `
-## In het kort
+## In short
 
-Een chatbot die fungeert als vraagbaak voor een team en veel tijd bespaart: chatten in
-plaats van handleidingen doorlezen.
+A chatbot that acts as a Q&A hub for a team and saves a lot of time: chat instead of
+reading through manuals.
 
-## Aanpak (op hoofdlijnen)
+## Approach (high level)
 
-Een klassieke **RAG-chatbot**: documentatie/handleidingen worden ontsloten via
-Retrieval-Augmented Generation, zodat teamleden hun vraag in natuurlijke taal kunnen
-stellen en direct een antwoord met context krijgen — in plaats van zelf te zoeken in
-handleidingen.
+A classic **RAG chatbot**: documentation/manuals are made accessible via
+Retrieval-Augmented Generation, so team members can ask their question in natural language
+and get an answer with context right away — instead of searching through the manuals
+themselves.
 
 ## Status
 
-**Concept.** Dit idee is nog niet uitgewerkt tot een demo.
+**Concept.** This idea has not yet been developed into a demo.
 `,
   },
   {
-    slug: "podcast-transcriptie",
+    slug: "podcast-transcription",
     n: "07",
-    title: "Podcast transcriptie en segmentering",
-    kind: "Podcasts automatisch transcriberen en segmenteren met tijdcodes",
+    title: "Podcast transcription and segmentation",
+    kind: "Automatically transcribe and segment podcasts with timecodes",
     sector: "Media",
     status: "concept",
     visibility: "coming-soon",
-    tags: ["Transcriptie", "LLM", "Audio"],
+    tags: ["Transcription", "LLM", "Audio"],
     stack: [],
     sources: ["headingfwd-com/src/data/index/page.json (teaser \"Podcast transcriptie en segmentering\")", "whisperfwd (gerelateerde, echte transcriptie-tech)"],
     body: `
-## In het kort
+## In short
 
-Upload je podcast en krijg automatisch een volledige transcriptie én een segmentindeling
-met tijdcodes — bijvoorbeeld:
+Upload your podcast and automatically get a full transcription plus a segment breakdown
+with timecodes — for example:
 
-- \`0:00–1:30\` Introductie
-- \`1:30–3:00\` Samenwerking in de zorg
+- \`0:00–1:30\` Introduction
+- \`1:30–3:00\` Collaboration in healthcare
 - …
 
-## Aanpak (op hoofdlijnen)
+## Approach (high level)
 
-Audio wordt automatisch omgezet naar tekst (transcriptie), waarna een model de inhoud in
-logische segmenten met tijdcodes indeelt. Zo wordt een lange aflevering doorzoekbaar en
-makkelijk te navigeren.
+Audio is automatically converted to text (transcription), after which a model divides the
+content into logical segments with timecodes. This makes a long episode searchable and
+easy to navigate.
 
 ## Status
 
-**Concept.** Dit idee is nog niet uitgewerkt tot een demo.
+**Concept.** This idea has not yet been developed into a demo.
 
-## Gerelateerde techniek: WhisperFWD
+## Related tech: WhisperFWD
 
-WhisperFWD is een macOS-menubalk-app voor het opnemen van vergaderingen, **lokale**
-transcriptie en AI-samenvattingen:
+WhisperFWD is a macOS menu-bar app for recording meetings, with **local** transcription
+and AI summaries:
 
-- Dual-stream audio (microfoon + systeemgeluid)
-- Lokale transcriptie met [WhisperKit](https://github.com/argmaxinc/WhisperKit), model \`large-v3-turbo\`
-- Gestructureerde samenvattingen via de Claude Code CLI
-- Output als Obsidian-compatibele Markdown
+- Dual-stream audio (microphone + system sound)
+- Local transcription with [WhisperKit](https://github.com/argmaxinc/WhisperKit), model \`large-v3-turbo\`
+- Structured summaries via the Claude Code CLI
+- Output as Obsidian-compatible Markdown
 - Stack: macOS 13+, Apple Silicon, Swift 5.9+
 
-Dit toont aan dat de transcriptie-component van de podcast-case technisch haalbaar en
-beproefd is; de podcast-specifieke segmentering met tijdcodes is (nog) niet als los
-product uitgewerkt.
+This shows that the transcription component of the podcast case is technically feasible and
+proven; the podcast-specific segmentation with timecodes has not (yet) been built as a
+standalone product.
 `,
   },
 ];
@@ -658,8 +666,8 @@ function demoteHeadings(body: string): string {
  */
 export function caseToAgentMarkdown(c: Case): string {
   const meta = [`Sector: ${c.sector}`, `Status: ${c.status}`];
-  if (c.role) meta.push(`Rol: ${c.role}`);
-  if (c.client) meta.push(`Klant: ${c.client}`);
+  if (c.role) meta.push(`Role: ${c.role}`);
+  if (c.client) meta.push(`Client: ${c.client}`);
 
   const lines = [
     `## ${c.n} — ${c.title}`,
@@ -673,12 +681,12 @@ export function caseToAgentMarkdown(c: Case): string {
   if (isComingSoonCase(c)) {
     lines.push(
       "",
-      "> Coming soon — de volledige uitwerking van deze case volgt binnenkort.",
+      "> Coming soon — the full write-up of this case is on its way.",
     );
   }
   lines.push("", demoteHeadings(c.body));
   if (c.videos && c.videos.length > 0) {
-    lines.push("", "### Video's");
+    lines.push("", "### Videos");
     for (const v of c.videos) {
       const mark = v.result === "fail" ? "❌ " : v.result === "success" ? "✅ " : "";
       const note = v.note ? ` — ${v.note}` : "";

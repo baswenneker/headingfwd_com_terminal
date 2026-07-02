@@ -1,9 +1,9 @@
 ---
-title: "Hintsay: AI-schrijfassistent voor LinkedIn"
+title: "Hintsay: AI writing assistant for LinkedIn"
 slug: hintsay-linkedin
 sector: Marketing
 status: live
-rol: Maker / AI engineer
+role: Maker / AI engineer
 tags: [LLM, Marketing, SaaS]
 stack: [React, Advanced language models, Cloud infrastructure]
 updated: 2025-06-19
@@ -15,84 +15,84 @@ sources:
   - vibes-chrome-li-extension (gerelateerd, los experiment)
 ---
 
-# Hintsay: AI-schrijfassistent voor LinkedIn
+# Hintsay: AI writing assistant for LinkedIn
 
-## In het kort
+## In short
 
-Hintsay is een AI-powered schrijfassistent die professionals helpt om engaging
-LinkedIn-content te maken en hun personal brand te versterken. De belofte:
-*"Generate months of LinkedIn content in minutes."* Genereer maanden aan content in
-enkele minuten, met behoud van je eigen stem en stijl.
+Hintsay is an AI-powered writing assistant that helps professionals create engaging
+LinkedIn content and strengthen their personal brand. The promise:
+*"Generate months of LinkedIn content in minutes."* Produce months of content in just a
+few minutes, while keeping your own voice and style.
 
-## Probleem
+## Problem
 
-Professionals worstelen met consistente, engaging content op LinkedIn:
+Professionals struggle with consistent, engaging content on LinkedIn:
 
-- Gebrek aan tijd voor regelmatige contentcreatie
-- Writer's block en gebrek aan inspiratie
-- Onzekerheid over wat resoneert met de doelgroep
-- Moeite met het vinden van de juiste tone of voice
-- Inconsistente posting-frequentie schaadt de zichtbaarheid
+- Lack of time for regular content creation
+- Writer's block and lack of inspiration
+- Uncertainty about what resonates with the audience
+- Difficulty finding the right tone of voice
+- Inconsistent posting frequency hurts visibility
 
-## Aanpak
+## Approach
 
-Een slimme schrijfassistent die contentcreatie versnelt én verbetert:
+A smart writing assistant that speeds up and improves content creation:
 
-- AI-gegenereerde content op basis van bewezen templates
-- Topic-suggesties vanuit keywords
-- Personalisatie op basis van het LinkedIn-profiel
-- Ondersteuning voor Engels en Nederlands
-- Behoud van persoonlijke stem en stijl
+- AI-generated content based on proven templates
+- Topic suggestions from keywords
+- Personalization based on the LinkedIn profile
+- Support for English and Dutch
+- Preserves your personal voice and style
 
-**UX-designproces:**
+**UX design process:**
 
-| Fase | Activiteiten |
+| Phase | Activities |
 |---|---|
-| Research & Discovery | Analyse van LinkedIn posting-patterns, user interviews met content creators, competitive analysis, performance-data |
-| Design & Prototyping | Minimalistisch/clean design, focus op snelheid, iteratieve UI/UX, A/B-testing van features |
-| AI Integration | Training op succesvolle posts, continue modelverbetering, personalisatie-algoritmes, quality assurance |
+| Research & Discovery | Analysis of LinkedIn posting patterns, user interviews with content creators, competitive analysis, performance data |
+| Design & Prototyping | Minimalist/clean design, focus on speed, iterative UI/UX, A/B testing of features |
+| AI Integration | Training on successful posts, continuous model improvement, personalization algorithms, quality assurance |
 
-## Hoe het werkt
+## How it works
 
-**Content Generatie**
+**Content generation**
 
-- AI-gegenereerde posts op basis van keywords
-- Bewezen templates voor verschillende content types
-- Personalisatie op basis van LinkedIn-profiel
-- Aanpasbare tone of voice
-- Meertalige ondersteuning (EN/NL)
-- Real-time preview en editing
+- AI-generated posts based on keywords
+- Proven templates for different content types
+- Personalization based on the LinkedIn profile
+- Adjustable tone of voice
+- Multilingual support (EN/NL)
+- Real-time preview and editing
 
-**Content Strategie**
+**Content strategy**
 
-- Topic-suggesties en brainstorming
-- Content-kalenderplanning
+- Topic suggestions and brainstorming
+- Content calendar planning
 - Performance insights *(coming soon)*
 - Audience engagement tracking
-- Best practices en tips
-- Content-diversificatieadvies
+- Best practices and tips
+- Content diversification advice
 
-## Impact & resultaten
+## Impact & results
 
-| Cijfer | Betekenis |
+| Figure | Meaning |
 |---|---|
-| 10× | Sneller content creëren |
-| 7 dagen | Gratis trial-periode |
-| 2 talen | Engels en Nederlands |
-| ∞ | Content-mogelijkheden |
+| 10× | Faster content creation |
+| 7 days | Free trial period |
+| 2 languages | English and Dutch |
+| ∞ | Content possibilities |
 
 ## Tech & stack
 
-- **Frontend & UX**: moderne React-interface, real-time content preview, responsive design, snelle laadtijden
-- **AI & Backend**: advanced language models, continuous learning pipeline, secure API-architectuur, schaalbare cloud-infrastructuur
+- **Frontend & UX**: modern React interface, real-time content preview, responsive design, fast load times
+- **AI & Backend**: advanced language models, continuous learning pipeline, secure API architecture, scalable cloud infrastructure
 
 ## Key takeaways
 
-1. **AI als assistent, niet als vervanging** — gebruikers willen controle houden over hun content.
-2. **Snelheid is essentieel** — professionals hebben weinig tijd; elke seconde telt.
-3. **Context en personalisatie** — generieke content werkt niet; personalisatie is cruciaal.
-4. **Continue verbetering** — LinkedIn-algoritmes veranderen constant; de tool moet meebewegen.
+1. **AI as assistant, not replacement** — users want to stay in control of their content.
+2. **Speed is essential** — professionals have little time; every second counts.
+3. **Context and personalization** — generic content doesn't work; personalization is crucial.
+4. **Continuous improvement** — LinkedIn algorithms change constantly; the tool must keep up.
 
 ## Status
 
-**Live** — SaaS-product, bereikbaar via [hintsay.com](https://hintsay.com).
+**Live** — SaaS product, available at [hintsay.com](https://hintsay.com).
