@@ -26,8 +26,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.69",
-    "@ai-sdk/react": "^3.0.201",
+    "@ai-sdk/openai": "^4.0.7",
+    "@ai-sdk/react": "^4.0.15",
     "@libsql/client": "^0.17.4",
     "@marsidev/react-turnstile": "^1.5.3",
     "@t3-oss/env-nextjs": "^0.13.11",
@@ -37,9 +37,9 @@
     "@trpc/server": "^11.18.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "ai": "^6.0.199",
+    "ai": "^7.0.14",
     "drizzle-orm": "^0.45.2",
-    "langsmith": "^0.7.5",
+    "langsmith": "^0.7.15",
     "marked": "^18.0.5",
     "next": "16.2.10",
     "react": "^19.2.7",
