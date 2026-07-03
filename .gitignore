@@ -50,3 +50,8 @@ test-results/
 .pnpm-store/
 tmp/db
 .playwright-mcp/
+.trees/
+
+# beans (local issue tracker — keep out of repo)
+.beans/
+.beans.yml

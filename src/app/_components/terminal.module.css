@@ -1,0 +1,667 @@
+/*
+ * Terminal shell styles.
+ *
+ * Design tokens are expressed as CSS custom properties so they can be
+ * overridden later for alternate color themes without touching markup.
+ * All sizes that must scale with viewport use clamp() values taken
+ * directly from the reference design. Container queries collapse the
+ * layout below 560px of inline-size.
+ */
+
+/* ─── Page wrapper ───────────────────────────────────────────────────── */
+/*
+ * Establishes the inline-size container context that drives the 560px
+ * responsive breakpoint. Also centers the terminal window in the viewport
+ * and sets the theme tokens for this color scheme.
+ */
+.page {
+  container-type: inline-size;
+  container-name: page;
+
+  /* Cyan theme design tokens */
+  --accent: #2ee6f6;
+  --backdrop: #0bd3e6;
+  --prompt: #5be6a0;
+
+  /* Full-viewport flex layout, centered on both axes */
+  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3.5cqw, 52px);
+}
+
+/* ─── Faint dot grid ─────────────────────────────────────────────────── */
+/*
+ * A 38px repeating grid at ~6% opacity, masked radially so it fades out
+ * toward the edges. Positioned fixed so it covers the full viewport but
+ * sits behind all content.
+ */
+.grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: radial-gradient(circle at 50% 45%, #000 30%, transparent 78%);
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 45%,
+    #000 30%,
+    transparent 78%
+  );
+}
+
+/* ─── Terminal window ────────────────────────────────────────────────── */
+.window {
+  position: relative;
+  width: min(980px, 100%);
+  height: min(84vh, 780px);
+  display: flex;
+  flex-direction: column;
+  background: #0a0e11;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  overflow: hidden;
+  /* Three-layer shadow: inner highlight, large drop shadow, outer stroke */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.07) inset,
+    0 40px 90px -20px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Title bar ──────────────────────────────────────────────────────── */
+.titleBar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  background: linear-gradient(#15191d, #0f1316);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* macOS traffic-light dots */
+.trafficLights {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dotRed {
+  background: #ff5f57;
+}
+
+.dotAmber {
+  background: #febc2e;
+}
+
+.dotGreen {
+  background: #28c840;
+}
+
+/* Centered window title */
+.titleText {
+  flex: 1;
+  text-align: center;
+  font-size: 12.5px;
+  color: rgba(220, 235, 240, 0.55);
+  letter-spacing: 0.2px;
+}
+
+/* "— zsh" segment hidden on narrow containers (see container query below) */
+.titleZsh {
+  /* visible by default */
+}
+
+/* Right-hand brand label */
+.brand {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+/* ─── Scrollable body ────────────────────────────────────────────────── */
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 26px clamp(18px, 3cqw, 34px) 22px;
+  color: #d6e6ea;
+  font-size: 14px;
+  line-height: 1.72;
+  cursor: text;
+}
+
+/* Slim, semi-transparent scrollbar matching the dark terminal surface */
+.body::-webkit-scrollbar {
+  width: 10px;
+}
+
+.body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ─── Intro content ──────────────────────────────────────────────────── */
+
+/* Shell prompt that precedes the wordmark */
+.promptLine {
+  color: var(--prompt);
+  font-size: 12.5px;
+}
+
+/* Large wordmark "HeadingFWD ››—›" */
+.wordmark {
+  margin-top: 8px;
+  font-size: clamp(28px, 7cqw, 46px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  color: #eafbfe;
+  line-height: 1.02;
+}
+
+.wordmarkAccent {
+  color: var(--accent);
+}
+
+/* Subtitle under the wordmark */
+.subtitle {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: rgba(214, 230, 234, 0.62);
+}
+
+/* Value-proposition paragraph */
+.valueProp {
+  margin-top: 24px;
+  max-width: 64ch;
+}
+
+.valuePropAccent {
+  color: var(--accent);
+}
+
+/* Key terms rendered in near-white at medium weight */
+.valuePropBright {
+  color: #eafbfe;
+  font-weight: 500;
+}
+
+/* "// specialities" comment */
+.specialitiesLabel {
+  margin-top: 22px;
+  color: rgba(160, 178, 182, 0.7);
+}
+
+/* Responsive two-column grid of speciality items */
+.specialitiesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 6px 26px;
+  margin-top: 6px;
+  max-width: 70ch;
+}
+
+/* Accent bullet character before each speciality — bold accent so the mark
+ * reads as a distinct marker, clearly set apart from the body text color. */
+.specialityBullet {
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 0.5em;
+}
+
+/* Tip / hint line in amber */
+.tip {
+  margin-top: 22px;
+  color: rgba(245, 197, 68, 0.9);
+}
+
+/* Highlighted command tokens inside the tip line, rendered as inline buttons.
+ * Button-reset rules strip browser chrome so the element looks identical to
+ * the old <span> while remaining keyboard- and tap-accessible. */
+.tipCommand {
+  color: var(--accent);
+  font-weight: 700;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  display: inline;
+}
+
+/* 1px rule separating the intro block from the (future) command feed */
+.divider {
+  margin-top: 14px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Command input row ──────────────────────────────────────────────── */
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* Prompt label to the left of the text field */
+.inputPrompt {
+  color: var(--prompt);
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+/* Long form of the prompt prefix — hidden on narrow containers */
+.inputPromptFull {
+  /* visible by default */
+}
+
+/* The "~$" portion that always stays visible */
+.inputPromptAccent {
+  color: var(--accent);
+}
+
+/* Borderless, transparent text input */
+.input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #eafbfe;
+  font-family: inherit;
+  font-size: 14px;
+  caret-color: var(--accent);
+}
+
+.input::placeholder {
+  /* Muted but AA-legible (~5:1) so the placeholder hint is readable while still
+     clearly dimmer than typed input (#eafbfe). */
+  color: #7a8488;
+  opacity: 1;
+}
+
+/* ─── Status bar ─────────────────────────────────────────────────────── */
+.statusBar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 7px 16px;
+  background: #0d1115;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 11px;
+  /* Solid muted tone ~5:1 on the status-bar background (WCAG AA). The previous
+     semi-transparent value resolved to ~4.05:1 and failed. */
+  color: #7a8488;
+}
+
+.statusOnline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Pulsing green dot — indicates the page is live */
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--prompt);
+  box-shadow: 0 0 8px var(--prompt);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+/* agents.txt link — points crawlers/agents at the machine-readable source */
+.statusAgents {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.statusAgents:hover {
+  text-decoration: underline;
+}
+
+/* Small accent dot with glow, mirroring the online indicator's treatment */
+.statusAgentsDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* Full descriptive label — shown on wide screens; hidden on narrow (below). */
+.statusAgentsFull {
+  display: inline;
+}
+
+/* Compact "llms.txt" label — hidden on wide screens, shown on narrow (below). */
+.statusAgentsShort {
+  display: none;
+}
+
+/* Right-aligned line counter */
+.statusRight {
+  margin-left: auto;
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ─── Command feed ───────────────────────────────────────────────────────── */
+/*
+ * The feed wraps the growing list of command output lines. A small top
+ * margin separates it from the divider above the first result.
+ */
+.feed {
+  margin-top: 14px;
+}
+
+/*
+ * Base style shared by every renderable feed line. Sets the monospace
+ * rhythm (font size, line height) and prevents long strings from
+ * overflowing the container.
+ */
+.feedLine {
+  font-size: 14px;
+  line-height: 1.72;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 10px blank spacer inserted after each command's output block */
+.feedSpacer {
+  height: 10px;
+}
+
+/* Command echo: slight top margin to separate it from the previous block */
+.feedCmd {
+  margin-top: 4px;
+}
+
+/* "bas@headingfwd " portion of the echoed prompt — prompt-green, bold */
+.feedCmdPrompt {
+  color: var(--prompt);
+  font-weight: 700;
+}
+
+/* "~$ " portion of the echoed prompt — accent color, bold */
+.feedCmdAccent {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* The raw typed text following the echoed prompt */
+.feedCmdText {
+  color: #eafbfe;
+}
+
+/* Section heading — accent color, bold, small top margin */
+.feedHead {
+  color: var(--accent);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Regular output text */
+.feedOut {
+  color: #cfe2e7;
+}
+
+/* Subdued helper / hint text — solid muted tone (~5:1 on the body background).
+   The previous 0.6-alpha value resolved to ~3.79:1 and failed WCAG AA. */
+.feedDim {
+  color: #7a8488;
+}
+
+/* Bullet line base — body text color; the mark is added as a child span */
+.feedBullet {
+  color: #cfe2e7;
+}
+
+/* The "* " bullet character shown before the bullet body — bold accent so the
+ * mark stands out clearly from the body text color. */
+.feedBulletMark {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Two-column command-list row */
+.feedRow {
+  display: flex;
+  gap: 16px;
+}
+
+/* Left column of a row — command name in accent, bold, fixed minimum width */
+.feedRowLabel {
+  color: var(--accent);
+  font-weight: 700;
+  min-width: 96px;
+}
+
+/* Applied to .feedRowLabel when it is rendered as a <button> so the browser's
+ * default button appearance is stripped while the visual style is preserved. */
+.feedRowLabelBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* Right column of a row — description in a slightly muted tone */
+.feedRowDesc {
+  color: rgba(207, 226, 231, 0.78);
+}
+
+/* Clickable link row — same two-column structure as feedRow */
+.feedLink {
+  display: flex;
+  gap: 16px;
+}
+
+/* Left column of a link row — dim label, fixed minimum width */
+.feedLinkLabel {
+  color: rgba(160, 178, 182, 0.7);
+  min-width: 96px;
+}
+
+/* The anchor in a link row — accent color with a readable underline */
+.feedLinkAnchor {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── AI conversation turn ───────────────────────────────────────────── */
+
+/*
+ * Blinking block cursor shown at the end of a streaming AI response.
+ * The keyframe mirrors the reference design's 0%→49% on / 50%→100% off
+ * cycle, giving a classic square-blink cadence rather than a CSS transition.
+ */
+@keyframes cursorBlink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Wraps a single free-text turn: user echo + assistant response */
+.aiTurn {
+  margin-top: 4px;
+}
+
+/*
+ * Shown while the AI request is in-flight (either waiting for the first
+ * token or while content is streaming in). Disappears when streaming ends.
+ */
+.aiThinking {
+  color: #7a8488;
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+/* Container for the streamed or completed assistant markdown response */
+.aiResponse {
+  color: #cfe2e7;
+  font-size: 14px;
+  line-height: 1.72;
+  /*
+   * Extend the font stack beyond the loaded JetBrains Mono latin subset.
+   * Box-drawing characters used in email previews (e.g. ━) fall outside
+   * the latin range, so including system monospace fonts that carry those
+   * glyphs prevents inconsistent glyph widths when the primary font
+   * falls back to the browser's default.
+   */
+  font-family: var(--font-jetbrains-mono), "Menlo", "Consolas",
+    "DejaVu Sans Mono", ui-monospace, monospace;
+}
+
+/* Blinking block cursor appended at the end of streaming content */
+.aiCursor {
+  display: inline-block;
+  width: 8px;
+  height: 0.9em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 1s step-start infinite;
+}
+
+/* Error line rendered when the AI request returns an error status */
+.aiError {
+  color: rgba(255, 110, 110, 0.9);
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+/* ─── Email tool status lines ────────────────────────────────────────────── */
+
+/*
+ * Dim placeholder shown while the email send tool is in flight.
+ * The same muted tone as "Thinking…" communicates that work is happening
+ * without drawing attention away from the surrounding text.
+ */
+.toolSending {
+  color: #7a8488;
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+/*
+ * Success confirmation line shown when the email was delivered.
+ * Uses --prompt (the same green as the shell prompt) so it reads as a
+ * positive terminal outcome rather than an error.
+ */
+.toolSent {
+  color: var(--prompt);
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+/* ─── Narrow container breakpoint (≤560px) ───────────────────────────── */
+/*
+ * When the page container is 560px wide or less, collapse the layout:
+ * the window goes full-height, title bar and prompt are shortened,
+ * and the specialities grid drops to one column.
+ *
+ * Additional rules below prevent horizontal overflow in the command feed
+ * and enlarge tap targets on the tappable row labels.
+ */
+@container page (max-width: 560px) {
+  .window {
+    height: calc(100% - 2px);
+    border-radius: 14px;
+  }
+
+  .titleText {
+    font-size: 11px;
+  }
+
+  .titleZsh {
+    display: none;
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .inputPromptFull {
+    display: none;
+  }
+
+  .statusBar {
+    gap: 11px;
+    font-size: 10px;
+  }
+
+  /* On narrow screens show only the compact "llms.txt" label. */
+  .statusAgentsFull {
+    display: none;
+  }
+
+  .statusAgentsShort {
+    display: inline;
+  }
+
+  .specialitiesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /*
+   * Link anchors: allow the URL text to break at any character so a long
+   * URL (e.g. a LinkedIn profile path) does not overflow the row.
+   */
+  .feedLinkAnchor {
+    word-break: break-all;
+    min-width: 0;
+  }
+
+  /*
+   * Tappable /help row labels: add vertical padding so the touch target is
+   * comfortably tall (~44px accounting for line height + padding).
+   */
+  .feedRowLabelBtn {
+    padding: 8px 0;
+  }
+}

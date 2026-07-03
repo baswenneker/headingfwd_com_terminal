@@ -1,0 +1,167 @@
+/*
+ * 404 page — pieces that are unique to the not-found screen.
+ *
+ * The window chrome (title bar, dot grid, body, status bar) is reused from
+ * terminal.module.css so the 404 lives inside the exact same shell. Only the
+ * error line, the big glyph, the route list and the blinking cursor are
+ * defined here. Colors come from the same --accent / --prompt tokens that
+ * terminal.module.css sets on .page, so themes stay in sync.
+ */
+
+/* ─── Failed-cd error line ───────────────────────────────────────────────── */
+/*
+ * Solid red matching the terminal's error tone (aiError uses the same hue at
+ * 0.9 alpha). Solid here nudges contrast a touch higher on the near-black body.
+ */
+.errorLine {
+  margin-top: 10px;
+  color: #ff6e6e;
+}
+
+/* ─── 404 glyph ──────────────────────────────────────────────────────────── */
+/*
+ * The page's single h1. Scales with the page container the same way the
+ * homepage wordmark does. Inline spans (no flex gap) so the tight negative
+ * letter-spacing applies between the digits.
+ */
+.code {
+  margin: 18px 0 0;
+  font-size: clamp(72px, 22cqw, 148px);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 0.92;
+  color: #eafbfe;
+  user-select: none;
+}
+
+/* Middle "0" in accent with a soft glow so the glyph reads as a lens/target. */
+.codeZero {
+  color: var(--accent);
+  text-shadow:
+    0 0 24px rgba(46, 230, 246, 0.55),
+    0 0 60px rgba(46, 230, 246, 0.22);
+}
+
+/* Punchy one-liner under the glyph. */
+.tagline {
+  margin-top: 4px;
+  font-size: clamp(15px, 4.5cqw, 22px);
+  font-weight: 500;
+  color: #eafbfe;
+}
+
+/* ─── Working-routes list ────────────────────────────────────────────────── */
+/*
+ * Echoes the /help two-column rhythm (accent command + muted description) but
+ * each row is a real link with a hover/focus surface, so a wrong turn is one
+ * click from the right page.
+ */
+.routes {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 70ch;
+}
+
+.route {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 6px 10px;
+  margin: 0 -10px;
+  border-radius: 7px;
+  text-decoration: none;
+  color: #cfe2e7;
+  transition: background-color 130ms ease;
+}
+
+.route:hover,
+.route:focus-visible {
+  background: rgba(46, 230, 246, 0.09);
+  outline: none;
+}
+
+/* Visible focus ring for keyboard users (outline is cleared above). */
+.route:focus-visible {
+  box-shadow: 0 0 0 1px rgba(46, 230, 246, 0.55) inset;
+}
+
+/* Green "→" prompt marker before each command. */
+.routeMark {
+  color: var(--prompt);
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+/* The command token — accent, bold, fixed min-width to align descriptions. */
+.routeCmd {
+  color: var(--accent);
+  font-weight: 700;
+  min-width: 118px;
+  flex: 0 0 auto;
+}
+
+.route:hover .routeCmd,
+.route:focus-visible .routeCmd {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Description column — slightly muted body tone. */
+.routeDesc {
+  color: rgba(207, 226, 231, 0.78);
+}
+
+/* ─── Blinking cursor ────────────────────────────────────────────────────── */
+/*
+ * Sits on the fresh prompt at the foot of the body, so the shell reads as
+ * ready for the next command. Same square-blink cadence as the AI cursor.
+ */
+@keyframes nfCursorBlink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor {
+  display: inline-block;
+  width: 9px;
+  height: 1.05em;
+  background: var(--accent);
+  vertical-align: text-bottom;
+  box-shadow: 0 0 10px rgba(46, 230, 246, 0.5);
+  animation: nfCursorBlink 1s step-start infinite;
+}
+
+/* Respect users who ask for less motion — hold the cursor solid. */
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ─── Narrow container (≤560px) ──────────────────────────────────────────── */
+/*
+ * Matches terminal.module.css's breakpoint. Loosen the glyph tracking and let
+ * the route command column collapse so descriptions keep their own line.
+ */
+@container page (max-width: 560px) {
+  .code {
+    letter-spacing: -0.04em;
+  }
+
+  .route {
+    gap: 10px;
+  }
+
+  .routeCmd {
+    min-width: 0;
+  }
+}

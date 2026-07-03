@@ -1,248 +1,231 @@
 import { test, expect } from "@playwright/test";
 import {
   navigateToTerminal,
-  sendTerminalMessage,
-  getLastMessage,
+  sendCommand,
   waitForTerminalReady,
 } from "../helpers/session";
-import { expectResponseToContain } from "../helpers/assertions";
-import { COMMAND_PATTERNS } from "../fixtures/command-outputs";
+import { COMMAND_TEXT } from "../fixtures/command-outputs";
 
-test.describe("Terminal Commands", () => {
+/**
+ * Tests for the client-static slash-command system.
+ *
+ * Slash-commands are processed entirely in the browser by terminal-commands.ts.
+ * Pressing Enter for a "/" input triggers a synchronous React state update —
+ * no network request is made. The output appears in the terminal feed as typed
+ * lines (head, out, bullet, row, link, etc.). These tests type a command,
+ * press Enter, and assert the expected visible text in the feed.
+ *
+ * Note: the `[data-testid="assistant-message"]` element is only rendered for
+ * AI replies, never for slash-commands. Assertions here target text directly.
+ */
+test.describe("Terminal slash commands", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the terminal
-    // Since CAPTCHA is disabled, the app will auto-create a session
     await navigateToTerminal(page);
     await waitForTerminalReady(page);
   });
 
-  test("should execute /help command and display command list", async ({
+  test("/help renders the available-commands header and all command row labels", async ({
     page,
   }) => {
-    // Send /help command
-    await sendTerminalMessage(page, "/help");
+    await sendCommand(page, "/help");
 
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
-
-    // Verify response contains command information
-    const response = await getLastMessage(page);
-    expect(response).toMatch(COMMAND_PATTERNS.HELP);
-    await expectResponseToContain(page, "/help");
-    await expectResponseToContain(page, "/services");
-    await expectResponseToContain(page, "/contact");
-    await expectResponseToContain(page, "/how-i-built-this");
-    await expectResponseToContain(page, "/linkedin");
-  });
-
-  test("should execute /services command and display services info", async ({
-    page,
-  }) => {
-    // Send /services command
-    await sendTerminalMessage(page, "/services");
-
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
-
-    // Verify response contains services information
-    const response = await getLastMessage(page);
-    expect(response).toMatch(COMMAND_PATTERNS.SERVICES);
-  });
-
-  test("should execute /contact command and display contact info", async ({
-    page,
-  }) => {
-    // Send /contact command
-    await sendTerminalMessage(page, "/contact");
-
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
-
-    // Verify response contains contact information
-    const response = await getLastMessage(page);
-    expect(response).toMatch(COMMAND_PATTERNS.CONTACT);
-
-    // Verify contact details are present
-    await expectResponseToContain(page, "LinkedIn");
-    await expectResponseToContain(page, "bas@headingfwd.com");
-  });
-
-  test("should execute /how-i-built-this command and open GitHub", async ({
-    page,
-  }) => {
-    // Send /how-i-built-this command
-    await sendTerminalMessage(page, "/how-i-built-this");
-
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
-
-    // Verify response contains tech stack info
-    const response = await getLastMessage(page);
-    expect(response).toMatch(COMMAND_PATTERNS.HOW_I_BUILT_THIS);
-  });
-
-  test("should execute /linkedin command and open LinkedIn profile", async ({
-    page,
-  }) => {
-    // Send /linkedin command
-    await sendTerminalMessage(page, "/linkedin");
-
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
-
-    // Verify response contains LinkedIn profile info
-    const response = await getLastMessage(page);
-    expect(response).toMatch(COMMAND_PATTERNS.LINKEDIN);
-
-    // Verify LinkedIn URL is mentioned in response
-    await expectResponseToContain(page, "LinkedIn");
-  });
-
-  test("should handle case-insensitive commands", async ({ page }) => {
-    // Send command in uppercase
-    await sendTerminalMessage(page, "/HELP");
-
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
-
-    // Verify response is the same as lowercase
-    const response = await getLastMessage(page);
-    expect(response).toMatch(COMMAND_PATTERNS.HELP);
-  });
-
-  test("should handle commands with extra spaces", async ({ page }) => {
-    // Send command with leading/trailing spaces
-    await sendTerminalMessage(page, "  /help  ");
-
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
-
-    // Verify response works correctly
-    const response = await getLastMessage(page);
-    expect(response).toMatch(COMMAND_PATTERNS.HELP);
-  });
-
-  test("should display error for unknown command", async ({ page }) => {
-    // Send unknown command
-    await sendTerminalMessage(page, "/unknown");
-
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
-
-    // Verify error message
-    await expectResponseToContain(page, "Unknown command");
-    await expectResponseToContain(page, "/help");
-  });
-
-  test("should execute multiple commands in sequence", async ({ page }) => {
-    // Count initial messages
-    const initialCount = await page
-      .locator('[data-testid="assistant-message"]')
-      .count();
-
-    // Send first command (sendTerminalMessage already waits for response)
-    await sendTerminalMessage(page, "/help");
-
-    // Verify first response appeared
-    let messageCount = await page
-      .locator('[data-testid="assistant-message"]')
-      .count();
-    expect(messageCount).toBe(initialCount + 1);
-
-    // Send second command (sendTerminalMessage already waits for response)
-    await sendTerminalMessage(page, "/services");
-
-    // Verify second response appeared
-    messageCount = await page
-      .locator('[data-testid="assistant-message"]')
-      .count();
-    expect(messageCount).toBe(initialCount + 2);
-
-    // Send third command (sendTerminalMessage already waits for response)
-    await sendTerminalMessage(page, "/contact");
-
-    // Verify third response appeared
-    messageCount = await page
-      .locator('[data-testid="assistant-message"]')
-      .count();
-    expect(messageCount).toBe(initialCount + 3);
-
-    // Verify all messages are present
-    const finalCount = await page
-      .locator('[data-testid="assistant-message"]')
-      .count();
-    expect(finalCount).toBeGreaterThanOrEqual(initialCount + 3);
-  });
-
-  test("should not be affected by rate limiting", async ({ page }) => {
-    // Commands should not count toward rate limits
-    // Send 12 commands (more than the 10 message rate limit)
-    for (let i = 0; i < 12; i++) {
-      await sendTerminalMessage(page, "/help");
-      await page.waitForTimeout(100); // Small delay between commands
+    await expect(page.getByText(COMMAND_TEXT.HELP.header)).toBeVisible();
+    for (const cmd of COMMAND_TEXT.HELP.commands) {
+      // Row labels are rendered as tappable buttons; .first() selects the
+      // feed occurrence rather than any duplicate in the static intro.
+      await expect(page.getByText(cmd).first()).toBeVisible();
     }
-
-    // Verify last command still works (no rate limit error)
-    const lastMessage = await getLastMessage(page);
-    expect(lastMessage).not.toContain("Rate limit");
-    expect(lastMessage).toMatch(/Available Commands|help/i);
+    // Dim tip line at the bottom of the help block.
+    await expect(
+      page.getByText(COMMAND_TEXT.HELP.tip, { exact: false }),
+    ).toBeVisible();
   });
 
-  test("should render markdown in command responses", async ({ page }) => {
-    // Send /contact command which has markdown
-    await sendTerminalMessage(page, "/contact");
-
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
-
-    //Verify response contains contact info
-    const response = await getLastMessage(page);
-    expect(response).toMatch(COMMAND_PATTERNS.CONTACT);
-
-    // Verify markdown links are rendered as actual links
-    const links = await page.locator("a").count();
-    expect(links).toBeGreaterThan(0);
-  });
-
-  test("should display commands instantly without streaming delay", async ({
+  test("/about renders the whoami header and Bas Wenneker bio line", async ({
     page,
   }) => {
-    const startTime = Date.now();
+    await sendCommand(page, "/about");
 
-    // Send command
-    await sendTerminalMessage(page, "/help");
+    await expect(page.getByText(COMMAND_TEXT.ABOUT.header)).toBeVisible();
+    await expect(
+      page.getByText(COMMAND_TEXT.ABOUT.content, { exact: false }),
+    ).toBeVisible();
+  });
 
-    // Wait for response
-    await page.waitForSelector('[data-testid="assistant-message"]', {
-      timeout: 5000,
-    });
+  test("/services renders the header and all four bullet items", async ({
+    page,
+  }) => {
+    await sendCommand(page, "/services");
 
-    const endTime = Date.now();
-    const duration = endTime - startTime;
+    await expect(page.getByText(COMMAND_TEXT.SERVICES.header)).toBeVisible();
+    for (const bullet of COMMAND_TEXT.SERVICES.bullets) {
+      await expect(page.getByText(bullet, { exact: false })).toBeVisible();
+    }
+  });
 
-    // Command should execute in less than 2 seconds (much faster than AI responses)
-    expect(duration).toBeLessThan(2000);
+  test("/stack renders the stack header and the technology list", async ({
+    page,
+  }) => {
+    await sendCommand(page, "/stack");
 
-    // Verify no "Thinking..." indicator appears for commands
-    const thinkingIndicator = page.locator('[data-testid="loading-indicator"]');
-    await expect(thinkingIndicator).not.toBeVisible();
+    await expect(page.getByText(COMMAND_TEXT.STACK.header)).toBeVisible();
+    await expect(
+      page.getByText(COMMAND_TEXT.STACK.content, { exact: false }),
+    ).toBeVisible();
+  });
+
+  test("/contact renders the header and LinkedIn link", async ({ page }) => {
+    await sendCommand(page, "/contact");
+
+    await expect(page.getByText(COMMAND_TEXT.CONTACT.header)).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: COMMAND_TEXT.CONTACT.linkedin }),
+    ).toBeVisible();
+  });
+
+  test("/clear empties the terminal feed", async ({ page }) => {
+    // Add content to the feed first.
+    await sendCommand(page, "/about");
+    await expect(
+      page.getByText(COMMAND_TEXT.ABOUT.content, { exact: false }),
+    ).toBeVisible();
+
+    // /clear resets the blocks array; the about content should disappear.
+    await sendCommand(page, "/clear");
+
+    await expect(
+      page.getByText(COMMAND_TEXT.ABOUT.content, { exact: false }),
+    ).not.toBeVisible();
+  });
+
+  test("/cls alias clears the feed just like /clear does", async ({ page }) => {
+    await sendCommand(page, "/services");
+    await expect(page.getByText(COMMAND_TEXT.SERVICES.header)).toBeVisible();
+
+    await sendCommand(page, "/cls");
+
+    await expect(
+      page.getByText(COMMAND_TEXT.SERVICES.header),
+    ).not.toBeVisible();
+  });
+
+  test("/whoami alias renders the guest welcome line", async ({ page }) => {
+    await sendCommand(page, "/whoami");
+    await expect(
+      page.getByText(COMMAND_TEXT.WHOAMI, { exact: false }),
+    ).toBeVisible();
+  });
+
+  test("/ls alias renders the fake directory listing", async ({ page }) => {
+    await sendCommand(page, "/ls");
+    await expect(
+      page.getByText(COMMAND_TEXT.LS, { exact: false }),
+    ).toBeVisible();
+  });
+
+  test("ArrowUp recalls the last submitted command into the input field", async ({
+    page,
+  }) => {
+    const input = page.getByTestId("terminal-input");
+
+    // Submit a command so it is added to the history buffer.
+    await sendCommand(page, "/help");
+    // After submission the input is cleared.
+    await expect(input).toHaveValue("");
+
+    // ArrowUp should restore the last history entry.
+    await input.press("ArrowUp");
+    await expect(input).toHaveValue("/help");
+  });
+
+  test("ArrowDown after ArrowUp moves back to an empty input", async ({
+    page,
+  }) => {
+    const input = page.getByTestId("terminal-input");
+
+    await sendCommand(page, "/help");
+    await input.press("ArrowUp");
+    await expect(input).toHaveValue("/help");
+
+    await input.press("ArrowDown");
+    await expect(input).toHaveValue("");
+  });
+
+  test("multiple commands in sequence all append their output to the feed", async ({
+    page,
+  }) => {
+    await sendCommand(page, "/about");
+    await expect(
+      page.getByText(COMMAND_TEXT.ABOUT.content, { exact: false }),
+    ).toBeVisible();
+
+    await sendCommand(page, "/services");
+    // Both the about content and the services header must be visible.
+    await expect(
+      page.getByText(COMMAND_TEXT.ABOUT.content, { exact: false }),
+    ).toBeVisible();
+    await expect(page.getByText(COMMAND_TEXT.SERVICES.header)).toBeVisible();
+
+    await sendCommand(page, "/contact");
+    await expect(
+      page.getByRole("link", { name: COMMAND_TEXT.CONTACT.linkedin }),
+    ).toBeVisible();
+  });
+
+  test("commands complete instantly — no loading indicator appears", async ({
+    page,
+  }) => {
+    await sendCommand(page, "/help");
+
+    // The loading indicator is only rendered during AI streaming, never for
+    // slash-commands. It must be absent from the DOM.
+    await expect(
+      page.locator('[data-testid="loading-indicator"]'),
+    ).not.toBeVisible();
+  });
+
+  test("the CAPTCHA overlay is never triggered by slash-commands", async ({
+    page,
+  }) => {
+    await sendCommand(page, "/contact");
+
+    await expect(
+      page.locator('[data-testid="captcha-overlay"]'),
+    ).not.toBeVisible();
+  });
+});
+
+/**
+ * Tests that exercise the terminal at a narrow mobile viewport (375 × 667 px).
+ *
+ * The terminal window must fit horizontally without adding a scrollbar, and
+ * slash-commands must remain functional when the responsive layout reflows.
+ */
+test.describe("Mobile viewport (375 px wide)", () => {
+  test.use({ viewport: { width: 375, height: 667 } });
+
+  test.beforeEach(async ({ page }) => {
+    await navigateToTerminal(page);
+    await waitForTerminalReady(page);
+  });
+
+  test("terminal loads without horizontal overflow at 375 px", async ({
+    page,
+  }) => {
+    const noOverflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth <=
+        document.documentElement.clientWidth,
+    );
+    expect(noOverflow).toBe(true);
+  });
+
+  test("slash-commands render their output at narrow width", async ({
+    page,
+  }) => {
+    await sendCommand(page, "/help");
+    await expect(page.getByText(COMMAND_TEXT.HELP.header)).toBeVisible();
+    // At least one command label must be visible to confirm the feed rendered.
+    await expect(page.getByText("/about").first()).toBeVisible();
   });
 });
