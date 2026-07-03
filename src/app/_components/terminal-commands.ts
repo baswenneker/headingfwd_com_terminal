@@ -226,8 +226,8 @@ export const COMMAND_PAGES: CommandPage[] = [
     token: "contact",
     title: "Contact",
     description:
-      `Get in touch with Bas Wenneker / HeadingFWD — email ${CONTACT.email} ` +
-      "or connect on LinkedIn.",
+      "Get in touch with Bas Wenneker / HeadingFWD — connect on LinkedIn, " +
+      "or send a message from the terminal chat.",
   },
   {
     token: "agents",

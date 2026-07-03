@@ -4,6 +4,7 @@ import { env } from "~/env";
 import { db } from "~/server/db";
 import { emailLogs } from "~/server/db/schema";
 import { logError } from "~/lib/errors";
+import { CONTACT } from "~/content/site-content";
 
 // Initialize Resend client
 const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
@@ -157,7 +158,9 @@ export async function sendContactEmail(params: {
     // Send email via Resend
     const { data, error } = await resend.emails.send({
       from: "Terminal Chat <terminal@chat.headingfwd.com>",
-      to: "bas@headingfwd.com",
+      // Canonical recipient — single source of truth in site-content, so the
+      // address lives in exactly one place (and never in served page source).
+      to: CONTACT.email,
       replyTo: senderEmail,
       subject,
       html: htmlBody,

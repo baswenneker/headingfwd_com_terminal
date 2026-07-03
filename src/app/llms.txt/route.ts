@@ -86,14 +86,14 @@ function buildAgentsTxt(): string {
     [
       "## Contact",
       "",
-      `- Email: ${CONTACT.email}`,
       `- LinkedIn: ${CONTACT.linkedin}`,
       "- Fastest reply: a DM on LinkedIn.",
+      "- Or send a message straight from the terminal chat on headingfwd.com.",
       "",
       "## Work with me",
       "",
       "Building an agent, assistant or AI workflow and want it to reach production?",
-      `Reach out at ${CONTACT.email}.`,
+      `Connect on LinkedIn (${CONTACT.linkedin}), or send a message from the terminal chat on headingfwd.com.`,
     ].join("\n"),
   );
 

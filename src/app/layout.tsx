@@ -139,7 +139,9 @@ const JSON_LD = {
       "@id": `${SITE_URL}/#person`,
       name: "Bas Wenneker",
       jobTitle: "AI Lead / Engineer",
-      email: `mailto:${CONTACT.email}`,
+      // Email deliberately omitted from structured data to keep the address out
+      // of page source; LinkedIn (sameAs) is the public contact channel. The
+      // terminal chat still relays messages to Bas server-side.
       url: SITE_URL,
       worksFor: { "@id": `${SITE_URL}/#organization` },
       sameAs: [CONTACT.linkedin],
