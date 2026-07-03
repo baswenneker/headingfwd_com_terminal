@@ -68,11 +68,16 @@ export type FeedLine =
  * `portfolio` — appends the given lines (echo + launch message) and signals
  *               that the fullscreen portfolio overlay should open after a
  *               short delay. The terminal handles the state change.
+ * `openurl`   — appends the given lines and signals the terminal to open
+ *               `url` in a new tab. Used by `/linkedin`. The terminal opens
+ *               the tab synchronously inside the triggering gesture so the
+ *               browser does not treat it as an unsolicited popup.
  */
 export type CommandResult =
   | { action: "clear" }
   | { action: "lines"; lines: FeedLine[] }
-  | { action: "portfolio"; lines: FeedLine[] };
+  | { action: "portfolio"; lines: FeedLine[] }
+  | { action: "openurl"; url: string; lines: FeedLine[] };
 
 // ── Command handlers ─────────────────────────────────────────────────────────
 
@@ -119,8 +124,8 @@ function stackLines(): FeedLine[] {
 function contactLines(): FeedLine[] {
   return [
     { kind: "head", text: "let's talk →" },
-    { kind: "link", label: "email",    text: CONTACT.email,             href: `mailto:${CONTACT.email}` },
     { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
+    { kind: "out",  text: "or just type your message right here — I'll pass it to Bas." },
     { kind: "dim",  text: CONTACT.note },
   ];
 }
@@ -150,6 +155,20 @@ const COMMANDS: Record<string, () => FeedLine[]> = {
   whoami:   () => [{ kind: "out", text: "guest@headingfwd — welcome :)" }],
   ls:       () => [{ kind: "out", text: "about/  services/  stack/  contact/" }],
 };
+
+/**
+ * `/linkedin` output. The AI assistant suggests this command (see the system
+ * prompt in `api/chat/route.ts`), so it must resolve to a real command rather
+ * than the unknown-command fallback. The terminal also opens the profile in a
+ * new tab (the `openurl` action below); this rendered link is the fallback if
+ * the browser blocks the popup.
+ */
+function linkedinLines(): FeedLine[] {
+  return [
+    { kind: "out",  text: "→ opening Bas's LinkedIn profile in a new tab…" },
+    { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
+  ];
+}
 
 // ── Command deep-link pages ──────────────────────────────────────────────────
 
@@ -227,7 +246,7 @@ function freeformLines(): FeedLine[] {
   return [
     { kind: "out",  text: "→ I'm a lightweight demo assistant on this page." },
     { kind: "out",  text: "  Type /help for commands, or reach Bas directly:" },
-    { kind: "link", label: "email", text: "bas@headingfwd.com", href: "mailto:bas@headingfwd.com" },
+    { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
   ];
 }
 
@@ -262,6 +281,16 @@ export function runCommand(raw: string): CommandResult {
     return {
       action: "portfolio",
       lines: [echo, { kind: "out", text: "→ launching portfolio…" }],
+    };
+  }
+
+  if (token === "linkedin" || token === "li") {
+    // Echo the command, render the profile link, and signal the terminal to
+    // open LinkedIn in a new tab. Advertised by the AI assistant.
+    return {
+      action: "openurl",
+      url: CONTACT.linkedin,
+      lines: [echo, ...linkedinLines()],
     };
   }
 

@@ -66,12 +66,10 @@ export const COMMAND_TEXT = {
     content: "LLMs · agents · RAG",
   },
 
-  /** /contact — link rows with email and LinkedIn */
+  /** /contact — LinkedIn link + "type here" hint (no email/mailto link) */
   CONTACT: {
     /** Section header. */
     header: "let's talk →",
-    /** Anchor text for the email link. */
-    email: "bas@headingfwd.com",
     /** Anchor text for the LinkedIn link. */
     linkedin: "linkedin.com/in/baswenneker",
   },

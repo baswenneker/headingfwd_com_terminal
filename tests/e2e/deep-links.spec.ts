@@ -127,7 +127,7 @@ test.describe("Command deep links (/help, /about, …)", () => {
     await waitForTerminalReady(page);
 
     await expect(
-      page.getByRole("link", { name: "bas@headingfwd.com" }),
+      page.getByRole("link", { name: "linkedin.com/in/baswenneker" }),
     ).toBeVisible();
   });
 

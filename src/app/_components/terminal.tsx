@@ -155,6 +155,15 @@ export function Terminal({
   const [pfIndex, setPfIndex] = useState(Math.max(initialCaseIndex, 0));
   const [pfDetail, setPfDetail] = useState(initialCaseIndex >= 0);
 
+  // Mirror `mode` into a ref so the deferred auto-focus timer below can read
+  // the live value when it fires — its effect runs once and would otherwise
+  // close over the mount-time mode. useRef(mode) seeds the correct value for a
+  // deep-link mount (mode already "portfolio"); the effect tracks later changes.
+  const modeRef = useRef(mode);
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
+
   // Session state for the AI chat.
   // sessionIdRef is the single source of truth read at request time by the
   // transport body callback; hasSession drives the UI gating logic.
@@ -203,6 +212,11 @@ export function Terminal({
   useEffect(() => {
     if (!prefersAutoFocus()) return;
     const timer = setTimeout(() => {
+      // Skip while the portfolio overlay owns the screen. A /portfolio/<slug>
+      // deep link mounts the terminal underneath an already-open overlay;
+      // grabbing focus here (650ms after mount) would steal it from the
+      // overlay and silently break its arrow-key / Esc navigation.
+      if (modeRef.current !== "terminal") return;
       inputRef.current?.focus();
     }, 650);
     return () => clearTimeout(timer);
@@ -331,6 +345,12 @@ export function Terminal({
         setPfDetail(false);
         setMode("portfolio");
       }, 140);
+    } else if (result.action === "openurl") {
+      setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
+      // Open synchronously within the triggering keypress/click so the browser
+      // treats it as a user-initiated navigation, not a blocked popup. The
+      // rendered link in result.lines is the fallback if it is blocked anyway.
+      window.open(result.url, "_blank", "noopener,noreferrer");
     } else {
       setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
     }

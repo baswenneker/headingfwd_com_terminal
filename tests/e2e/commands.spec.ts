@@ -74,15 +74,10 @@ test.describe("Terminal slash commands", () => {
     ).toBeVisible();
   });
 
-  test("/contact renders the header, email link, and LinkedIn link", async ({
-    page,
-  }) => {
+  test("/contact renders the header and LinkedIn link", async ({ page }) => {
     await sendCommand(page, "/contact");
 
     await expect(page.getByText(COMMAND_TEXT.CONTACT.header)).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: COMMAND_TEXT.CONTACT.email }),
-    ).toBeVisible();
     await expect(
       page.getByRole("link", { name: COMMAND_TEXT.CONTACT.linkedin }),
     ).toBeVisible();
@@ -173,7 +168,7 @@ test.describe("Terminal slash commands", () => {
 
     await sendCommand(page, "/contact");
     await expect(
-      page.getByRole("link", { name: COMMAND_TEXT.CONTACT.email }),
+      page.getByRole("link", { name: COMMAND_TEXT.CONTACT.linkedin }),
     ).toBeVisible();
   });
 
