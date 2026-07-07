@@ -19,7 +19,7 @@ sources:
 ## In short
 
 Software that gives feedback on fitness videos, just like a coach or personal trainer
-would. The throughline: an experiment with **ChatGPT as a personal trainer fails**, while
+would. The story: an experiment with **ChatGPT as a personal trainer fails**, while
 a **custom AI solution succeeds**. With custom software you can analyze complex movements
 in video and give technical, personalized coaching on them.
 
