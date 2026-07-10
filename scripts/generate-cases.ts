@@ -55,6 +55,7 @@ function caseToFileMarkdown(c: Case): string {
     `sector: ${yamlScalar(c.sector)}`,
     `status: ${c.status}`,
   ];
+  if (c.period) fm.push(`period: ${yamlScalar(c.period)}`);
   // Only surface visibility when it differs from the default ("published").
   if (caseVisibility(c) !== "published") fm.push(`visibility: ${caseVisibility(c)}`);
   if (c.role) fm.push(`role: ${yamlScalar(c.role)}`);

@@ -61,9 +61,9 @@ export interface CaseVideo {
  * A single portfolio case with all of its details in one place.
  *
  * Required fields drive the visible surfaces; the optional metadata fields
- * (`role`, `client`, `links`, `sources`, `updated`, `image`, `caseUrl`,
- * `videos`) are preserved for provenance and future UI without being required
- * everywhere.
+ * (`period`, `role`, `client`, `links`, `sources`, `updated`, `image`,
+ * `caseUrl`, `videos`) are preserved for provenance and future UI without
+ * being required everywhere.
  */
 export interface Case {
   /** URL-safe identifier; also the generated Markdown filename. */
@@ -76,6 +76,8 @@ export interface Case {
   kind: string;
   /** Sector / domain label. */
   sector: string;
+  /** Engagement period, shown in the metadata line (e.g. "Q1 2025", "2024–2025"). */
+  period?: string;
   /** Lifecycle status. */
   status: CaseStatus;
   /**
@@ -115,57 +117,52 @@ export const CASES: Case[] = [
     title: "AI Writing Assistant",
     kind: "AI writing assistant that guards the house style — data stays in-house",
     sector: "Government",
+    period: "Q1 2025",
     status: "live",
     role: "Initiator / AI engineer",
     tags: ["LLM", "Writing", "Marketing", "Python", "VectorDB"],
-    stack: ["Azure OpenAI", "Python", "Agentic programming", "VSCode"],
+    stack: ["Azure OpenAI", "Python", "Agentic architecture", "VSCode"],
     sources: ["headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/page.tsx", "headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/schrijfhulp-demo.tsx", "headingfwd-com/src/data/index/page.json (teaser \"AI Schrijfhulp\")", "dspy-writing-style (gerelateerd R&D-experiment)"],
-    updated: "2025-06-19",
+    updated: "2026-07-10",
     body: `
 ## In short
 
-An AI-powered writing assistant for the editorial team of a large public-sector
-organization. The tool rewrites text into a clear, error-free message that meets the
-organization's style guide, word lists, style rules and accessibility requirements
-(B1 level). One consistent house style for the whole editorial team — while sensitive
-data stays inside the organization's own environment.
+A generative-AI writing assistant for a large public-sector organization. It rewrites
+any text to match the in-house style guide, approved word lists and B1 (plain-language)
+accessibility level — without a single sentence ever leaving the organization's own
+environment. Editors paste a draft and get sentence-by-sentence suggestions they can
+accept, adjust or ignore, so they stay fully in control.
 
 ## Problem
 
-At an organization with one of the most-visited websites in the Netherlands, which sends
-millions of letters a year, writing is a core task. Editors have to deliver text that
-meets a style guide, word lists, style rules and accessibility requirements. Generic AI
-tools (ChatGPT, Copilot) fall short for this:
+Editors here work across high-traffic websites and large letter runs, and everything
+they publish has to stay consistent: the style guide, the approved terminology, and
+B1-level plain language so the average reader actually understands it. Doing that by
+hand, at this volume, is slow and easy to get wrong.
 
-- No knowledge of the house style or tone of voice
-- Generic suggestions without the organization's context
-- Inconsistent output across different prompts
-- Privacy concerns with sensitive company and personal data
+Generic AI tools could help with the writing itself, but they came with two
+dealbreakers: they don't know the organization's house style, and sending sensitive
+government text to an external cloud was simply not an option on privacy grounds.
 
 ## Approach
 
-I helped shape a custom AI writing assistant from the ground up. We worked in close
-co-creation with members of the editorial team. Early on there was suspicion and
-resistance; as we collaborated more closely and delivered results, trust and adoption
-grew.
+Instead of dropping a finished tool on the team, I built it together with the editors.
+Early scepticism turned into ownership by shipping small, showing real results on their
+own texts, and adapting the tool to the way they actually work.
 
-The solution runs inside the organization's own environment (an internal URL like
-\`schrijfhulp.intranet.nl\`), so even commercially sensitive and personal data never
-leaves the organization.
+Just as important: the assistant runs entirely inside the organization's own
+environment. Sensitive data never leaves the building — and that is precisely what made
+adoption possible.
 
 ## How it works
 
-The user pastes a text; the assistant analyzes it and returns a rewritten version per
-sentence, with remarks. Examples from the demo — a Dutch-language tool (original →
-rewritten):
+An editor pastes a piece of text. The assistant rewrites it sentence by sentence and
+returns the result as a three-column table — **Original · Rewritten · Remarks** — so
+nothing is a black box: you see exactly what changed and why.
 
-- "Door de afgelopen week ben ik beezig geweest met het ontwikelen van een nieuwe
-  AI-gestuerde schrijfhulp tool." → "Vorige week werkte ik aan het maken van een nieuwe
-  AI-gestuurde schrijfhulptool." (simpler, B1, spelling fixes, compound word)
-- "…zodat je profesioneler overkomt in je communicatie." → split into two sentences,
-  "professioneler" corrected (clarity + spelling)
-- "Vervolgens geeft hij suggesties…" → "Vervolgens geeft de tool suggesties…"
-  (clearer reference)
+Behind the scenes, it retrieves the relevant style-guide rules and word-list entries
+for each sentence, applies them, and flags anything worth a closer look. The editor
+decides what to keep.
 
 The output appears as a table with three columns: **Original sentence · Rewritten
 sentence · Remarks**.
@@ -174,27 +171,28 @@ sentence · Remarks**.
 
 | Benefit | Explanation |
 |---|---|
-| 🔒 Data security | Also for commercially sensitive and personal data; everything stays in your own environment |
-| ⚡ Efficiency | Instant result, ready while you wait |
-| 🎯 Consistency | A style guide is interpreted differently by everyone; AI does it consistently |
-| 📚 Word lists | Enforce jargon — or deliberately avoid it |
-| 👥 B1 level | Write so the average reader can follow it easily |
-| ✨ Everyone can do it | Turns every employee into a good writer |
+| 🔒 Data security | Every sentence stays inside your own environment — nothing goes to an external cloud. |
+| ⚡ Efficiency | Instant rewrites, ready while you wait — no more checking style line by line. |
+| 🎯 Consistency | The same style guide, applied the same way, every single time. |
+| 📚 Word lists | Enforce preferred terms and avoid jargon on purpose, not from memory. |
+| 👥 B1 level | Rewrites aim for plain language the average reader genuinely understands. |
+| ✨ Everyone can write well | Turns every employee into a confident writer — not just the editors. |
 
 > "By constantly getting new suggestions, it helps me in the creative process and it
 > instantly meets the writing rules we follow!" — Editor
 
 ## Tech & stack
 
-- ☁️ **Azure OpenAI LLMs** — LLM API provider
+- ☁️ **Azure OpenAI LLMs** — LLM provider, hosted within the organization's own Azure tenant
 - 🐍 **Python** — backend
-- 🤖 **Agentic programming** — AI architecture pattern
-- 💻 **VSCode** — IDE
-- 🔎 **Vector database** — surfaces the style guide and word lists for the tool
+- 🤖 **Agentic architecture** — the assistant reasons per sentence and calls the right rules
+- 💻 **VSCode** — development environment
+- 🔎 **Vector database** — retrieves the matching style-guide rules and word-list entries per sentence
 
 ## Status
 
-**Live** — custom client project at a large public-sector organization.
+**Live** — a custom client project running in production at a large public-sector
+organization.
 `,
   },
   {
@@ -494,7 +492,7 @@ bodies that want to make their letters more accessible.
 ## In short
 
 Software that gives feedback on fitness videos, just like a coach or personal trainer
-would. The throughline: an experiment with **ChatGPT as a personal trainer fails**, while
+would. The story: an experiment with **ChatGPT as a personal trainer fails**, while
 a **custom AI solution succeeds**. With custom software you can analyze complex movements
 in video and give technical, personalized coaching on them.
 
@@ -665,7 +663,9 @@ function demoteHeadings(body: string): string {
  * a heading, a compact metadata line, and the (heading-demoted) body.
  */
 export function caseToAgentMarkdown(c: Case): string {
-  const meta = [`Sector: ${c.sector}`, `Status: ${c.status}`];
+  const meta = [`Sector: ${c.sector}`];
+  if (c.period) meta.push(`Period: ${c.period}`);
+  meta.push(`Status: ${c.status}`);
   if (c.role) meta.push(`Role: ${c.role}`);
   if (c.client) meta.push(`Client: ${c.client}`);
 

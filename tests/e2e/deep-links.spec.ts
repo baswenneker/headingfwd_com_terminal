@@ -54,7 +54,7 @@ test.describe("Case deep links (/portfolio/<slug>)", () => {
     const res = await page.request.get(`/portfolio/${CASE_1.slug}`);
     const html = await res.text();
     expect(html).toContain(CASE_1.title);
-    expect(html).toContain("editorial team"); // phrase from the case body
+    expect(html).toContain("sentence-by-sentence"); // phrase from the case body
   });
 
   test("browsing in the overlay keeps the URL in sync", async ({ page }) => {
