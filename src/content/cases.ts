@@ -201,93 +201,99 @@ organization.
     title: "Hintsay: AI writing assistant for LinkedIn",
     kind: "Months of LinkedIn content in minutes, in your own voice",
     sector: "Marketing",
+    period: "2022–2023",
     status: "live",
     role: "Maker / AI engineer",
     tags: ["LLM", "Marketing", "SaaS"],
     stack: ["React", "Advanced language models", "Cloud infrastructure"],
     links: ["https://hintsay.com"],
     sources: ["headingfwd-demo-playground/src/app/cases/hintsay/page.tsx", "headingfwd-com/src/data/index/page.json (teaser \"LinkedIn Schrijfhulp\")", "vibes-chrome-li-extension (gerelateerd, los experiment)"],
-    updated: "2025-06-19",
+    updated: "2026-07-10",
     body: `
 ## In short
 
-Hintsay is an AI-powered writing assistant that helps professionals create engaging
-LinkedIn content and strengthen their personal brand. The promise:
-*"Generate months of LinkedIn content in minutes."* Produce months of content in just a
-few minutes, while keeping your own voice and style.
+Hintsay is an AI writing assistant that helps professionals build their personal brand
+on LinkedIn — turning a keyword or an idea into finished, on-brand posts in minutes
+instead of hours. I designed and built it end to end, from the AI that writes in your
+voice to the interface that keeps you in control. The promise, in one line:
+**generate months of LinkedIn content in minutes.**
 
 ## Problem
 
-Professionals struggle with consistent, engaging content on LinkedIn:
+Most professionals know that showing up on LinkedIn grows their brand and their
+business. Actually doing it, consistently, is the hard part:
 
-- Lack of time for regular content creation
-- Writer's block and lack of inspiration
-- Uncertainty about what resonates with the audience
-- Difficulty finding the right tone of voice
-- Inconsistent posting frequency hurts visibility
+- **No time** to write regularly next to a full workload
+- **Writer's block** — staring at a blank post with no angle
+- **Guesswork** about what actually resonates with their audience
+- **Voice drift** — hard to sound like themselves at speed
+- **Inconsistency** — irregular posting quietly kills reach
 
 ## Approach
 
-A smart writing assistant that speeds up and improves content creation:
+A writing assistant that makes content creation faster *and* better — without taking
+the person out of the loop.
 
-- AI-generated content based on proven templates
-- Topic suggestions from keywords
-- Personalization based on the LinkedIn profile
-- Support for English and Dutch
-- Preserves your personal voice and style
+**What it does:**
 
-**UX design process:**
+- Generates posts from proven, high-performing templates
+- Turns a keyword into ready-to-use topic suggestions
+- Personalises to your LinkedIn profile so it sounds like you
+- Works in English and Dutch
+- Keeps your personal voice and style intact
 
-| Phase | Activities |
+**Design process:**
+
+| Phase | What happened |
 |---|---|
-| Research & Discovery | Analysis of LinkedIn posting patterns, user interviews with content creators, competitive analysis, performance data |
-| Design & Prototyping | Minimalist/clean design, focus on speed, iterative UI/UX, A/B testing of features |
-| AI Integration | Training on successful posts, continuous model improvement, personalization algorithms, quality assurance |
+| Research & discovery | Analysed LinkedIn posting patterns, interviewed content creators, ran competitive and performance analysis |
+| Design & prototyping | Minimalist, speed-first UI; iterated on UX and A/B-tested key features |
+| AI integration | Trained on high-performing posts, built personalisation, added quality checks and a continuous-improvement loop |
 
 ## How it works
 
 **Content generation**
 
-- AI-generated posts based on keywords
+- AI-written posts from a keyword or idea
 - Proven templates for different content types
-- Personalization based on the LinkedIn profile
+- Personalisation based on your LinkedIn profile
 - Adjustable tone of voice
-- Multilingual support (EN/NL)
-- Real-time preview and editing
+- English & Dutch (EN/NL)
+- Real-time preview and inline editing
 
 **Content strategy**
 
 - Topic suggestions and brainstorming
-- Content calendar planning
+- Content-calendar planning
 - Performance insights *(coming soon)*
-- Audience engagement tracking
+- Audience-engagement tracking
 - Best practices and tips
-- Content diversification advice
+- Advice on diversifying your content
 
 ## Impact & results
 
 | Figure | Meaning |
 |---|---|
 | 10× | Faster content creation |
-| 7 days | Free trial period |
-| 2 languages | English and Dutch |
+| 7 days | Free trial |
+| 2 languages | English & Dutch |
 | ∞ | Content possibilities |
 
 ## Tech & stack
 
-- **Frontend & UX**: modern React interface, real-time content preview, responsive design, fast load times
-- **AI & Backend**: advanced language models, continuous learning pipeline, secure API architecture, scalable cloud infrastructure
+- **Frontend & UX** — modern React interface, real-time content preview, responsive design, fast load times
+- **AI & backend** — LLM-powered generation with a personalisation layer, a continuous-learning pipeline, secure API architecture, and scalable cloud infrastructure
 
 ## Key takeaways
 
-1. **AI as assistant, not replacement** — users want to stay in control of their content.
-2. **Speed is essential** — professionals have little time; every second counts.
-3. **Context and personalization** — generic content doesn't work; personalization is crucial.
-4. **Continuous improvement** — LinkedIn algorithms change constantly; the tool must keep up.
+1. **AI as assistant, not replacement** — people want to stay in control of what goes out under their name.
+2. **Speed is the product** — professionals have little time; every second of friction costs a post.
+3. **Personalisation is non-negotiable** — generic content doesn't land; context is everything.
+4. **Keep up or fall behind** — LinkedIn's algorithm keeps shifting, so the tool has to keep learning.
 
 ## Status
 
-**Live** — SaaS product, available at [hintsay.com](https://hintsay.com).
+**Live** — a SaaS product, available at [hintsay.com](https://hintsay.com).
 `,
   },
   {
@@ -296,13 +302,14 @@ A smart writing assistant that speeds up and improves content creation:
     title: "MyWorq: employee app for horticulture",
     kind: "Employee app for horticulture — live with thousands of users",
     sector: "Horticulture",
+    period: "2022–2024",
     status: "live",
     role: "Product Manager",
     client: "bQurius",
     tags: ["Mobile App", "Product Management", "Design Thinking"],
     stack: [],
     sources: ["headingfwd-demo-playground/src/app/showcase/myworq/page.tsx", "headingfwd-demo-playground/src/app/showcase/myworq/myworq-intro.tsx", "headingfwd-demo-playground/src/app/showcase/myworq/process-ticker.tsx"],
-    updated: "2025-06-19",
+    updated: "2026-07-15",
     videos: [
       {
         id: "G3QL3dCgkOg",
@@ -314,65 +321,60 @@ A smart writing assistant that speeds up and improves content creation:
     body: `
 ## In short
 
-An employee app for the horticulture sector, focused on employee satisfaction,
-productivity and collaboration. My role: **product manager**. The app is now live and
-used by thousands of workers in horticulture.
+An employee app for the horticulture sector, built to lift employee satisfaction,
+productivity and day-to-day collaboration. I led it as **product manager** — from
+mapping what workers and team leaders actually needed, to shaping the roadmap, to
+rolling it out. The app is now live and used by **thousands of workers** across
+horticulture.
 
 ## The story
 
-With my roots in the Westland region, the MyWorq assignment was a home game. I was asked
-to join the Data team of **bQurius** as product manager, to help develop an innovative
-employee app specifically for the horticulture sector.
-
-I worked closely with a colleague to map users' needs: the team leaders in the greenhouses
-and the people working in them. Once we had outlined the app, we looked for a software
-agency to build it.
-
-After 2 years I handed the role over to the colleague I had worked with all along. The app
-is now live and used by thousands of workers in the horticulture sector. Proud of this
-project!
+**bQurius** brought me in to lead the product. I spent time on the ground — talking with
+team leaders and greenhouse workers — to map real needs and pain points rather than
+assumed ones, and turned that into a roadmap the team could ship against. Over roughly
+two years, the app grew from concept to a product used daily by thousands, at which
+point I handed the product role over to the client's own team.
 
 ## Problem
 
-The horticulture sector faces specific challenges around workforce management:
+Horticulture is a demanding place to build software for: a seasonal, multilingual,
+largely deskless workforce.
 
-- High staff turnover and hard-to-find personnel
-- Complex planning due to seasonal work
-- Language barriers with international workers
-- Lack of digital tools for field workers
-- Inefficient communication between management and operational staff
+- **High turnover**, and skilled people are hard to find
+- **Complex planning** driven by seasonal peaks
+- **Language barriers** with international workers
+- **No digital tools** built for field workers
+- **Communication gaps** between management and the operational floor
 
 ## Solution
 
-A user-friendly employee app, designed specifically for horticulture:
-
-- Intuitive interface in multiple languages
-- Real-time work planning and task management
+- Intuitive interface, available in multiple languages
+- Real-time planning and task management
 - Direct communication between teams and supervisors
-- Gamification elements for higher engagement
+- Gamification to drive day-to-day engagement
 - Integration with existing HR and planning systems
 
 ## Way of working
 
-1. 🔍 **Research** — conversations with customers to understand needs and pain points
-2. ✏️ **Sketching** — sketching what a new feature could look like
-3. 🎨 **Designing** — working the idea into a prototype with a UX/UI designer
-4. 💻 **Building** — the software engineers build the feature into the app
-5. 🧪 **Testing** — thoroughly testing the new feature
-6. 🚀 **Rollout** — rolling out the updated app to users
-7. 🔄 **Iterate** — analyze data, gather feedback, and the process starts again
+1. 🔍 **Research** — talk to customers to understand needs and pain points
+2. ✏️ **Sketching** — sketch what a new feature could look like
+3. 🎨 **Designing** — work it into a prototype with a UX/UI designer
+4. 💻 **Building** — engineers build the feature into the app
+5. 🧪 **Testing** — test the new feature thoroughly
+6. 🚀 **Rollout** — ship the update to users
+7. 🔄 **Iterate** — analyse data, gather feedback, and start again
 
-## Role & stack
+## Role
 
-This is a **product-management case**, not an in-house development project: the app was
-built by an external software agency. My contribution was in research, product definition,
-design thinking and steering the build process. There is therefore no own tech stack to
-list.
+This is a **product-management case**. The app itself was built by an external software
+agency — my job was to own the product: discovery with real users, prioritisation, and
+steering design and engineering toward what mattered most. In other words: I was
+accountable for *what* got built and *why*, not for writing the code.
 
 ## Status
 
-**Live** — the app is in production and used by thousands of workers in the horticulture
-sector. Role handed over after 2 years.
+**Live** — running in production with thousands of horticulture-sector users. I handed
+the product role over to the client after roughly two years.
 `,
   },
   {
