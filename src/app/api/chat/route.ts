@@ -246,10 +246,14 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
           description:
             "Send a message to Bas via email. ONLY call this after showing the user a preview and getting explicit confirmation. The full conversation history will be included automatically.",
           inputSchema: z.object({
+            // NOTE: no .email() here. Zod 4 turns it into a lookahead `pattern`
+            // that the OpenAI Responses API rejects, which makes the whole
+            // response come back empty. Validated in execute() instead.
             senderEmail: z
               .string()
-              .email()
-              .describe("The sender's email address for Bas to reply to"),
+              .describe(
+                "The sender's email address for Bas to reply to. Must be a valid email address.",
+              ),
             message: z
               .string()
               .min(10, "Message must be at least 10 characters")
@@ -271,6 +275,16 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
                 success: false,
                 error:
                   "Cannot send email without explicit user confirmation. Please show a preview and ask the user to confirm first.",
+              };
+            }
+
+            // Validate the email address here, since the tool schema cannot
+            // carry a pattern the OpenAI Responses API accepts.
+            if (!z.string().email().safeParse(senderEmail).success) {
+              return {
+                success: false,
+                error:
+                  "That does not look like a valid email address. Please ask the user for a valid one.",
               };
             }
 

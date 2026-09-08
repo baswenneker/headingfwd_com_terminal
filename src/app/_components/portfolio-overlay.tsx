@@ -280,9 +280,12 @@ function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailVi
   // Coming-soon cases are teasers: the write-up is replaced by a placeholder.
   const comingSoon = isComingSoonCase(caseItem);
 
-  // Compact metadata line: sector · status · role (role only when present).
-  // Coming-soon cases surface that state instead of their lifecycle status.
-  const meta = [caseItem.sector, comingSoon ? "coming soon" : caseItem.status];
+  // Compact metadata line: sector · period · status · role (period and role
+  // only when present). Coming-soon cases surface that state instead of their
+  // lifecycle status.
+  const meta = [caseItem.sector];
+  if (caseItem.period) meta.push(caseItem.period);
+  meta.push(comingSoon ? "coming soon" : caseItem.status);
   if (caseItem.role) meta.push(caseItem.role);
 
   return (
