@@ -164,10 +164,14 @@
 
 /*
  * Each project row: two-column grid — a fixed 46px index column, then the
- * project details. Left border signals the active selection.
+ * project details. Left border signals the active selection. The row is an
+ * <a> to /portfolio/<slug>, so the default link colour and underline are
+ * reset here; the row's own children carry the real colours.
  */
 .listRow {
   display: grid;
+  color: inherit;
+  text-decoration: none;
   grid-template-columns: 46px 1fr;
   gap: 3px 18px;
   align-items: baseline;
@@ -253,9 +257,10 @@
   max-width: 800px;
 }
 
-/* "← back to all work" text button */
+/* "← back to all work" — a link to /portfolio, styled as plain text */
 .backBtn {
   display: block;
+  text-decoration: none;
   background: transparent;
   border: none;
   color: var(--accent);

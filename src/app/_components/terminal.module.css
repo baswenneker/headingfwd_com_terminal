@@ -332,6 +332,16 @@
   animation: statusPulse 2s ease-in-out infinite;
 }
 
+/* Plain accent link in the status bar (e.g. "portfolio"). */
+.statusLink {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.statusLink:hover {
+  text-decoration: underline;
+}
+
 /* agents.txt link — points crawlers/agents at the machine-readable source */
 .statusAgents {
   display: inline-flex;
