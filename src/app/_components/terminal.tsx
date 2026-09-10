@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { api } from "~/trpc/react";
@@ -8,7 +9,10 @@ import { env } from "~/env";
 import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
-import { PortfolioOverlay } from "./portfolio-overlay";
+import {
+  PortfolioOverlay,
+  isBrowserHandledClick,
+} from "./portfolio-overlay";
 import { visibleCases } from "~/content/cases";
 import { CaptchaOverlay } from "./captcha-overlay";
 import { MemoizedMarkdown } from "./memoized-markdown";
@@ -340,11 +344,7 @@ export function Terminal({
       setMessages([]);
     } else if (result.action === "portfolio") {
       setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
-      setTimeout(() => {
-        setPfIndex(0);
-        setPfDetail(false);
-        setMode("portfolio");
-      }, 140);
+      setTimeout(openPortfolio, 140);
     } else if (result.action === "openurl") {
       setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
       // Open synchronously within the triggering keypress/click so the browser
@@ -427,6 +427,21 @@ export function Terminal({
       window.history.replaceState(null, "", path);
     }
   }, [mode, pfIndex, pfDetail]);
+
+  /**
+   * Open the portfolio overlay on the case list, from the first case. Used by
+   * the "portfolio" link in the status bar; the `/portfolio` command runs the
+   * same three state changes after its own short output animation.
+   *
+   * The URL follows through the sync effect above, so the overlay and the
+   * address bar agree without a route navigation — the terminal underneath
+   * keeps its feed and its AI session.
+   */
+  function openPortfolio() {
+    setPfIndex(0);
+    setPfDetail(false);
+    setMode("portfolio");
+  }
 
   /**
    * Close the portfolio overlay and, on fine-pointer devices, return keyboard
@@ -826,6 +841,31 @@ export function Terminal({
           </span>
           <span>main</span>
           <span>utf-8</span>
+          {/*
+           * Crawl path into the case pages. `/portfolio` is reachable by
+           * typing the command too, but only a real anchor in the initial
+           * HTML gives crawlers (and visitors who don't type commands) a way
+           * in: home → list → case.
+           *
+           * A plain click is intercepted and opens the overlay in place, like
+           * every link inside the overlay itself. Letting it navigate for real
+           * would unmount the terminal — losing the feed, the AI session and
+           * the CAPTCHA — and would leave the App Router pointing at
+           * /portfolio while exitPortfolio() rewrites the URL back to `/`,
+           * after which a second click on this link does nothing at all.
+           */}
+          <Link
+            className={styles.statusLink}
+            href="/portfolio"
+            prefetch={false}
+            onClick={(e) => {
+              if (isBrowserHandledClick(e)) return;
+              e.preventDefault();
+              openPortfolio();
+            }}
+          >
+            portfolio
+          </Link>
           {/*
            * Plain-text source for AI agents & crawlers. Points at the
            * statically-generated /llms.txt (see app/llms.txt/route.ts).

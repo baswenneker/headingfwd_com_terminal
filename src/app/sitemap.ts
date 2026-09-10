@@ -1,6 +1,7 @@
 import { type MetadataRoute } from "next";
 import { COMMAND_PAGES } from "~/app/_components/terminal-commands";
 import { visibleCases } from "~/content/cases";
+import { SITE_URL } from "~/config/site";
 
 /**
  * `/sitemap.xml` — the indexable surfaces of the site. The two hand-written
@@ -10,15 +11,18 @@ import { visibleCases } from "~/content/cases";
  * routes themselves are generated from, so the sitemap can never drift.
  * `/llms.txt`, the plain-text agent source, is a real crawlable URL too.
  *
- * `lastModified` is intentionally omitted rather than stamped with a build-time
- * date: the metadata route runs during static generation where `Date.now()` is
- * discouraged, and an inaccurate date is worse than none.
+ * Case entries carry `lastModified` from the case's own `updated` field — the
+ * same single source that feeds `Article.dateModified` on the case page, so
+ * the two dates can never drift. Everything else stays undated rather than
+ * stamped with a build-time date: the metadata route runs during static
+ * generation where `Date.now()` is discouraged, and an inaccurate date is
+ * worse than none.
  */
-const SITE_URL = "https://headingfwd.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const casePages = visibleCases().map((c) => ({
     url: `${SITE_URL}/portfolio/${c.slug}`,
+    ...(c.updated ? { lastModified: c.updated } : {}),
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));

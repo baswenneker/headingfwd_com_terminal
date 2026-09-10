@@ -6,12 +6,16 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { TRPCReactProvider } from "~/trpc/react";
 import { CONTACT } from "~/content/site-content";
+// Canonical production origin + brand name. `metadataBase` lets Next resolve
+// every relative URL below (canonical, Open Graph, icons) to an absolute URL,
+// which crawlers and social scrapers require.
+import {
+  ORGANIZATION_ID,
+  PERSON_ID,
+  SITE_NAME,
+  SITE_URL,
+} from "~/config/site";
 
-// Canonical production origin. `metadataBase` lets Next resolve every relative
-// URL below (canonical, Open Graph, icons) to an absolute URL, which crawlers
-// and social scrapers require.
-const SITE_URL = "https://headingfwd.com";
-const SITE_NAME = "HeadingFWD";
 const TITLE = "HeadingFWD — AI Engineering & Consultancy";
 const DESCRIPTION =
   "HeadingFWD helps teams get real value from Generative AI — designing and " +
@@ -120,30 +124,30 @@ const JSON_LD = {
       name: SITE_NAME,
       description: DESCRIPTION,
       inLanguage: "en",
-      publisher: { "@id": `${SITE_URL}/#organization` },
+      publisher: { "@id": ORGANIZATION_ID },
     },
     {
       "@type": "Organization",
-      "@id": `${SITE_URL}/#organization`,
+      "@id": ORGANIZATION_ID,
       name: SITE_NAME,
       url: SITE_URL,
       description:
         "AI engineering & consultancy — building agents, assistants and AI " +
         "workflows that reach production.",
       logo: `${SITE_URL}/android-chrome-512x512.png`,
-      founder: { "@id": `${SITE_URL}/#person` },
+      founder: { "@id": PERSON_ID },
       sameAs: [CONTACT.linkedin],
     },
     {
       "@type": "Person",
-      "@id": `${SITE_URL}/#person`,
+      "@id": PERSON_ID,
       name: "Bas Wenneker",
       jobTitle: "AI Lead / Engineer",
       // Email deliberately omitted from structured data to keep the address out
       // of page source; LinkedIn (sameAs) is the public contact channel. The
       // terminal chat still relays messages to Bas server-side.
       url: SITE_URL,
-      worksFor: { "@id": `${SITE_URL}/#organization` },
+      worksFor: { "@id": ORGANIZATION_ID },
       sameAs: [CONTACT.linkedin],
     },
   ],

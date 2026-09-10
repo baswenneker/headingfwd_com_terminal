@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { marked } from "marked";
 import { type Case, type CaseVideo, isComingSoonCase } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
@@ -22,6 +23,33 @@ const ASCII_BANNER = `██████  ██   ██  █████
  * Keeps the list view compact while still being scannable.
  */
 const TAG_SEP = "    ·    ";
+
+/** Path of a case's own page — the `href` behind every in-overlay navigation. */
+function casePath(c: Case): string {
+  return `/portfolio/${c.slug}`;
+}
+
+/**
+ * True when a click should be left to the browser rather than handled inside
+ * the overlay: ctrl/cmd/shift/alt-click and any non-primary button all mean
+ * "open this somewhere else" (new tab, new window, download). Middle-click
+ * never reaches an onClick handler at all, so the browser handles it anyway.
+ *
+ * Exported because the terminal's own "portfolio" link intercepts its click
+ * the same way.
+ *
+ * Every navigation control in the overlay renders a real anchor with an
+ * `href`, so crawlers see internal links and visitors can share, hover-preview
+ * and open-in-new-tab. A plain left click is intercepted instead:
+ * preventDefault plus the in-overlay state change, which keeps the terminal
+ * experience free of page loads (the URL still follows via the parent's
+ * replaceState sync). Because that click never navigates, every one of these
+ * links sets `prefetch={false}` — prefetching a route we never visit would be
+ * pure waste.
+ */
+export function isBrowserHandledClick(e: React.MouseEvent): boolean {
+  return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
+}
 
 interface PortfolioOverlayProps {
   cases: Case[];
@@ -184,6 +212,8 @@ export function PortfolioOverlay({
           caseItem={current}
           index={safeIndex}
           total={cases.length}
+          prevCase={cases[(safeIndex - 1 + cases.length) % cases.length]!}
+          nextCase={cases[(safeIndex + 1) % cases.length]!}
           onBack={() => onSetPfDetail(false)}
           onPrev={() => onSetPfIndex((safeIndex - 1 + cases.length) % cases.length)}
           onNext={() => onSetPfIndex((safeIndex + 1) % cases.length)}
@@ -214,15 +244,30 @@ function ListView({ cases, selectedIndex, onHover, onOpen }: ListViewProps) {
     <>
       <div className={styles.listView}>
         {cases.map((c, i) => (
-          <div
+          /*
+           * A real anchor, not a div: crawlers follow it, the status bar shows
+           * the URL on hover and cmd/middle-click opens the case in a new tab.
+           * tabIndex={-1} keeps it out of the tab order — arrow keys and Enter
+           * on the overlay container remain the single keyboard model, exactly
+           * as before. The link stays in the accessibility tree, so screen
+           * readers still announce each row as a link named by the case title.
+           */
+          <Link
             key={c.slug}
+            href={casePath(c)}
+            prefetch={false}
+            tabIndex={-1}
             className={
               i === selectedIndex
                 ? `${styles.listRow} ${styles.listRowSelected}`
                 : styles.listRow
             }
             onMouseEnter={() => onHover(i)}
-            onClick={() => onOpen(i)}
+            onClick={(e) => {
+              if (isBrowserHandledClick(e)) return;
+              e.preventDefault();
+              onOpen(i);
+            }}
           >
             <span className={styles.listRowIndex}>{c.n}</span>
             <div>
@@ -235,7 +280,7 @@ function ListView({ cases, selectedIndex, onHover, onOpen }: ListViewProps) {
               <div className={styles.listRowKind}>{c.kind}</div>
               <div className={styles.listRowTags}>{c.tags.join(TAG_SEP)}</div>
             </div>
-          </div>
+          </Link>
         ))}
         <div className={styles.listDivider} />
       </div>
@@ -252,6 +297,9 @@ interface DetailViewProps {
   caseItem: Case;
   index: number;
   total: number;
+  /** Neighbouring cases (wrapping) — the `href` targets of prev / next. */
+  prevCase: Case;
+  nextCase: Case;
   onBack: () => void;
   onPrev: () => void;
   onNext: () => void;
@@ -267,10 +315,22 @@ interface DetailViewProps {
  * input), so rendering it via dangerouslySetInnerHTML is safe and lets the
  * terminal aesthetic style every element (incl. tables and quotes).
  *
- * ← prev / next → buttons cycle through cases without returning to the list.
+ * ← prev / next → cycle through cases without returning to the list, and
+ * "back to all work" returns to it. All three are anchors pointing at the
+ * matching URL, so crawlers reach the neighbouring cases and the list from
+ * any case page; a plain click is intercepted and handled in the overlay.
  * Esc or Backspace (handled by the parent overlay) returns to the list.
  */
-function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailViewProps) {
+function DetailView({
+  caseItem,
+  index,
+  total,
+  prevCase,
+  nextCase,
+  onBack,
+  onPrev,
+  onNext,
+}: DetailViewProps) {
   // Convert the Markdown body to HTML once per case (memoised on the body).
   const bodyHtml = useMemo(
     () => marked.parse(caseItem.body) as string,
@@ -291,9 +351,18 @@ function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailVi
   return (
     <div className={styles.detailView}>
       {/* Return to list */}
-      <button className={styles.backBtn} onClick={onBack}>
+      <Link
+        href="/portfolio"
+        prefetch={false}
+        className={styles.backBtn}
+        onClick={(e) => {
+          if (isBrowserHandledClick(e)) return;
+          e.preventDefault();
+          onBack();
+        }}
+      >
         ← back to all work
-      </button>
+      </Link>
 
       {/* Case index + position counter */}
       <div className={styles.detailCounter}>
@@ -363,12 +432,30 @@ function DetailView({ caseItem, index, total, onBack, onPrev, onNext }: DetailVi
 
       {/* Button row — prev/next navigation + CTA + optional case link */}
       <div className={styles.detailButtons}>
-        <button className={styles.outlineBtn} onClick={onPrev}>
+        <Link
+          href={casePath(prevCase)}
+          prefetch={false}
+          className={styles.outlineBtn}
+          onClick={(e) => {
+            if (isBrowserHandledClick(e)) return;
+            e.preventDefault();
+            onPrev();
+          }}
+        >
           ← prev
-        </button>
-        <button className={styles.outlineBtn} onClick={onNext}>
+        </Link>
+        <Link
+          href={casePath(nextCase)}
+          prefetch={false}
+          className={styles.outlineBtn}
+          onClick={(e) => {
+            if (isBrowserHandledClick(e)) return;
+            e.preventDefault();
+            onNext();
+          }}
+        >
           next →
-        </button>
+        </Link>
 
         {/*
          * "read the case study →" appears only when caseItem.caseUrl is set.
