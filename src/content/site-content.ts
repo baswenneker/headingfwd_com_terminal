@@ -71,14 +71,17 @@ export const CONTACT = {
  * description and the `## Blog` heading note in `/llms.txt`.
  */
 export const BLOG = {
-  /** Meta description and feed channel description — one sentence, external. */
+  /**
+   * Meta description and feed channel description — external, and read by
+   * someone who has not opened the page yet, so it says more than the intro
+   * does. "Published here first" earns its place: it is the line that tells a
+   * reader arriving from a copy elsewhere which page is the original.
+   */
   description:
-    "Long-form writing by Bas Wenneker on AI engineering — agents, " +
-    "assistants and AI workflows that reach production. Published here first.",
+    "My thoughts on AI and engineering, by Bas Wenneker — agents, assistants " +
+    "and AI workflows that reach production. Published here first.",
   /** The intro paragraph under the "Blog" heading on the overview. */
-  intro:
-    "Long-form writing on AI engineering — what actually reaches production, " +
-    "and what does not. Everything here is published on this site first.",
+  intro: "my thoughts on AI and engineering.",
 } as const;
 
 /**

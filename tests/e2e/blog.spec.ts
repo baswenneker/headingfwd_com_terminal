@@ -230,6 +230,25 @@ test.describe("Post page (/blog/<slug>)", () => {
     await expect(page.locator("article")).toHaveAttribute("lang", "en");
   });
 
+  /**
+   * The overview is English chrome over posts that may be in another
+   * language, so each card states the language of the post it links to.
+   * Without it a screen reader reads a Dutch title with an English voice.
+   */
+  test("each overview card states the language of its own post", async ({
+    page,
+  }) => {
+    await page.goto("/blog");
+
+    const card = (slug: string) =>
+      page
+        .locator("li")
+        .filter({ has: page.locator(`a[href="/blog/${slug}"]`) });
+
+    await expect(card(DUTCH.slug)).toHaveAttribute("lang", "nl");
+    await expect(card(TEMPLATE.slug)).toHaveAttribute("lang", "en");
+  });
+
   test("a post page emits Article and BreadcrumbList JSON-LD", async ({
     page,
   }) => {
