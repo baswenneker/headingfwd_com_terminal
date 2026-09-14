@@ -53,9 +53,29 @@ export type StatSpec = z.infer<typeof statSchema>;
 
 // ── Geometry ─────────────────────────────────────────────────────────────────
 
-const W = 720;
-const H = 300;
-const PAD = { top: 18, right: 14, bottom: 40, left: 60 };
+/*
+ * The chart is drawn once, at one size, and that size is also the size it
+ * renders at: the SVG carries `width`/`height` attributes as well as a
+ * `viewBox`, so it has an intrinsic size the stylesheet caps rather than
+ * stretches (`width: auto; max-width: 100%`).
+ *
+ * That cap is what keeps the labels readable. Everything inside a `viewBox`
+ * scales with the rendered width, text included, and there is no unit that
+ * escapes it — so a wide chart squeezed into a phone column shrinks its own
+ * labels with it. At 720 units wide and 11-unit labels the axis text landed at
+ * 5.5px on a 390px phone, which is unreadable.
+ *
+ * Hence a narrower drawing with larger labels: 460 units wide with 13-unit
+ * text renders at 13px on a desktop column and still 10px in a 358px phone
+ * column, the narrowest the body column gets.
+ */
+const W = 460;
+const H = 250;
+const LABEL_SIZE = 13;
+// `right` leaves room for the last x-label, which is centred on the final
+// gridline and would otherwise hang off the drawing and be clipped at the
+// edge of a phone's body column.
+const PAD = { top: 16, right: 26, bottom: 38, left: 48 };
 const PLOT_W = W - PAD.left - PAD.right;
 const PLOT_H = H - PAD.top - PAD.bottom;
 
@@ -143,9 +163,9 @@ function gridAndAxis(ticks: number[], y: (v: number) => number) {
         "text",
         {
           x: PAD.left - 10,
-          y: ty + 4,
+          y: ty + LABEL_SIZE / 3,
           textAnchor: "end",
-          fontSize: 11,
+          fontSize: LABEL_SIZE,
           fill: LABEL,
         },
         [tickLabel(tick)],
@@ -182,9 +202,9 @@ function xLabels(spec: ChartSpec, xs: number[]): Element[] {
       "text",
       {
         x: xs[i]!,
-        y: PAD.top + PLOT_H + 22,
+        y: PAD.top + PLOT_H + LABEL_SIZE + 9,
         textAnchor: "middle",
-        fontSize: 11,
+        fontSize: LABEL_SIZE,
         fill: LABEL,
       },
       [point.label],
@@ -249,10 +269,13 @@ function drawBars(spec: ChartSpec, y: (v: number) => number): Element[] {
 /**
  * One chart, as a `<figure>` holding an inline SVG and its caption.
  *
- * The SVG carries a `viewBox` and no fixed width, so it scales with the body
- * column and stays sharp at any zoom. Its accessible name is the caption; the
- * plot itself is marked `img` so a screen reader announces one figure rather
- * than a pile of shapes.
+ * The SVG carries `width`/`height` alongside its `viewBox`, so it has an
+ * intrinsic size: the stylesheet lets it shrink into a narrow column but never
+ * stretches it past that size, which is what keeps the labels readable (see
+ * the Geometry note above). It stays sharp at any zoom either way.
+ *
+ * Its accessible name is the caption; the plot itself is marked `img` so a
+ * screen reader announces one figure rather than a pile of shapes.
  */
 export function renderChart(spec: ChartSpec): Element {
   const ticks = axisTicks(spec);
@@ -267,6 +290,8 @@ export function renderChart(spec: ChartSpec): Element {
       "svg",
       {
         viewBox: `0 0 ${W} ${H}`,
+        width: W,
+        height: H,
         role: "img",
         ariaLabel: name,
         preserveAspectRatio: "xMidYMid meet",
