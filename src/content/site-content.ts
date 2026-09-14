@@ -64,3 +64,47 @@ export const CONTACT = {
   linkedin: "https://www.linkedin.com/in/baswenneker",
   note: "fastest reply: drop me a DM on LinkedIn.",
 } as const;
+
+/**
+ * How the blog describes itself. One source for the four places that say it:
+ * the `/blog` metadata, the overview's own intro line, the RSS channel
+ * description and the `## Blog` heading note in `/llms.txt`.
+ */
+export const BLOG = {
+  /** Meta description and feed channel description — one sentence, external. */
+  description:
+    "Long-form writing by Bas Wenneker on AI engineering — agents, " +
+    "assistants and AI workflows that reach production. Published here first.",
+  /** The intro paragraph under the "Blog" heading on the overview. */
+  intro:
+    "Long-form writing on AI engineering — what actually reaches production, " +
+    "and what does not. Everything here is published on this site first.",
+} as const;
+
+/**
+ * Copy inside a post, in the post's own language. Everything language-
+ * dependent a reader sees on a post page lives here: the heading above the
+ * source list, its back-links, and the notice that this page is the original
+ * — the last one matters most, because it is written for a visitor who
+ * arrived from a copy on LinkedIn.
+ */
+export const POST_COPY = {
+  nl: {
+    footnoteLabel: "Bronnen",
+    footnoteBackLabel: "Terug naar de tekst",
+    origin:
+      "Origineel gepubliceerd op headingfwd.com. Lees je dit ergens anders, " +
+      "dan is deze pagina het origineel.",
+    allPosts: "alle posts",
+    backToTerminal: "terug naar de terminal",
+  },
+  en: {
+    footnoteLabel: "Sources",
+    footnoteBackLabel: "Back to content",
+    origin:
+      "Originally published on headingfwd.com. If you are reading a copy " +
+      "elsewhere, this page is the original.",
+    allPosts: "all posts",
+    backToTerminal: "back to the terminal",
+  },
+} as const;

@@ -126,7 +126,7 @@ export async function sendContactEmail(params: {
   const { sessionId, senderEmail, message, conversationHistory } = params;
 
   // In test environment, return mock response without sending real emails
-  if (process.env.ENVIRONMENT === "test" || process.env.NODE_ENV === "test") {
+  if (env.ENVIRONMENT === "test" || env.NODE_ENV === "test") {
     return {
       success: true,
       messageId: `test_email_${Date.now()}`,

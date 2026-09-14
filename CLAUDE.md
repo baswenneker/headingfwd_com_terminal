@@ -111,18 +111,41 @@ pnpm run deploy       # Merge main→production and push (triggers Vercel deploy
 ### Project Structure
 
 ```
+content/
+└── blog/                     # Blog posts — one Markdown file per post
+public/
+└── blog/<slug>/              # Images belonging to one post
+docs/
+└── adr/                      # Architecture decision records
 src/
 ├── app/
+│   ├── layout.tsx            # Root layout: html/body, font, JSON-LD, analytics
+│   ├── (terminal)/           # Route group: everything that runs the terminal
+│   │   ├── layout.tsx        # TRPCReactProvider lives here, not in the root
+│   │   ├── page.tsx          # Homepage
+│   │   ├── [command]/        # /help, /about, … deep links
+│   │   └── portfolio/        # /portfolio and /portfolio/<slug>
+│   ├── (blog)/               # Route group: no tRPC, no terminal bundle
+│   │   ├── layout.tsx        # data-blog-root wrapper
+│   │   ├── blog.module.css   # Editorial layout styles
+│   │   └── blog/             # /blog, /blog/<slug>, /blog/rss.xml
 │   ├── _components/          # React components
 │   │   ├── terminal.tsx      # Main terminal container
-│   │   ├── chat-terminal.tsx # Interactive chat UI
-│   │   ├── captcha-overlay.tsx
-│   │   └── code-block.tsx
+│   │   ├── terminal-commands.ts  # Command registry & feed line model
+│   │   ├── portfolio-overlay.tsx
+│   │   ├── post-body.tsx     # Markdown → editorial layout (server-rendered)
+│   │   └── captcha-overlay.tsx
 │   ├── api/
 │   │   ├── chat/route.ts     # AI streaming endpoint (Vercel AI SDK)
-│   │   ├── commands/[command]/route.ts  # Slash command endpoints
 │   │   └── health/route.ts   # Health check endpoint
-│   └── page.tsx              # Homepage
+│   ├── llms.txt/route.ts     # Plain-text source for agents
+│   ├── sitemap.ts
+│   └── not-found.tsx
+├── content/
+│   ├── cases.ts              # Portfolio cases (source of truth)
+│   ├── posts.ts              # Blog post loader, validation & visibility
+│   ├── site-content.ts       # About, specialities, stack, contact
+│   └── blog/                 # Post rendering: remark plugin, charts, assets
 ├── server/
 │   ├── api/
 │   │   ├── routers/
@@ -137,8 +160,6 @@ src/
 │       ├── email.ts               # Resend email integration
 │       ├── rate-limiter.ts        # Rate limiting logic
 │       └── turnstile.ts           # CAPTCHA verification
-├── config/
-│   └── commands.ts           # Command registry & definitions
 ├── trpc/
 │   ├── react.tsx             # tRPC React provider
 │   └── server.ts             # Server-side tRPC caller
@@ -151,7 +172,9 @@ src/
 
 - **`src/app/api/chat/route.ts`** - Main AI chat endpoint, uses Vercel AI SDK's `streamText`, includes `sendMessage` tool for email sending
 - **`src/server/services/command-executor.ts`** - All slash command handlers, returns markdown
-- **`src/config/commands.ts`** - Command registry (add new commands here)
+- **`src/app/_components/terminal-commands.ts`** - Command registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link routes and the sitemap
+- **`src/content/posts.ts`** - Blog post loader: frontmatter schema, the `isPublished` predicate and the date formatting. Every blog surface derives from it
+- **`src/content/blog/remark-post-structure.ts`** - Turns a post's Markdown into the editorial layout (roman-numeral sections, numbered two-column items, charts, figures)
 - **`src/server/db/schema.ts`** - Database schema (modify tables here, then run `pnpm db:push`)
 - **`src/instrumentation.ts`** - Runs automatic migrations in production on server startup
 - **`src/server/services/rate-limiter.ts`** - Rate limiting implementation with database logging
@@ -162,6 +185,17 @@ src/
 1. Add command definition to `src/config/commands.ts` in `COMMAND_REGISTRY`
 2. If dynamic response, add handler function to `commandHandlers` in `src/server/services/command-executor.ts`
 3. Command automatically available via `/api/commands/[command]` route
+
+### Adding a Blog Post
+
+1. Add one Markdown file to `content/blog/`. The filename is the slug unless frontmatter overrides it
+2. Required frontmatter: `title`, `date`, `lang` (`nl` or `en`), `excerpt`. Optional: `slug`, `updated`, `kicker`, `tags`, `draft`, `image`
+3. Drop any images in `public/blog/<slug>/` and reference them by filename
+4. `content/blog/post-template.md` is the reference: a permanent draft showing every supported element
+
+Sections (`##`) and items (`###`) are numbered automatically — never type the numbers. `CONTEXT.md` defines the vocabulary (kicker, lead, excerpt, item, section) and the visibility rules; `docs/adr/` records why posts are Markdown and why the blog sits outside the terminal.
+
+Drafts and future-dated posts are withheld from every public surface. Outside production (`ENVIRONMENT` is `development` or `test`) a draft is previewable with a banner and `noindex`; a future-dated post is never previewable.
 
 ### AI System Prompt
 
@@ -184,6 +218,7 @@ See `.env.example` for all required variables. Key ones:
 - `RESEND_API_KEY` - Required for email sending
 - `TURNSTILE_SECRET_KEY` / `NEXT_PUBLIC_TURNSTILE_SITE_KEY` - Cloudflare CAPTCHA
 - `MESSAGE_RATE_LIMIT` - Messages per minute (default: 10)
+- `ENVIRONMENT` - `development` | `test` | `production`. Distinct from `NODE_ENV`. Outside production, blog drafts are previewable. Unset means production, so it fails closed and Vercel needs no new variable
 
 ### Testing Notes
 

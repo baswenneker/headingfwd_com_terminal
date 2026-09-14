@@ -1,6 +1,7 @@
 import { type MetadataRoute } from "next";
 import { COMMAND_PAGES } from "~/app/_components/terminal-commands";
 import { visibleCases } from "~/content/cases";
+import { lastModified, postPath, publishedPosts } from "~/content/posts";
 import { SITE_URL } from "~/config/site";
 
 /**
@@ -11,7 +12,11 @@ import { SITE_URL } from "~/config/site";
  * routes themselves are generated from, so the sitemap can never drift.
  * `/llms.txt`, the plain-text agent source, is a real crawlable URL too.
  *
- * Case entries carry `lastModified` from the case's own `updated` field — the
+ * The blog adds `/blog` plus one URL per PUBLISHED post — `publishedPosts()`,
+ * the same predicate the overview and the feed use, so a draft or a
+ * future-dated post is absent here as well.
+ *
+ * Case and post entries carry `lastModified` from their own `updated` field — the
  * same single source that feeds `Article.dateModified` on the case page, so
  * the two dates can never drift. Everything else stays undated rather than
  * stamped with a build-time date: the metadata route runs during static
@@ -23,6 +28,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const casePages = visibleCases().map((c) => ({
     url: `${SITE_URL}/portfolio/${c.slug}`,
     ...(c.updated ? { lastModified: c.updated } : {}),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  const postPages = publishedPosts().map((p) => ({
+    url: `${SITE_URL}${postPath(p)}`,
+    lastModified: lastModified(p),
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
@@ -44,7 +56,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: `${SITE_URL}/blog`,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
     ...casePages,
+    ...postPages,
     ...commandPages,
     {
       url: `${SITE_URL}/llms.txt`,

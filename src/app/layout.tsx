@@ -4,7 +4,6 @@ import { type Metadata, type Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { TRPCReactProvider } from "~/trpc/react";
 import { CONTACT } from "~/content/site-content";
 // Canonical production origin + brand name. `metadataBase` lets Next resolve
 // every relative URL below (canonical, Open Graph, icons) to an absolute URL,
@@ -173,7 +172,7 @@ export default function RootLayout({
           // Static, trusted content built above — safe to inline as JSON-LD.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
         />
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        {children}
         <Analytics />
         <SpeedInsights />
       </body>

@@ -7,6 +7,7 @@
  * The file is generated from the same content the terminal renders:
  *   - About / specialities / stack / contact → `~/content/site-content`
  *   - Portfolio cases (incl. full write-ups) → `~/content/cases` (CASES)
+ *   - Blog posts (title, date, excerpt, URL)  → `~/content/posts`
  *
  * Because everything is derived from those sources, the file can never drift
  * from what visitors see. In particular the cases come from `visibleCases()` —
@@ -22,8 +23,11 @@ import {
   INTRO,
   SPECIALTIES,
   STACK,
+  BLOG,
 } from "~/content/site-content";
 import { caseToAgentMarkdown, visibleCases } from "~/content/cases";
+import { postToAgentMarkdown, publishedPosts } from "~/content/posts";
+import { SITE_URL } from "~/config/site";
 
 export const dynamic = "force-static";
 
@@ -79,6 +83,35 @@ function buildAgentsTxt(): string {
   );
   for (const c of visibleCases()) {
     blocks.push(caseToAgentMarkdown(c));
+  }
+
+  // ── Blog ────────────────────────────────────────────────────────────────
+  // The section is always present, even with nothing published: an agent that
+  // reads this file has to be able to learn that the blog exists and where its
+  // overview and feed live, and to come back to them later.
+  //
+  // Only PUBLISHED posts are listed: `publishedPosts()` is the same predicate
+  // the overview, the sitemap and the feed use, so a draft or a future-dated
+  // post is absent here too. Each post is inlined in full, the way cases are —
+  // an agent reading this file gets the writing itself, not a pointer to it.
+  // The section intro is one block and each post another, so the
+  // horizontal-rule join below separates them cleanly.
+  const posts = publishedPosts();
+  blocks.push(
+    [
+      "## Blog",
+      "",
+      `> ${BLOG.description}`,
+      "",
+      `- Overview: ${SITE_URL}/blog`,
+      `- RSS feed: ${SITE_URL}/blog/rss.xml`,
+      ...(posts.length === 0
+        ? ["", "No posts published yet."]
+        : [`- Published posts: ${posts.length}`]),
+    ].join("\n"),
+  );
+  for (const post of posts) {
+    blocks.push(postToAgentMarkdown(post));
   }
 
   // ── Contact ─────────────────────────────────────────────────────────────
