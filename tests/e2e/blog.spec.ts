@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { postPath, publishedPosts } from "~/content/posts";
 
 /**
@@ -228,6 +230,25 @@ test.describe("Post page (/blog/<slug>)", () => {
     await expect(page.locator("article")).toHaveAttribute("lang", "en");
   });
 
+  /**
+   * The overview is English chrome over posts that may be in another
+   * language, so each card states the language of the post it links to.
+   * Without it a screen reader reads a Dutch title with an English voice.
+   */
+  test("each overview card states the language of its own post", async ({
+    page,
+  }) => {
+    await page.goto("/blog");
+
+    const card = (slug: string) =>
+      page
+        .locator("li")
+        .filter({ has: page.locator(`a[href="/blog/${slug}"]`) });
+
+    await expect(card(DUTCH.slug)).toHaveAttribute("lang", "nl");
+    await expect(card(TEMPLATE.slug)).toHaveAttribute("lang", "en");
+  });
+
   test("a post page emits Article and BreadcrumbList JSON-LD", async ({
     page,
   }) => {
@@ -272,6 +293,36 @@ test.describe("Post page (/blog/<slug>)", () => {
     ).toHaveAttribute("href", "/");
   });
 
+  /**
+   * A chart's labels live inside its viewBox, so they shrink with the drawing
+   * and no CSS unit escapes that. Stretched across a wide column the axis text
+   * blows up; squeezed into a phone column it vanishes — it measured 5.5px
+   * before the chart was given an intrinsic size it is never stretched past.
+   * This pins the readable floor at the narrowest the body column gets.
+   */
+  test("chart labels stay readable from phone to desktop", async ({ page }) => {
+    const measure = () =>
+      page.evaluate(() => {
+        const svg = document.querySelector("[data-post-chart] svg")!;
+        const declared = Number(
+          svg.querySelector("text")!.getAttribute("font-size"),
+        );
+        const viewBoxWidth = Number(svg.getAttribute("viewBox")!.split(" ")[2]);
+        const rendered = svg.getBoundingClientRect().width;
+        return (declared * rendered) / viewBoxWidth;
+      });
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/blog/${TEMPLATE.slug}`);
+    expect(await measure()).toBeGreaterThanOrEqual(9.5);
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const wide = await measure();
+    expect(wide).toBeGreaterThanOrEqual(9.5);
+    // And never inflated into a heading by a wide column.
+    expect(wide).toBeLessThanOrEqual(16);
+  });
+
   test("a future-dated post is a 404 on its own URL", async ({ page }) => {
     const res = await page.goto(`/blog/${SCHEDULED.slug}`);
     expect(res?.status()).toBe(404);
@@ -280,6 +331,52 @@ test.describe("Post page (/blog/<slug>)", () => {
   test("an unknown slug is a hard 404", async ({ page }) => {
     const res = await page.goto("/blog/does-not-exist");
     expect(res?.status()).toBe(404);
+  });
+
+  /**
+   * Writing a post should not mean restarting the server. `allPosts()` skips
+   * its cache outside production so the overview picks a new file up, but
+   * `generateStaticParams` runs once — with the route refusing every slug
+   * outside that set, a post appeared in the list and then 404'd when the
+   * author clicked it.
+   *
+   * This is the only test that writes into the content directory, so it
+   * cleans up in a `finally` even when an assertion fails.
+   */
+  test("a post added while the server runs is reachable at once", async ({
+    page,
+  }) => {
+    const slug = "e2e-hot-pickup-check";
+    const file = join(process.cwd(), "content", "blog", `${slug}.md`);
+
+    await writeFile(
+      file,
+      [
+        "---",
+        'title: "Hot pickup check"',
+        "date: 2026-02-01",
+        "lang: en",
+        'excerpt: "Written while the server was already running."',
+        "draft: true",
+        "---",
+        "",
+        "The lead paragraph of a post that was not there when the server started.",
+        "",
+        "## A section",
+        "",
+        "Body text.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    try {
+      const res = await page.goto(`/blog/${slug}`);
+      expect(res?.status()).toBe(200);
+      await expect(page.locator("article")).toContainText("Hot pickup check");
+    } finally {
+      await rm(file, { force: true });
+    }
   });
 });
 

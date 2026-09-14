@@ -19,13 +19,13 @@ import {
 /**
  * `/blog/<slug>` — one post, server-rendered outside the terminal.
  *
- * The route enumerates its slugs at build time and treats anything outside
- * that set as a hard 404 (`dynamicParams = false`), matching the case and
- * command routes. Which slugs exist depends on the environment: published
- * posts everywhere, plus drafts outside production, which render with a
- * visible banner and `noindex`. A future-dated post has no page at all until
- * its date arrives — and because the set is computed at build time, it
- * appears only after the next deploy. That is accepted, not a bug.
+ * The route enumerates its slugs at build time and, in production, treats
+ * anything outside that set as a hard 404, matching the case and command
+ * routes. Which slugs exist depends on the environment: published posts
+ * everywhere, plus drafts outside production, which render with a visible
+ * banner and `noindex`. A future-dated post has no page at all until its date
+ * arrives — and because the set is computed at build time, it appears only
+ * after the next deploy. That is accepted, not a bug.
  */
 
 interface PostPageProps {
@@ -37,9 +37,25 @@ export function generateStaticParams() {
   return routablePosts().map((p) => ({ slug: p.slug }));
 }
 
-// Slugs outside generateStaticParams (drafts in production, future-dated
-// posts, typos) are a hard 404.
-export const dynamicParams = false;
+/**
+ * Slugs outside `generateStaticParams` render on demand rather than being
+ * refused by the router, because `generateStaticParams` runs once and is not
+ * re-evaluated when a file appears under a running dev server. Pinned false,
+ * a post the author had just written showed up in the overview — `allPosts()`
+ * skips its cache outside production for exactly that — but 404'd on its own
+ * URL until the server was restarted.
+ *
+ * Nothing is thereby reachable that was not reachable before: `routablePosts`
+ * remains the single gate, and the page below calls `notFound()` for every
+ * slug `findRoutablePost` does not return. A typo, a future-dated post and —
+ * in production — a draft are all still 404s, now decided by that predicate
+ * instead of by the router's param list. `ENVIRONMENT` defaults to production,
+ * so an unset variable still hides drafts.
+ *
+ * Next requires this to be a literal boolean; it cannot be computed per
+ * environment, which is why the check lives in the page instead.
+ */
+export const dynamicParams = true;
 
 /**
  * Structured data for one post: an `Article` wired into the site-wide graph

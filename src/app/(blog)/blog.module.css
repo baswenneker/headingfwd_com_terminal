@@ -387,8 +387,25 @@
   margin: 22px 0;
 }
 
-.body [data-post-chart] svg,
-.body figure svg {
+/*
+ * A chart is drawn at one size and carries it as `width`/`height` attributes,
+ * so `width: auto` renders it at that size. It may shrink into a narrow
+ * column, but it is never stretched past it: everything inside a viewBox
+ * scales with the rendered width, labels included, so stretching the drawing
+ * across a wide column would blow the axis text up, and shrinking it without a
+ * floor is what made the labels unreadable on a phone. See the Geometry note
+ * in `src/content/blog/charts.ts`.
+ */
+.body [data-post-chart] svg {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  overflow: visible;
+}
+
+/* A hand-drawn SVG is authored for the column and does fill it. */
+.body figure:not([data-post-chart]) svg {
   display: block;
   width: 100%;
   height: auto;
