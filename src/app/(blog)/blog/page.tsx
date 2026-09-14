@@ -5,6 +5,7 @@ import { BLOG } from "~/content/site-content";
 import {
   draftPreviewEnabled,
   formatPostDate,
+  POST_LOCALES,
   postPath,
   routablePosts,
 } from "~/content/posts";
@@ -43,7 +44,7 @@ export default function BlogIndexPage() {
   return (
     <div className={styles.shell}>
       <div className={styles.metaBar}>
-        <span className={styles.kicker}>HeadingFWD · Journal</span>
+        <span className={styles.kicker}>Bas Wenneker · Journal</span>
         <Link href="/" className={styles.backLink}>
           ← back to the terminal
         </Link>
@@ -57,7 +58,16 @@ export default function BlogIndexPage() {
       ) : (
         <ul className={styles.postList}>
           {posts.map((post) => (
-            <li key={post.slug} className={styles.postItem}>
+            // Everything in a card — the date, the title, the excerpt — is in
+            // the post's own language, while the page around it is English.
+            // Stating that here is what makes a screen reader pronounce a
+            // Dutch title in Dutch; the post page does the same on its
+            // `article` element.
+            <li
+              key={post.slug}
+              className={styles.postItem}
+              lang={POST_LOCALES[post.lang].html}
+            >
               <Link href={postPath(post)} className={styles.postLink}>
                 <time className={styles.postDate} dateTime={post.date}>
                   {formatPostDate(post.date, post.lang)}
@@ -65,8 +75,11 @@ export default function BlogIndexPage() {
                 <div>
                   <h2 className={styles.postTitle}>
                     {post.title}
+                    {/* Chrome, not content: English whatever the post is. */}
                     {previewing && post.draft ? (
-                      <span className={styles.draftBadge}>draft</span>
+                      <span className={styles.draftBadge} lang="en">
+                        draft
+                      </span>
                     ) : null}
                   </h2>
                   <p className={styles.postExcerpt}>{post.excerpt}</p>
