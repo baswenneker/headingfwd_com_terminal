@@ -33,6 +33,27 @@ body {
     );
 }
 
+/*
+ * Blog routes opt out of both rules above.
+ *
+ * The terminal needs the page itself never to scroll and the cyan gradient
+ * behind it; a long article needs the opposite. A nested layout cannot set
+ * attributes on `html` or `body`, so the blog layout marks its own wrapper
+ * with `data-blog-root` and these two rules key off it. The wrapper paints
+ * the near-black blog surface at full viewport height, so no cyan shows
+ * through on a page shorter than the screen.
+ */
+html:has([data-blog-root]),
+body:has([data-blog-root]) {
+  height: auto;
+  overflow: auto;
+}
+
+body:has([data-blog-root]) {
+  background-color: #07090b;
+  background-image: none;
+}
+
 /* Highlight color for selected text uses the accent token. */
 ::selection {
   background: var(--accent, #2ee6f6);

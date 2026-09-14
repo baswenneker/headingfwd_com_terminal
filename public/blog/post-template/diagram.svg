@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 140" role="presentation">
+  <g fill="none" stroke="currentColor" stroke-width="1.5">
+    <rect x="8" y="34" width="150" height="60" rx="4"/>
+    <rect x="245" y="34" width="150" height="60" rx="4"/>
+    <rect x="482" y="34" width="150" height="60" rx="4"/>
+    <path d="M158 64h87M395 64h87"/>
+    <path d="M236 58l9 6-9 6M473 58l9 6-9 6"/>
+  </g>
+  <g fill="currentColor" font-family="monospace" font-size="13" text-anchor="middle">
+    <text x="83" y="69">source</text>
+    <text x="320" y="69">transform</text>
+    <text x="557" y="69">page</text>
+  </g>
+</svg>

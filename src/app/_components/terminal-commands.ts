@@ -72,12 +72,18 @@ export type FeedLine =
  *               `url` in a new tab. Used by `/linkedin`. The terminal opens
  *               the tab synchronously inside the triggering gesture so the
  *               browser does not treat it as an unsolicited popup.
+ * `navigate`  — appends the given lines and signals the terminal to leave for
+ *               `href`, a real page of its own. Used by `/blog`, which lives
+ *               outside the terminal entirely: unlike the portfolio overlay
+ *               there is nothing to show in place, and a full navigation is
+ *               what drops the terminal bundle the blog does not load.
  */
 export type CommandResult =
   | { action: "clear" }
   | { action: "lines"; lines: FeedLine[] }
   | { action: "portfolio"; lines: FeedLine[] }
-  | { action: "openurl"; url: string; lines: FeedLine[] };
+  | { action: "openurl"; url: string; lines: FeedLine[] }
+  | { action: "navigate"; href: string; lines: FeedLine[] };
 
 // ── Command handlers ─────────────────────────────────────────────────────────
 
@@ -89,6 +95,7 @@ function helpLines(): FeedLine[] {
     { kind: "row", label: "/about",     desc: "who I am & how I work" },
     { kind: "row", label: "/services",  desc: "what I help teams with" },
     { kind: "row", label: "/portfolio", desc: "browse my work in fullscreen ↵" },
+    { kind: "row", label: "/blog",      desc: "long-form writing on AI engineering ↵" },
     { kind: "row", label: "/stack",     desc: "tools, models & tech" },
     { kind: "row", label: "/contact",   desc: "how to reach me" },
     { kind: "row", label: "/agents",    desc: "plaintext version for agents (llms.txt)" },
@@ -184,14 +191,16 @@ export interface CommandPage {
 
 /**
  * The commands that get their own shareable URL, in /help order. Single
- * source of truth for those pages: `src/app/[command]/page.tsx` derives its
+ * source of truth for those pages: `src/app/(terminal)/[command]/page.tsx` derives its
  * routes + metadata from this array and `src/app/sitemap.ts` its sitemap
  * entries, so adding one entry here publishes a new URL everywhere at once.
  *
  * Deliberately absent: `/clear` and `/cls` (they only mutate feed state —
  * there is no state to deep-link), the `/whoami`, `/ls` and `/llms`
- * easter-egg aliases, and `/portfolio`, which has a real route of its own
- * (`src/app/portfolio/`).
+ * easter-egg aliases, and `/portfolio` and `/blog`, which both have a real
+ * route of their own (`src/app/(terminal)/portfolio/`, `src/app/(blog)/blog/`).
+ * Registering `blog` here would generate a dead `/blog` page under the
+ * `[command]` route and a duplicate sitemap entry.
  */
 export const COMMAND_PAGES: CommandPage[] = [
   {
@@ -281,6 +290,16 @@ export function runCommand(raw: string): CommandResult {
     return {
       action: "portfolio",
       lines: [echo, { kind: "out", text: "→ launching portfolio…" }],
+    };
+  }
+
+  if (token === "blog") {
+    // The blog is a real route outside the terminal, not an overlay: echo the
+    // command, then leave. See the `navigate` action above.
+    return {
+      action: "navigate",
+      href: "/blog",
+      lines: [echo, { kind: "out", text: "→ opening the blog…" }],
     };
   }
 
