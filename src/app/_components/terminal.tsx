@@ -345,6 +345,14 @@ export function Terminal({
     } else if (result.action === "portfolio") {
       setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
       setTimeout(openPortfolio, 140);
+    } else if (result.action === "navigate") {
+      setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
+      // A real page outside the terminal — see the `navigate` action in
+      // terminal-commands.ts. A full navigation rather than router.push:
+      // the overlay writes the URL with history.replaceState behind the
+      // router's back, so the router's idea of the current route cannot be
+      // trusted here, and leaving for real is what drops the terminal bundle.
+      setTimeout(() => window.location.assign(result.href), 140);
     } else if (result.action === "openurl") {
       setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
       // Open synchronously within the triggering keypress/click so the browser
@@ -584,7 +592,17 @@ export function Terminal({
             >
               /portfolio
             </button>
-            {" "}to browse my work fullscreen · or just ask
+            {" "}to browse my work fullscreen ·{" "}
+            <button
+              className={styles.tipCommand}
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatchCommand("/blog");
+              }}
+            >
+              /blog
+            </button>
+            {" "}to read what I write · or just ask
           </div>
 
           {/* Divider separating the intro from the chronological feed */}
@@ -865,6 +883,14 @@ export function Terminal({
             }}
           >
             portfolio
+          </Link>
+          {/*
+           * Crawl path into the blog. `/blog` is a real route outside the
+           * terminal, so this is a plain link: clicking it leaves the page,
+           * which is exactly what the `/blog` command does too.
+           */}
+          <Link className={styles.statusLink} href="/blog" prefetch={false}>
+            blog
           </Link>
           {/*
            * Plain-text source for AI agents & crawlers. Points at the

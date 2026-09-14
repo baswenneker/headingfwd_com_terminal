@@ -6,8 +6,11 @@ import { NotFoundConsole } from "./_components/not-found-console";
 
 /**
  * Global 404. Next.js renders this for any unmatched URL and whenever a route
- * calls notFound() — the command deep-links (`/[command]`) and case deep-links
- * (`/portfolio/[slug]`) both do for tokens/slugs outside their registries.
+ * calls notFound() — the command deep-links (`/[command]`), the case deep-links
+ * (`/portfolio/[slug]`) and the post pages (`/blog/[slug]`) all do for
+ * tokens/slugs outside their registries. A draft or future-dated post lands
+ * here too: it is absent from `generateStaticParams` and `dynamicParams` is
+ * false, so its URL is a hard 404 rather than a soft one.
  *
  * It reuses the terminal window chrome (title bar, dot grid, status bar) from
  * terminal.module.css, so a wrong turn still lands the visitor inside the same
@@ -19,7 +22,7 @@ export const metadata: Metadata = {
   title: "404 — page not found",
   description:
     "That route doesn’t exist on headingfwd.com. Head back to the terminal, " +
-    "or jump to the portfolio, services, about or contact pages.",
+    "or jump to the portfolio, blog, services, about or contact pages.",
   // The response already carries a 404 status; say noindex explicitly so no
   // crawler ever keeps a soft-404 URL in its index.
   robots: { index: false, follow: true },
@@ -29,6 +32,7 @@ export const metadata: Metadata = {
 const ROUTES = [
   { cmd: "cd ~", href: "/", desc: "back to the terminal" },
   { cmd: "/portfolio", href: "/portfolio", desc: "browse my work fullscreen" },
+  { cmd: "/blog", href: "/blog", desc: "long-form writing on AI engineering" },
   { cmd: "/services", href: "/services", desc: "what I help teams with" },
   { cmd: "/about", href: "/about", desc: "who I am & how I work" },
   { cmd: "/contact", href: "/contact", desc: "get in touch" },

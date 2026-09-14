@@ -12,6 +12,17 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    /**
+     * Deployment environment, set per environment rather than per process.
+     * Distinct from NODE_ENV: the end-to-end suite runs `next dev` with
+     * NODE_ENV=test, and blog draft previews key off this value.
+     *
+     * Fails closed — an unset variable means "production", which hides
+     * drafts. Vercel therefore needs no new variable.
+     */
+    ENVIRONMENT: z
+      .enum(["development", "test", "production"])
+      .default("production"),
     TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
     OPENAI_API_KEY: z.string().min(1).optional(),
     RESEND_API_KEY: z.string().min(1).optional(),
@@ -41,6 +52,7 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN,
     NODE_ENV: process.env.NODE_ENV,
+    ENVIRONMENT: process.env.ENVIRONMENT,
     TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
     NEXT_PUBLIC_DISABLE_CAPTCHA: process.env.NEXT_PUBLIC_DISABLE_CAPTCHA,
