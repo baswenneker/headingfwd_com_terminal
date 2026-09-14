@@ -592,7 +592,17 @@ export function Terminal({
             >
               /portfolio
             </button>
-            {" "}to browse my work fullscreen · or just ask
+            {" "}to browse my work fullscreen ·{" "}
+            <button
+              className={styles.tipCommand}
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatchCommand("/blog");
+              }}
+            >
+              /blog
+            </button>
+            {" "}to read what I write · or just ask
           </div>
 
           {/* Divider separating the intro from the chronological feed */}

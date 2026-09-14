@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { publishedPosts } from "~/content/posts";
+import { postPath, publishedPosts } from "~/content/posts";
 
 /**
  * Tests for the blog at `/blog`, `/blog/<slug>` and `/blog/rss.xml`.
@@ -347,6 +347,30 @@ test.describe("Feed, sitemap and llms.txt", () => {
       );
     }
   });
+
+  // The Blog section is unconditional: an agent has to be able to learn that
+  // the blog exists and where to come back to, even before the first post.
+  test("llms.txt names the blog overview and feed even with nothing published", async ({
+    page,
+  }) => {
+    const res = await page.request.get("/llms.txt");
+    const text = await res.text();
+
+    expect(text).toContain("## Blog");
+    expect(text).toContain("https://headingfwd.com/blog\n");
+    expect(text).toContain("https://headingfwd.com/blog/rss.xml");
+  });
+
+  test("the blog overview and every post point at the feed", async ({
+    page,
+  }) => {
+    for (const path of ["/blog", ...publishedPosts().map((p) => postPath(p))]) {
+      const html = await (await page.request.get(path)).text();
+      expect(html, `${path} has no feed autodiscovery`).toContain(
+        'type="application/rss+xml"',
+      );
+    }
+  });
 });
 
 test.describe("Terminal integration", () => {
@@ -356,8 +380,28 @@ test.describe("Terminal integration", () => {
     expect(html).toContain('href="/blog"');
   });
 
+  // Scoped to the help output: the tip line above the prompt carries a `/blog`
+  // token of its own, so a bare text match would resolve to two elements.
   test("/help lists the blog command", async ({ page }) => {
     await page.goto("/help");
-    await expect(page.getByText("/blog", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("long-form writing on AI engineering"),
+    ).toBeVisible();
+  });
+
+  // The tip line above the prompt is the first thing a visitor reads, and its
+  // command tokens are real buttons so a touch visitor never has to type.
+  test("the tip line offers /blog and it navigates", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "/blog", exact: true }).click();
+    await expect(page).toHaveURL("/blog");
+  });
+
+  // A wrong turn is a crawl path too: the 404 offers the working routes, and
+  // the blog is one of them.
+  test("the 404 page offers /blog as a working route", async ({ page }) => {
+    const res = await page.goto("/this-route-does-not-exist");
+    expect(res?.status()).toBe(404);
+    await expect(page.getByRole("link", { name: /\/blog/ })).toBeVisible();
   });
 });

@@ -27,6 +27,7 @@ import {
 } from "~/content/site-content";
 import { caseToAgentMarkdown, visibleCases } from "~/content/cases";
 import { postToAgentMarkdown, publishedPosts } from "~/content/posts";
+import { SITE_URL } from "~/config/site";
 
 export const dynamic = "force-static";
 
@@ -85,18 +86,32 @@ function buildAgentsTxt(): string {
   }
 
   // ── Blog ────────────────────────────────────────────────────────────────
-  // Only PUBLISHED posts: `publishedPosts()` is the same predicate the
-  // overview, the sitemap and the feed use, so a draft or a future-dated post
-  // is absent here too. Each post is inlined in full, the way cases are — an
-  // agent reading this file gets the writing itself, not a pointer to it.
+  // The section is always present, even with nothing published: an agent that
+  // reads this file has to be able to learn that the blog exists and where its
+  // overview and feed live, and to come back to them later.
+  //
+  // Only PUBLISHED posts are listed: `publishedPosts()` is the same predicate
+  // the overview, the sitemap and the feed use, so a draft or a future-dated
+  // post is absent here too. Each post is inlined in full, the way cases are —
+  // an agent reading this file gets the writing itself, not a pointer to it.
   // The section intro is one block and each post another, so the
   // horizontal-rule join below separates them cleanly.
   const posts = publishedPosts();
-  if (posts.length > 0) {
-    blocks.push(["## Blog", "", `> ${BLOG.description}`].join("\n"));
-    for (const post of posts) {
-      blocks.push(postToAgentMarkdown(post));
-    }
+  blocks.push(
+    [
+      "## Blog",
+      "",
+      `> ${BLOG.description}`,
+      "",
+      `- Overview: ${SITE_URL}/blog`,
+      `- RSS feed: ${SITE_URL}/blog/rss.xml`,
+      ...(posts.length === 0
+        ? ["", "No posts published yet."]
+        : [`- Published posts: ${posts.length}`]),
+    ].join("\n"),
+  );
+  for (const post of posts) {
+    blocks.push(postToAgentMarkdown(post));
   }
 
   // ── Contact ─────────────────────────────────────────────────────────────
