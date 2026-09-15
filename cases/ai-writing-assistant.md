@@ -23,7 +23,9 @@ accessibility level — without a single sentence ever leaving the organization'
 environment. Editors paste a draft and get sentence-by-sentence suggestions they can
 accept, adjust or ignore, so they stay fully in control.
 
-## Problem
+## The work
+
+### Problem
 
 Editors here work across high-traffic websites and large letter runs, and everything
 they publish has to stay consistent: the style guide, the approved terminology, and
@@ -34,7 +36,7 @@ Generic AI tools could help with the writing itself, but they came with two
 dealbreakers: they don't know the organization's house style, and sending sensitive
 government text to an external cloud was simply not an option on privacy grounds.
 
-## Approach
+### Approach
 
 Instead of dropping a finished tool on the team, I built it together with the editors.
 Early scepticism turned into ownership by shipping small, showing real results on their
@@ -44,7 +46,7 @@ Just as important: the assistant runs entirely inside the organization's own
 environment. Sensitive data never leaves the building — and that is precisely what made
 adoption possible.
 
-## How it works
+### How it works
 
 An editor pastes a piece of text. The assistant rewrites it sentence by sentence and
 returns the result as a three-column table — **Original · Rewritten · Remarks** — so
@@ -57,7 +59,7 @@ decides what to keep.
 The output appears as a table with three columns: **Original sentence · Rewritten
 sentence · Remarks**.
 
-**Benefits:**
+### Benefits
 
 | Benefit | Explanation |
 |---|---|
@@ -71,7 +73,9 @@ sentence · Remarks**.
 > "By constantly getting new suggestions, it helps me in the creative process and it
 > instantly meets the writing rules we follow!" — Editor
 
-## Tech & stack
+## Outcome
+
+### Tech & stack
 
 - ☁️ **Azure OpenAI LLMs** — LLM provider, hosted within the organization's own Azure tenant
 - 🐍 **Python** — backend
@@ -79,7 +83,7 @@ sentence · Remarks**.
 - 💻 **VSCode** — development environment
 - 🔎 **Vector database** — retrieves the matching style-guide rules and word-list entries per sentence
 
-## Status
+### Status
 
 **Live** — a custom client project running in production at a large public-sector
 organization.

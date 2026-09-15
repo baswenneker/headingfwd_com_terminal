@@ -20,17 +20,21 @@ with timecodes — for example:
 - `1:30–3:00` Collaboration in healthcare
 - …
 
-## Approach (high level)
+## The work
+
+### Approach (high level)
 
 Audio is automatically converted to text (transcription), after which a model divides the
 content into logical segments with timecodes. This makes a long episode searchable and
 easy to navigate.
 
-## Status
+## Outcome
+
+### Status
 
 **Concept.** This idea has not yet been developed into a demo.
 
-## Related tech: WhisperFWD
+### Related tech: WhisperFWD
 
 WhisperFWD is a macOS menu-bar app for recording meetings, with **local** transcription
 and AI summaries:

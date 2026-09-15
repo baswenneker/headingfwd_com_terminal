@@ -21,7 +21,9 @@ would. The story: an experiment with **ChatGPT as a personal trainer fails**, wh
 a **custom AI solution succeeds**. With custom software you can analyze complex movements
 in video and give technical, personalized coaching on them.
 
-## Problem
+## The work
+
+### Problem
 
 I was curious how far the multimodal capabilities of today's LLMs reach — models that
 understand text, sound, images and video. For this I used videos I had earlier sent to my
@@ -29,7 +31,7 @@ own personal trainer. After uploading them to ChatGPT I only got generic, unspec
 feedback. No available model could analyze the movements accurately; when asked for visual
 feedback it generated irrelevant images.
 
-## Approach
+### Approach
 
 So I built a custom solution: an AI-powered virtual Olympic coach that poses as the
 world-famous weightlifting coach
@@ -52,7 +54,9 @@ world-famous weightlifting coach
 The two attempts (attempt 1 with ChatGPT, attempt 2 with the custom coach) and two
 technique analyses are shown as playable videos at the bottom of this case.
 
-## Tech & stack
+## Outcome
+
+### Tech & stack
 
 - 💬 **ChatGPT** — macOS app (first, failed attempt)
 - 🤖 **Google AI Studio** — Gemini 2.5 Pro (multimodal video analysis)
@@ -60,7 +64,7 @@ technique analyses are shown as playable videos at the bottom of this case.
 - 💻 **VSCode** — IDE
 - 🐍 **Python** — tool for slowing down video and the feedback overlay
 
-## Status
+### Status
 
 **Experiment** — my own R&D, shared via LinkedIn with demo videos. It shows that generic
 multimodal models fall short for movement analysis, while a custom approach with Gemini
