@@ -20,7 +20,6 @@ import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import { env } from "~/env";
-import { SITE_URL } from "~/config/site";
 
 /** Where post sources live, relative to the repository root. */
 const POSTS_DIR = join(process.cwd(), "content", "blog");
@@ -289,27 +288,4 @@ export function toRfc822(date: string): string {
 /** The date a post was last touched: `updated` when set, else `date`. */
 export function lastModified(post: Post): string {
   return post.updated ?? post.date;
-}
-
-/**
- * One post as plain Markdown for `/llms.txt`, mirroring
- * `caseToAgentMarkdown`: a heading, the metadata as a list, then the writing
- * itself. The body goes in verbatim — an agent reading that file is meant to
- * get the article, not a pointer to it. The URL is stated first, because it
- * is the canonical original.
- */
-export function postToAgentMarkdown(post: Post): string {
-  return [
-    `### ${post.title}`,
-    "",
-    `- URL: ${SITE_URL}${postPath(post)}`,
-    `- Published: ${post.date} (${formatPostDate(post.date, post.lang)})`,
-    ...(post.updated ? [`- Updated: ${post.updated}`] : []),
-    `- Language: ${post.lang}`,
-    ...(post.tags?.length ? [`- Tags: ${post.tags.join(", ")}`] : []),
-    "",
-    `> ${post.excerpt}`,
-    "",
-    post.body,
-  ].join("\n");
 }

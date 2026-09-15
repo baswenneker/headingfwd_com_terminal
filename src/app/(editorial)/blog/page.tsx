@@ -1,6 +1,6 @@
 import { type Metadata } from "next";
 import Link from "next/link";
-import styles from "../blog.module.css";
+import styles from "../editorial.module.css";
 import { BLOG } from "~/content/site-content";
 import {
   draftPreviewEnabled,
@@ -56,7 +56,7 @@ export default function BlogIndexPage() {
       {posts.length === 0 ? (
         <p className={styles.empty}>No posts yet. Check back soon.</p>
       ) : (
-        <ul className={styles.postList}>
+        <ul className={styles.list}>
           {posts.map((post) => (
             // Everything in a card — the date, the title, the excerpt — is in
             // the post's own language, while the page around it is English.
@@ -65,24 +65,24 @@ export default function BlogIndexPage() {
             // `article` element.
             <li
               key={post.slug}
-              className={styles.postItem}
+              className={styles.listItem}
               lang={POST_LOCALES[post.lang].html}
             >
-              <Link href={postPath(post)} className={styles.postLink}>
-                <time className={styles.postDate} dateTime={post.date}>
+              <Link href={postPath(post)} className={styles.listLink}>
+                <time className={styles.listMeta} dateTime={post.date}>
                   {formatPostDate(post.date, post.lang)}
                 </time>
                 <div>
-                  <h2 className={styles.postTitle}>
+                  <h2 className={styles.listTitle}>
                     {post.title}
                     {/* Chrome, not content: English whatever the post is. */}
                     {previewing && post.draft ? (
-                      <span className={styles.draftBadge} lang="en">
+                      <span className={styles.badge} lang="en">
                         draft
                       </span>
                     ) : null}
                   </h2>
-                  <p className={styles.postExcerpt}>{post.excerpt}</p>
+                  <p className={styles.listSummary}>{post.excerpt}</p>
                 </div>
               </Link>
             </li>

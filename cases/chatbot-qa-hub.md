@@ -14,8 +14,6 @@ sources:
 
 # Chatbot: a Q&A hub for your team
 
-## In short
-
 A chatbot that acts as a Q&A hub for a team and saves a lot of time: chat instead of
 reading through manuals.
 

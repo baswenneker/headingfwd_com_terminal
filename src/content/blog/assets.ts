@@ -1,11 +1,12 @@
 /**
- * Image assets for a post.
+ * Image assets for one page of editorial Markdown.
  *
- * An author drops a file in `public/blog/<slug>/` and references it by name:
- * `![A diagram](pipeline.png)`. This module turns that name into a public
- * path plus the file's intrinsic width and height, read from the bytes at
- * build time — so the page reserves the right box before the image loads and
- * nothing jumps while reading, without dimensions in the Markdown.
+ * An author drops a file in the page's asset directory — `public/blog/<slug>/`
+ * for a post, `public/portfolio/<slug>/` for a case — and references it by
+ * name: `![A diagram](pipeline.png)`. This module turns that name into a
+ * public path plus the file's intrinsic width and height, read from the bytes
+ * at build time — so the page reserves the right box before the image loads
+ * and nothing jumps while reading, without dimensions in the Markdown.
  *
  * SVG files are handled differently: their markup is returned so the renderer
  * can inline it, letting a hand-drawn diagram pick up the page's colours
@@ -19,7 +20,7 @@ import type { ResolvedImage } from "./remark-post-structure";
 
 const PUBLIC_DIR = join(process.cwd(), "public");
 
-/** Everything one post's renderer needs to place its images. */
+/** Everything one page's renderer needs to place its images. */
 export interface PostAssets {
   /** Resolve an image URL as written in the Markdown. */
   resolve: (url: string) => ResolvedImage | null;
@@ -33,18 +34,22 @@ function isExternal(url: string): boolean {
 }
 
 /**
- * Build the asset resolver for one post. Nothing is read until an image is
- * actually referenced, so a post with no images touches no files.
+ * Build the asset resolver for one page.
+ *
+ * `assetBase` is the public directory its bare filenames resolve against,
+ * without a trailing slash: `/blog/<slug>` or `/portfolio/<slug>`. Nothing is
+ * read until an image is actually referenced, so a page with no images
+ * touches no files.
  */
-export function postAssets(slug: string): PostAssets {
+export function postAssets(assetBase: string): PostAssets {
   const inlineSvg = new Map<string, string>();
   const cache = new Map<string, ResolvedImage | null>();
 
   function read(url: string): ResolvedImage | null {
     if (isExternal(url)) return null;
 
-    // A bare filename belongs to this post; an absolute path is taken as-is.
-    const src = url.startsWith("/") ? url : `/blog/${slug}/${url}`;
+    // A bare filename belongs to this page; an absolute path is taken as-is.
+    const src = url.startsWith("/") ? url : `${assetBase}/${url}`;
     const file = join(PUBLIC_DIR, src.replace(/^\//, ""));
 
     let bytes: Buffer;
