@@ -24,7 +24,9 @@ instead of hours. I designed and built it end to end, from the AI that writes in
 voice to the interface that keeps you in control. The promise, in one line:
 **generate months of LinkedIn content in minutes.**
 
-## Problem
+## The work
+
+### Problem
 
 Most professionals know that showing up on LinkedIn grows their brand and their
 business. Actually doing it, consistently, is the hard part:
@@ -35,12 +37,12 @@ business. Actually doing it, consistently, is the hard part:
 - **Voice drift** — hard to sound like themselves at speed
 - **Inconsistency** — irregular posting quietly kills reach
 
-## Approach
+### Approach
 
 A writing assistant that makes content creation faster *and* better — without taking
 the person out of the loop.
 
-**What it does:**
+### What it does
 
 - Generates posts from proven, high-performing templates
 - Turns a keyword into ready-to-use topic suggestions
@@ -48,7 +50,7 @@ the person out of the loop.
 - Works in English and Dutch
 - Keeps your personal voice and style intact
 
-**Design process:**
+### Design process
 
 | Phase | What happened |
 |---|---|
@@ -56,7 +58,7 @@ the person out of the loop.
 | Design & prototyping | Minimalist, speed-first UI; iterated on UX and A/B-tested key features |
 | AI integration | Trained on high-performing posts, built personalisation, added quality checks and a continuous-improvement loop |
 
-## How it works
+### How it works
 
 **Content generation**
 
@@ -76,7 +78,9 @@ the person out of the loop.
 - Best practices and tips
 - Advice on diversifying your content
 
-## Impact & results
+## Outcome
+
+### Impact & results
 
 | Figure | Meaning |
 |---|---|
@@ -85,18 +89,18 @@ the person out of the loop.
 | 2 languages | English & Dutch |
 | ∞ | Content possibilities |
 
-## Tech & stack
+### Tech & stack
 
 - **Frontend & UX** — modern React interface, real-time content preview, responsive design, fast load times
 - **AI & backend** — LLM-powered generation with a personalisation layer, a continuous-learning pipeline, secure API architecture, and scalable cloud infrastructure
 
-## Key takeaways
+### Key takeaways
 
 1. **AI as assistant, not replacement** — people want to stay in control of what goes out under their name.
 2. **Speed is the product** — professionals have little time; every second of friction costs a post.
 3. **Personalisation is non-negotiable** — generic content doesn't land; context is everything.
 4. **Keep up or fall behind** — LinkedIn's algorithm keeps shifting, so the tool has to keep learning.
 
-## Status
+### Status
 
 **Live** — a SaaS product, available at [hintsay.com](https://hintsay.com).

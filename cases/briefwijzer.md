@@ -24,7 +24,9 @@ letter. As a bonus, you as the sender see which of your letters are experienced 
 unreadable, so you can improve them — and you lower the contact load on your customer
 service.
 
-## Problem
+## The work
+
+### Problem
 
 Communication is not understandable for a large part of the Netherlands:
 
@@ -34,7 +36,7 @@ Communication is not understandable for a large part of the Netherlands:
 - Services don't match the needs of this audience
 - Complicated letters lead to frustration and confusion
 
-## Approach
+### Approach
 
 BriefWijzer is a digital reading aid that makes letters readable for everyone, without
 extra work for the sender:
@@ -44,7 +46,7 @@ extra work for the sender:
 - Interactive chat function that answers within the context of the letter
 - Insight for the sender into which letters are experienced as unreadable
 
-## How it works
+### How it works
 
 **Your customer…**
 
@@ -58,7 +60,9 @@ extra work for the sender:
 - 👆 …makes actions directly clickable — you configure the call-to-actions shown.
 - 💬 …answers questions directly via chat.
 
-## Tech & stack
+## Outcome
+
+### Tech & stack
 
 - 🐍 **Python** — backend processing
 - 👁️ **Google Vision** — OCR and document analysis
@@ -68,7 +72,7 @@ extra work for the sender:
 The pipeline: OCR reads the letter, RAG/LLM summarizes and answers questions within the
 context of the letter.
 
-## Status
+### Status
 
 **Demo** — working product concept. Positioned as an app for companies and government
 bodies that want to make their letters more accessible.

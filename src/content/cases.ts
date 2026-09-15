@@ -13,10 +13,20 @@
  *
  * The `body` goes through the same renderer as a blog post, so it follows the
  * post vocabulary in `CONTEXT.md`: the text before the first `##` is the LEAD,
- * a `##` is a numbered SECTION and a `###` a numbered ITEM. Never open a body
- * with a heading such as `## In short` — that turns the summary into section I
- * and leaves the case without a lead. Numbers are added by the renderer;
- * authors never type them.
+ * a `##` is a numbered SECTION and a `###` a numbered ITEM. Numbers are added
+ * by the renderer; authors never type them.
+ *
+ * Two rules that are easy to get wrong:
+ *
+ *   - Never open a body with a heading such as `## In short`. That turns the
+ *     summary into section I and leaves the case without a lead.
+ *   - A `###` only becomes an item when a `##` stands above it. A `###` before
+ *     the first `##` silently lands in the lead instead.
+ *
+ * Every case is therefore shaped the same way: a lead, then two sections —
+ * "The work" and "Outcome" — with the individual headings as items under
+ * them. That is what puts the heading in the left column and its text in the
+ * right, the two-column rhythm the blog uses.
  *
  * To add a case: append an entry to CASES with a unique slug, the next `n`
  * display index, a one-line `kind`, the metadata fields, and the full write-up
@@ -139,7 +149,9 @@ accessibility level — without a single sentence ever leaving the organization'
 environment. Editors paste a draft and get sentence-by-sentence suggestions they can
 accept, adjust or ignore, so they stay fully in control.
 
-## Problem
+## The work
+
+### Problem
 
 Editors here work across high-traffic websites and large letter runs, and everything
 they publish has to stay consistent: the style guide, the approved terminology, and
@@ -150,7 +162,7 @@ Generic AI tools could help with the writing itself, but they came with two
 dealbreakers: they don't know the organization's house style, and sending sensitive
 government text to an external cloud was simply not an option on privacy grounds.
 
-## Approach
+### Approach
 
 Instead of dropping a finished tool on the team, I built it together with the editors.
 Early scepticism turned into ownership by shipping small, showing real results on their
@@ -160,7 +172,7 @@ Just as important: the assistant runs entirely inside the organization's own
 environment. Sensitive data never leaves the building — and that is precisely what made
 adoption possible.
 
-## How it works
+### How it works
 
 An editor pastes a piece of text. The assistant rewrites it sentence by sentence and
 returns the result as a three-column table — **Original · Rewritten · Remarks** — so
@@ -173,7 +185,7 @@ decides what to keep.
 The output appears as a table with three columns: **Original sentence · Rewritten
 sentence · Remarks**.
 
-**Benefits:**
+### Benefits
 
 | Benefit | Explanation |
 |---|---|
@@ -187,7 +199,9 @@ sentence · Remarks**.
 > "By constantly getting new suggestions, it helps me in the creative process and it
 > instantly meets the writing rules we follow!" — Editor
 
-## Tech & stack
+## Outcome
+
+### Tech & stack
 
 - ☁️ **Azure OpenAI LLMs** — LLM provider, hosted within the organization's own Azure tenant
 - 🐍 **Python** — backend
@@ -195,7 +209,7 @@ sentence · Remarks**.
 - 💻 **VSCode** — development environment
 - 🔎 **Vector database** — retrieves the matching style-guide rules and word-list entries per sentence
 
-## Status
+### Status
 
 **Live** — a custom client project running in production at a large public-sector
 organization.
@@ -222,7 +236,9 @@ instead of hours. I designed and built it end to end, from the AI that writes in
 voice to the interface that keeps you in control. The promise, in one line:
 **generate months of LinkedIn content in minutes.**
 
-## Problem
+## The work
+
+### Problem
 
 Most professionals know that showing up on LinkedIn grows their brand and their
 business. Actually doing it, consistently, is the hard part:
@@ -233,12 +249,12 @@ business. Actually doing it, consistently, is the hard part:
 - **Voice drift** — hard to sound like themselves at speed
 - **Inconsistency** — irregular posting quietly kills reach
 
-## Approach
+### Approach
 
 A writing assistant that makes content creation faster *and* better — without taking
 the person out of the loop.
 
-**What it does:**
+### What it does
 
 - Generates posts from proven, high-performing templates
 - Turns a keyword into ready-to-use topic suggestions
@@ -246,7 +262,7 @@ the person out of the loop.
 - Works in English and Dutch
 - Keeps your personal voice and style intact
 
-**Design process:**
+### Design process
 
 | Phase | What happened |
 |---|---|
@@ -254,7 +270,7 @@ the person out of the loop.
 | Design & prototyping | Minimalist, speed-first UI; iterated on UX and A/B-tested key features |
 | AI integration | Trained on high-performing posts, built personalisation, added quality checks and a continuous-improvement loop |
 
-## How it works
+### How it works
 
 **Content generation**
 
@@ -274,7 +290,9 @@ the person out of the loop.
 - Best practices and tips
 - Advice on diversifying your content
 
-## Impact & results
+## Outcome
+
+### Impact & results
 
 | Figure | Meaning |
 |---|---|
@@ -283,19 +301,19 @@ the person out of the loop.
 | 2 languages | English & Dutch |
 | ∞ | Content possibilities |
 
-## Tech & stack
+### Tech & stack
 
 - **Frontend & UX** — modern React interface, real-time content preview, responsive design, fast load times
 - **AI & backend** — LLM-powered generation with a personalisation layer, a continuous-learning pipeline, secure API architecture, and scalable cloud infrastructure
 
-## Key takeaways
+### Key takeaways
 
 1. **AI as assistant, not replacement** — people want to stay in control of what goes out under their name.
 2. **Speed is the product** — professionals have little time; every second of friction costs a post.
 3. **Personalisation is non-negotiable** — generic content doesn't land; context is everything.
 4. **Keep up or fall behind** — LinkedIn's algorithm keeps shifting, so the tool has to keep learning.
 
-## Status
+### Status
 
 **Live** — a SaaS product, available at [hintsay.com](https://hintsay.com).
 `,
@@ -329,7 +347,9 @@ mapping what workers and team leaders actually needed, to shaping the roadmap, t
 rolling it out. The app is now live and used by **thousands of workers** across
 horticulture.
 
-## The story
+## The work
+
+### The story
 
 **bQurius** brought me in to lead the product. I spent time on the ground — talking with
 team leaders and greenhouse workers — to map real needs and pain points rather than
@@ -337,7 +357,7 @@ assumed ones, and turned that into a roadmap the team could ship against. Over r
 two years, the app grew from concept to a product used daily by thousands, at which
 point I handed the product role over to the client's own team.
 
-## Problem
+### Problem
 
 Horticulture is a demanding place to build software for: a seasonal, multilingual,
 largely deskless workforce.
@@ -348,7 +368,7 @@ largely deskless workforce.
 - **No digital tools** built for field workers
 - **Communication gaps** between management and the operational floor
 
-## Solution
+### Solution
 
 - Intuitive interface, available in multiple languages
 - Real-time planning and task management
@@ -356,7 +376,7 @@ largely deskless workforce.
 - Gamification to drive day-to-day engagement
 - Integration with existing HR and planning systems
 
-## Way of working
+### Way of working
 
 1. 🔍 **Research** — talk to customers to understand needs and pain points
 2. ✏️ **Sketching** — sketch what a new feature could look like
@@ -366,14 +386,16 @@ largely deskless workforce.
 6. 🚀 **Rollout** — ship the update to users
 7. 🔄 **Iterate** — analyse data, gather feedback, and start again
 
-## Role
+## Outcome
+
+### Role
 
 This is a **product-management case**. The app itself was built by an external software
 agency — my job was to own the product: discovery with real users, prioritisation, and
 steering design and engineering toward what mattered most. In other words: I was
 accountable for *what* got built and *why*, not for writing the code.
 
-## Status
+### Status
 
 **Live** — running in production with thousands of horticulture-sector users. I handed
 the product role over to the client after roughly two years.
@@ -399,7 +421,9 @@ letter. As a bonus, you as the sender see which of your letters are experienced 
 unreadable, so you can improve them — and you lower the contact load on your customer
 service.
 
-## Problem
+## The work
+
+### Problem
 
 Communication is not understandable for a large part of the Netherlands:
 
@@ -409,7 +433,7 @@ Communication is not understandable for a large part of the Netherlands:
 - Services don't match the needs of this audience
 - Complicated letters lead to frustration and confusion
 
-## Approach
+### Approach
 
 BriefWijzer is a digital reading aid that makes letters readable for everyone, without
 extra work for the sender:
@@ -419,7 +443,7 @@ extra work for the sender:
 - Interactive chat function that answers within the context of the letter
 - Insight for the sender into which letters are experienced as unreadable
 
-## How it works
+### How it works
 
 **Your customer…**
 
@@ -433,7 +457,9 @@ extra work for the sender:
 - 👆 …makes actions directly clickable — you configure the call-to-actions shown.
 - 💬 …answers questions directly via chat.
 
-## Tech & stack
+## Outcome
+
+### Tech & stack
 
 - 🐍 **Python** — backend processing
 - 👁️ **Google Vision** — OCR and document analysis
@@ -443,7 +469,7 @@ extra work for the sender:
 The pipeline: OCR reads the letter, RAG/LLM summarizes and answers questions within the
 context of the letter.
 
-## Status
+### Status
 
 **Demo** — working product concept. Positioned as an app for companies and government
 bodies that want to make their letters more accessible.
@@ -496,7 +522,9 @@ would. The story: an experiment with **ChatGPT as a personal trainer fails**, wh
 a **custom AI solution succeeds**. With custom software you can analyze complex movements
 in video and give technical, personalized coaching on them.
 
-## Problem
+## The work
+
+### Problem
 
 I was curious how far the multimodal capabilities of today's LLMs reach — models that
 understand text, sound, images and video. For this I used videos I had earlier sent to my
@@ -504,7 +532,7 @@ own personal trainer. After uploading them to ChatGPT I only got generic, unspec
 feedback. No available model could analyze the movements accurately; when asked for visual
 feedback it generated irrelevant images.
 
-## Approach
+### Approach
 
 So I built a custom solution: an AI-powered virtual Olympic coach that poses as the
 world-famous weightlifting coach
@@ -527,7 +555,9 @@ world-famous weightlifting coach
 The two attempts (attempt 1 with ChatGPT, attempt 2 with the custom coach) and two
 technique analyses are shown as playable videos at the bottom of this case.
 
-## Tech & stack
+## Outcome
+
+### Tech & stack
 
 - 💬 **ChatGPT** — macOS app (first, failed attempt)
 - 🤖 **Google AI Studio** — Gemini 2.5 Pro (multimodal video analysis)
@@ -535,7 +565,7 @@ technique analyses are shown as playable videos at the bottom of this case.
 - 💻 **VSCode** — IDE
 - 🐍 **Python** — tool for slowing down video and the feedback overlay
 
-## Status
+### Status
 
 **Experiment** — my own R&D, shared via LinkedIn with demo videos. It shows that generic
 multimodal models fall short for movement analysis, while a custom approach with Gemini
@@ -558,14 +588,18 @@ multimodal models fall short for movement analysis, while a custom approach with
 A chatbot that acts as a Q&A hub for a team and saves a lot of time: chat instead of
 reading through manuals.
 
-## Approach (high level)
+## The work
+
+### Approach (high level)
 
 A classic **RAG chatbot**: documentation/manuals are made accessible via
 Retrieval-Augmented Generation, so team members can ask their question in natural language
 and get an answer with context right away — instead of searching through the manuals
 themselves.
 
-## Status
+## Outcome
+
+### Status
 
 **Concept.** This idea has not yet been developed into a demo.
 `,
@@ -589,17 +623,21 @@ with timecodes — for example:
 - \`1:30–3:00\` Collaboration in healthcare
 - …
 
-## Approach (high level)
+## The work
+
+### Approach (high level)
 
 Audio is automatically converted to text (transcription), after which a model divides the
 content into logical segments with timecodes. This makes a long episode searchable and
 easy to navigate.
 
-## Status
+## Outcome
+
+### Status
 
 **Concept.** This idea has not yet been developed into a demo.
 
-## Related tech: WhisperFWD
+### Related tech: WhisperFWD
 
 WhisperFWD is a macOS menu-bar app for recording meetings, with **local** transcription
 and AI summaries:

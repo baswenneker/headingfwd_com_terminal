@@ -23,7 +23,9 @@ mapping what workers and team leaders actually needed, to shaping the roadmap, t
 rolling it out. The app is now live and used by **thousands of workers** across
 horticulture.
 
-## The story
+## The work
+
+### The story
 
 **bQurius** brought me in to lead the product. I spent time on the ground — talking with
 team leaders and greenhouse workers — to map real needs and pain points rather than
@@ -31,7 +33,7 @@ assumed ones, and turned that into a roadmap the team could ship against. Over r
 two years, the app grew from concept to a product used daily by thousands, at which
 point I handed the product role over to the client's own team.
 
-## Problem
+### Problem
 
 Horticulture is a demanding place to build software for: a seasonal, multilingual,
 largely deskless workforce.
@@ -42,7 +44,7 @@ largely deskless workforce.
 - **No digital tools** built for field workers
 - **Communication gaps** between management and the operational floor
 
-## Solution
+### Solution
 
 - Intuitive interface, available in multiple languages
 - Real-time planning and task management
@@ -50,7 +52,7 @@ largely deskless workforce.
 - Gamification to drive day-to-day engagement
 - Integration with existing HR and planning systems
 
-## Way of working
+### Way of working
 
 1. 🔍 **Research** — talk to customers to understand needs and pain points
 2. ✏️ **Sketching** — sketch what a new feature could look like
@@ -60,14 +62,16 @@ largely deskless workforce.
 6. 🚀 **Rollout** — ship the update to users
 7. 🔄 **Iterate** — analyse data, gather feedback, and start again
 
-## Role
+## Outcome
+
+### Role
 
 This is a **product-management case**. The app itself was built by an external software
 agency — my job was to own the product: discovery with real users, prioritisation, and
 steering design and engineering toward what mattered most. In other words: I was
 accountable for *what* got built and *why*, not for writing the code.
 
-## Status
+### Status
 
 **Live** — running in production with thousands of horticulture-sector users. I handed
 the product role over to the client after roughly two years.

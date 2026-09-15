@@ -48,6 +48,10 @@ the number and label on the left, the body on the right. Numbered automatically
 and **continuously across sections** — items 1-3 in section I, 4-6 in section
 II. Authors never type the number.
 
+An item only exists inside a section: a `###` written before the first `##`
+lands in the lead instead. Every case body is shaped accordingly — a lead, then
+the sections "The work" and "Outcome" with the individual headings as items.
+
 **Aside** — a `:::aside` container directly under a `###`. It renders in the
 item's left column, beside the argument rather than inside it. An `:::aside`
 anywhere else renders as an ordinary side note.
