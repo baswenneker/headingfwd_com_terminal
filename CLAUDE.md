@@ -205,9 +205,10 @@ Drafts and future-dated posts are withheld from every public surface. Outside pr
 ### Adding a Portfolio Case
 
 1. Append an entry to `CASES` in `src/content/cases.ts` with a unique slug, the next `n` index, a one-line `kind`, the metadata fields and the write-up as a Markdown string in `body`
-2. The body follows the post vocabulary: the text before the first `##` is the lead, a `##` is a numbered section, a `###` a numbered item. Never open a body with a heading
-3. Drop any images in `public/portfolio/<slug>/` and reference them by filename
-4. Run `pnpm gen:cases` to re-emit the `cases/*.md` archive — never hand-edit those files
+2. The body follows the post vocabulary: the text before the first `##` is the lead, a `##` is a numbered section, a `###` a numbered item. Never open a body with a heading, and never write a `###` before the first `##` — it lands in the lead
+3. Shape the body like the existing cases: a lead, then `## The work` and `## Outcome`, with each individual heading as a `###` item. Items render as two columns, heading left and text right
+4. Drop any images in `public/portfolio/<slug>/` and reference them by filename
+5. Run `pnpm gen:cases` to re-emit the `cases/*.md` archive — never hand-edit those files
 
 ### AI System Prompt
 
