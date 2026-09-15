@@ -1,12 +1,13 @@
 /*
- * Blog styles — the editorial layout at /blog and /blog/<slug>.
+ * Editorial styles — the reading layout shared by /blog and /portfolio.
  *
  * A CSS Module rather than Tailwind utilities: the Markdown renderer emits
  * headings, paragraphs, lists, blockquotes and figures that cannot carry
- * class names, which is exactly the case the case-body stylesheet in
- * portfolio-overlay.module.css already solves with element selectors. The
+ * class names, so the rules below reach them with element selectors. The
  * structure plugin marks what it builds with `data-post-*` attributes, and
- * the rules below hang off those.
+ * the rules hang off those. A post body and a case body go through the same
+ * pipeline, so both are styled here; the surface-specific bits live in
+ * `blog.module.css` and `portfolio.module.css`.
  *
  * Tokens mirror the terminal's: the cyan accent, the near-black surface, the
  * light body text, hairline rules at low white opacity. Typography is
@@ -29,7 +30,11 @@
   /* Drives the single-column breakpoint below, the way the terminal's .page
      drives its own 560px breakpoint. */
   container-type: inline-size;
-  container-name: blog;
+  container-name: editorial;
+
+  /* Containing block and stacking context for the grid layer below. */
+  position: relative;
+  isolation: isolate;
 
   min-height: 100dvh;
   background:
@@ -43,6 +48,31 @@
   font-size: 14px;
   line-height: 1.75;
   letter-spacing: -0.01em;
+}
+
+/*
+ * The faint 42px grid, the same one the terminal draws behind its window, so
+ * an editorial page and the terminal share one backdrop.
+ *
+ * The mask fades it out below the first screenful. Its radius is in pixels,
+ * not per cent: a percentage resolves against the element, so on a long
+ * article the fade would land halfway down the page instead of near the top.
+ */
+.root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(
+    ellipse 90% 720px at 50% 0,
+    #000 20%,
+    transparent 70%
+  );
 }
 
 .shell {
@@ -97,20 +127,6 @@
 
 .article {
   display: block;
-}
-
-/* ─── Draft banner ───────────────────────────────────────────────────────── */
-
-.draftBanner {
-  margin: 20px 0 0;
-  padding: 10px 14px;
-  border: 1px dashed var(--accent);
-  border-radius: 4px;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(46, 230, 246, 0.06);
 }
 
 /* ─── Article body ───────────────────────────────────────────────────────── */
@@ -197,6 +213,23 @@
 
 .body li {
   margin-bottom: 6px;
+}
+
+/*
+ * A plain Markdown `>` quote. The pull quote (`:::quote`) has its own rules
+ * further down; this one catches the quotes a case body writes by hand, which
+ * would otherwise render with the margins Tailwind's preflight strips.
+ */
+.body blockquote {
+  margin: 0 0 16px;
+  padding: 4px 0 4px 16px;
+  max-width: 68ch;
+  border-left: 2px solid var(--accent);
+  color: var(--ink-dim);
+}
+
+.body blockquote p {
+  margin: 0;
 }
 
 /* Tables (GFM) scroll on their own rather than widening the page. */
@@ -480,22 +513,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ─── Article footer ─────────────────────────────────────────────────────── */
-
-.origin {
-  margin-top: clamp(34px, 5vw, 60px);
-  padding-top: 18px;
-  border-top: 1px solid var(--rule);
-  font-size: 12px;
-  color: var(--ink-dim);
-}
-
-.origin a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 /* ─── Overview ───────────────────────────────────────────────────────────── */
 
 .overviewLead {
@@ -505,21 +522,28 @@
   color: var(--ink);
 }
 
-.postList {
+/* A link in the overview intro reads as one, the way a link in the body does. */
+.overviewLead a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.list {
   list-style: none;
   margin: clamp(26px, 4vw, 46px) 0 0;
   padding: 0;
 }
 
-.postItem {
+.listItem {
   border-top: 1px solid var(--rule-faint);
 }
 
-.postItem:last-child {
+.listItem:last-child {
   border-bottom: 1px solid var(--rule-faint);
 }
 
-.postLink {
+.listLink {
   display: grid;
   grid-template-columns: minmax(120px, 160px) minmax(0, 1fr);
   gap: clamp(12px, 2cqw, 36px);
@@ -528,11 +552,11 @@
   color: inherit;
 }
 
-.postLink:hover .postTitle {
+.listLink:hover .listTitle {
   color: var(--accent);
 }
 
-.postDate {
+.listMeta {
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -540,7 +564,7 @@
   padding-top: 5px;
 }
 
-.postTitle {
+.listTitle {
   margin: 0;
   font-size: clamp(17px, 2.1cqw, 24px);
   font-weight: 700;
@@ -550,13 +574,13 @@
   text-wrap: balance;
 }
 
-.postExcerpt {
+.listSummary {
   margin: 8px 0 0;
   max-width: 66ch;
   color: var(--ink);
 }
 
-.draftBadge {
+.badge {
   display: inline-block;
   margin-left: 10px;
   padding: 1px 7px;
@@ -580,7 +604,7 @@
  * Below 720px of container inline-size the two-column item grid collapses to
  * one, with the label above its body — nothing squeezed, nothing cut off.
  */
-@container blog (max-width: 720px) {
+@container editorial (max-width: 720px) {
   .body [data-post-item] {
     grid-template-columns: minmax(0, 1fr);
     gap: 10px;
@@ -590,12 +614,12 @@
     position: static;
   }
 
-  .postLink {
+  .listLink {
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
   }
 
-  .postDate {
+  .listMeta {
     padding-top: 0;
   }
 }

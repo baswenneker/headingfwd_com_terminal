@@ -1,0 +1,151 @@
+/*
+ * Click-to-play YouTube previews rendered from a case's `videos` field. Each
+ * card is a facade — thumbnail + ▶ button — that swaps in an iframe on click.
+ *
+ * Colours come from the editorial shell's own tokens, so the block matches the
+ * page it sits on rather than carrying the overlay's hard-coded values.
+ */
+.videoSection {
+  margin-top: clamp(30px, 4vw, 48px);
+}
+
+.videoSectionTitle {
+  margin: 0 0 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule-faint);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.videoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.videoCard {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.videoFrame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #05070a;
+}
+
+/* Thumbnail button fills the frame; the image sits under the play/badge marks. */
+.videoThumb {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.videoThumbImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.videoThumb:hover .videoThumbImg,
+.videoThumb:focus-visible .videoThumbImg {
+  transform: scale(1.04);
+  filter: brightness(1.08);
+}
+
+/* Centered play affordance — accent ring over a translucent disc. */
+.videoPlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  padding-left: 3px; /* optically centre the ▶ triangle */
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: rgba(4, 12, 14, 0.6);
+  color: var(--accent);
+  font-size: 18px;
+  box-shadow: 0 0 22px rgba(46, 230, 246, 0.35);
+  pointer-events: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.videoThumb:hover .videoPlay,
+.videoThumb:focus-visible .videoPlay {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: rgba(4, 12, 14, 0.78);
+}
+
+/* Outcome marker (❌ failed attempt / ✅ working one) in the top-left corner. */
+.videoBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: rgba(4, 12, 14, 0.72);
+  font-size: 15px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.videoIframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.videoCaption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.videoTitle {
+  color: var(--ink-strong);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.videoTitle:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.videoNote {
+  color: var(--ink-dim);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/* Single column on narrow containers. */
+@container editorial (max-width: 720px) {
+  .videoGrid {
+    grid-template-columns: 1fr;
+  }
+}

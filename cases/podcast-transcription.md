@@ -13,8 +13,6 @@ sources:
 
 # Podcast transcription and segmentation
 
-## In short
-
 Upload your podcast and automatically get a full transcription plus a segment breakdown
 with timecodes — for example:
 

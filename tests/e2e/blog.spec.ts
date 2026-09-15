@@ -434,14 +434,22 @@ test.describe("Feed, sitemap and llms.txt", () => {
     }
   });
 
-  test("llms.txt lists every published post", async ({ page }) => {
+  // A post is one link line — title, URL and excerpt — not the article itself.
+  // An agent follows the link; the page is server-rendered prose.
+  test("llms.txt lists every published post as a link line", async ({
+    page,
+  }) => {
     const res = await page.request.get("/llms.txt");
     const text = await res.text();
 
     for (const post of publishedPosts()) {
       expect(text, `missing llms.txt entry for ${post.slug}`).toContain(
-        `https://headingfwd.com/blog/${post.slug}`,
+        `- [${post.title}](https://headingfwd.com/blog/${post.slug}): ${post.excerpt}`,
       );
+      expect(
+        text,
+        `llms.txt inlines the body of ${post.slug} instead of linking to it`,
+      ).not.toContain(post.body.trim().slice(0, 60));
     }
   });
 

@@ -1,0 +1,191 @@
+/*
+ * Portfolio-only styles — what a case has and a post does not.
+ *
+ * The shell, the meta bar, the title, the whole rendered body and the overview
+ * list live in `editorial.module.css`; a case reuses all of them. What is left
+ * here is the case's own furniture: the one-line kind under the title, the
+ * metadata line, the tag chips, the hero image, the coming-soon placeholder
+ * and the footer buttons.
+ *
+ * Values come from the old portfolio overlay, restated in the editorial
+ * tokens so the two sheets cannot drift apart on colour.
+ */
+
+/* ─── Case header ────────────────────────────────────────────────────────── */
+
+/* The case's one-line outcome summary, directly under the title. */
+.kind {
+  margin: 10px 0 0;
+  max-width: 62ch;
+  font-size: clamp(14px, 1.6cqw, 16px);
+  color: var(--accent);
+}
+
+/* Sector · period · status · role, faint and small. */
+.meta {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  margin: 0;
+  padding: 5px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+/* ─── Hero image ─────────────────────────────────────────────────────────── */
+
+.hero {
+  margin: clamp(22px, 3vw, 34px) 0 0;
+}
+
+.hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+
+/* ─── Coming-soon placeholder ────────────────────────────────────────────── */
+/*
+ * Shown instead of the write-up for a coming-soon case: a bordered panel with
+ * a faint 45° stripe wash, an accent mark and a one-line teaser. The case's
+ * title, kind, metadata and tags still render above it, so the page reads as
+ * a proper teaser rather than an empty article.
+ */
+.comingSoon {
+  margin-top: clamp(28px, 4vw, 40px);
+  max-width: 62ch;
+  padding: clamp(28px, 5vw, 48px) clamp(20px, 4vw, 36px);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background:
+    radial-gradient(
+      120% 120% at 50% 0%,
+      rgba(46, 230, 246, 0.06),
+      transparent 60%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.03) 0 12px,
+      transparent 12px 24px
+    );
+  text-align: center;
+}
+
+.comingSoonMark {
+  font-size: clamp(15px, 2.6cqw, 20px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 18px rgba(46, 230, 246, 0.3);
+}
+
+.comingSoonText {
+  margin: 14px auto 0;
+  max-width: 46ch;
+  color: var(--ink);
+  line-height: 1.7;
+}
+
+/* ─── Case footer ────────────────────────────────────────────────────────── */
+
+.footer {
+  margin-top: clamp(34px, 5vw, 60px);
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Shared outline button (prev / next / case link). */
+.outlineBtn {
+  display: inline-block;
+  padding: 9px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.outlineBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Solid accent "work with me →" call to action. */
+.ctaBtn {
+  display: inline-block;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  font-weight: 700;
+  font-size: 13px;
+  color: #04181c;
+  text-decoration: none;
+}
+
+.footerLinks {
+  margin: 18px 0 0;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.footerLinks a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── Overview ───────────────────────────────────────────────────────────── */
+
+/* The case number in the left column, where a post shows its date. */
+.index {
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.listTags {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+}
+
+/* ─── Narrow container ───────────────────────────────────────────────────── */
+/*
+ * Roughly 44px tall tap targets on a phone, the minimum recommended size.
+ */
+@container editorial (max-width: 720px) {
+  .outlineBtn,
+  .ctaBtn {
+    padding-block: 12px;
+  }
+}

@@ -284,8 +284,8 @@ function mapBlocks(
       const resolved = options.resolveImage(image.url);
       if (!resolved) {
         throw new Error(
-          `post image not found: "${image.url}" — drop the file in ` +
-            `public/blog/<slug>/ and reference it by name.`,
+          `image not found: "${image.url}" — drop the file in this page's ` +
+            `asset directory under public/ and reference it by name.`,
         );
       }
       const caption = loneEmphasis(nodes[i + 1]);

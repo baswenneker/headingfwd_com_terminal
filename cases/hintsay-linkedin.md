@@ -18,8 +18,6 @@ sources:
 
 # Hintsay: AI writing assistant for LinkedIn
 
-## In short
-
 Hintsay is an AI writing assistant that helps professionals build their personal brand
 on LinkedIn — turning a keyword or an idea into finished, on-brand posts in minutes
 instead of hours. I designed and built it end to end, from the AI that writes in your

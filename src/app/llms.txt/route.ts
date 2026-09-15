@@ -1,20 +1,27 @@
 /**
- * `/llms.txt` — a plain-text, machine-readable copy of everything on the site,
- * for AI agents and crawlers to read the source directly instead of scraping
- * the interactive terminal UI. This is the canonical full file; `/agents.txt`
- * permanently redirects here (see `next.config.js`).
+ * `/llms.txt` — a plain-text, machine-readable map of the site, for AI agents
+ * and crawlers to read the source directly instead of scraping the interactive
+ * terminal UI. This is the canonical file; `/agents.txt` permanently redirects
+ * here (see `next.config.js`).
  *
- * The file is generated from the same content the terminal renders:
+ * The file is generated from the same content the site renders:
  *   - About / specialities / stack / contact → `~/content/site-content`
- *   - Portfolio cases (incl. full write-ups) → `~/content/cases` (CASES)
- *   - Blog posts (title, date, excerpt, URL)  → `~/content/posts`
+ *   - Portfolio cases                        → `~/content/cases` (CASES)
+ *   - Blog posts                             → `~/content/posts`
+ *
+ * The short site copy is carried in full. The long-form writing is not: each
+ * case and each post is one link line — title, URL and a one-line summary —
+ * following the llmstxt.org convention. Those pages are server-rendered prose
+ * with no application JavaScript, so an agent that follows a link gets the
+ * whole piece from the page itself, always in its current form. Inlining it
+ * here as well would only be a second copy to keep in step.
  *
  * Because everything is derived from those sources, the file can never drift
  * from what visitors see. In particular the cases come from `visibleCases()` —
- * the very same list that drives the `/portfolio` overlay, so a `hidden` case
- * is absent here too and a `coming-soon` case is marked as such (via
- * `caseToAgentMarkdown`). The route is statically rendered at build time
- * (`force-static`) and served as a static asset — no work happens per request.
+ * the very same list that drives `/portfolio`, so a `hidden` case is absent
+ * here too and a `coming-soon` case is marked as such. The route is statically
+ * rendered at build time (`force-static`) and served as a static asset — no
+ * work happens per request.
  */
 
 import {
@@ -25,8 +32,8 @@ import {
   STACK,
   BLOG,
 } from "~/content/site-content";
-import { caseToAgentMarkdown, visibleCases } from "~/content/cases";
-import { postToAgentMarkdown, publishedPosts } from "~/content/posts";
+import { isComingSoonCase, visibleCases } from "~/content/cases";
+import { postPath, publishedPosts } from "~/content/posts";
 import { SITE_URL } from "~/config/site";
 
 export const dynamic = "force-static";
@@ -72,18 +79,24 @@ function buildAgentsTxt(): string {
   blocks.push(["## Tech stack", "", ...STACK.map((s) => `- ${s}`)].join("\n"));
 
   // ── Portfolio / cases ─────────────────────────────────────────────────────
-  // The section intro is one block; each case is its own top-level block so the
-  // horizontal-rule join below separates them cleanly.
+  // One link line per case. The full write-up lives on the case page, which is
+  // server-rendered prose; follow the link to read it.
+  const cases = visibleCases();
   blocks.push(
     [
       "## Portfolio / cases",
       "",
-      "> Detailed write-ups of selected work. Source language: Dutch.",
+      "> Selected work. Each link is one case, written up in full on its page.",
+      "",
+      `- Overview: ${SITE_URL}/portfolio`,
+      "",
+      ...cases.map(
+        (c) =>
+          `- [${c.title}](${SITE_URL}/portfolio/${c.slug}): ${c.kind}` +
+          (isComingSoonCase(c) ? " — coming soon" : ""),
+      ),
     ].join("\n"),
   );
-  for (const c of visibleCases()) {
-    blocks.push(caseToAgentMarkdown(c));
-  }
 
   // ── Blog ────────────────────────────────────────────────────────────────
   // The section is always present, even with nothing published: an agent that
@@ -92,10 +105,8 @@ function buildAgentsTxt(): string {
   //
   // Only PUBLISHED posts are listed: `publishedPosts()` is the same predicate
   // the overview, the sitemap and the feed use, so a draft or a future-dated
-  // post is absent here too. Each post is inlined in full, the way cases are —
-  // an agent reading this file gets the writing itself, not a pointer to it.
-  // The section intro is one block and each post another, so the
-  // horizontal-rule join below separates them cleanly.
+  // post is absent here too. Each one is a link line, the way cases are; the
+  // article itself is on the page.
   const posts = publishedPosts();
   blocks.push(
     [
@@ -107,12 +118,16 @@ function buildAgentsTxt(): string {
       `- RSS feed: ${SITE_URL}/blog/rss.xml`,
       ...(posts.length === 0
         ? ["", "No posts published yet."]
-        : [`- Published posts: ${posts.length}`]),
+        : [
+            `- Published posts: ${posts.length}`,
+            "",
+            ...posts.map(
+              (post) =>
+                `- [${post.title}](${SITE_URL}${postPath(post)}): ${post.excerpt}`,
+            ),
+          ]),
     ].join("\n"),
   );
-  for (const post of posts) {
-    blocks.push(postToAgentMarkdown(post));
-  }
 
   // ── Contact ─────────────────────────────────────────────────────────────
   blocks.push(

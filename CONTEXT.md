@@ -8,17 +8,22 @@ Use these words as written.
 
 **Case** — one piece of portfolio work. The source of truth is a TypeScript
 entry in `src/content/cases.ts`; the Markdown files in `cases/` are generated
-from it by `pnpm gen:cases` and are never hand-edited. A case surfaces in the
-`/portfolio` overlay, at `/portfolio/<slug>`, and in `/llms.txt`.
+from it by `pnpm gen:cases` and are never hand-edited. A case surfaces on the
+`/portfolio` overview, at `/portfolio/<slug>`, and in `/llms.txt` as a link.
 
 **Post** — one long-form blog article. The source of truth is a Markdown file
 with YAML frontmatter in `content/blog/`; there is no generated counterpart.
 A post surfaces at `/blog`, at `/blog/<slug>`, in `/blog/rss.xml`, in the
-sitemap and in `/llms.txt`.
+sitemap and in `/llms.txt` as a link.
 
 The inversion is deliberate. See `docs/adr/0001-markdown-posts.md`.
 
-## Parts of a post
+A case body and a post body go through the same renderer, so both follow the
+vocabulary below: lead, section, item, and the rest. A case has no kicker and
+no excerpt — its `kind`, the one-line outcome summary, plays the excerpt's
+role. See `docs/adr/0003-portfolio-on-editorial-layout.md`.
+
+## Parts of a post (and of a case body)
 
 **Kicker** — the small label above the title, top left of the meta bar. Comes
 from frontmatter. Optional.
@@ -29,6 +34,8 @@ who has *not* yet decided to read.
 
 **Lead** — the opening paragraphs of the article itself: everything in the
 Markdown before the first `##`. Written for someone who *has* decided to read.
+A body therefore never opens with a heading: a `## In short` at the top would
+become section I and leave the piece without a lead.
 
 The excerpt and the lead are separate on purpose, and are never the same
 string. If you find yourself copying one into the other, one of them is wrong.

@@ -52,4 +52,6 @@ marks its own wrapper with `data-blog-root`, and `globals.css` undoes both with
   `portfolio` precedent — a token handled in the command parser that has a real
   route of its own.
 - Migrating `/portfolio` to this layout is deliberately deferred; this layout is
-  the reference implementation it will be migrated onto (issue #4).
+  the reference implementation it will be migrated onto (issue #4). Done — see
+  `0003-portfolio-on-editorial-layout.md`, which also renames the `(blog)`
+  route group to `(editorial)`.

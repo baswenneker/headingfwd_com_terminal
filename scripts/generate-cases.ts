@@ -4,8 +4,9 @@
  *
  * The Markdown files are derived artifacts — never hand-edit them. Edit a case
  * in `cases.ts` and run `pnpm gen:cases` to re-emit the files. The same `CASES`
- * array also drives `/work`, the `/portfolio` overlay and `/llms.txt`, so all
- * four surfaces stay in lockstep.
+ * array also drives the `/portfolio` overview, the case pages and `/llms.txt`,
+ * so every surface stays in lockstep. This archive is the one surface that
+ * still carries a case write-up in full; `/llms.txt` links to the page.
  *
  * Runs on plain Node via type stripping (Node 24): see the `gen:cases` script
  * in package.json. No build step or extra dependency required.

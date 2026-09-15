@@ -6,15 +6,16 @@ import type { Element } from "hast";
 import { postAssets } from "~/content/blog/assets";
 import { remarkPostStructure } from "~/content/blog/remark-post-structure";
 import { POST_COPY } from "~/content/site-content";
-import type { Post } from "~/content/posts";
+import type { PostLanguage } from "~/content/posts";
 
 /**
- * The rendered body of one post.
+ * The rendered body of one post or case.
  *
  * Everything happens on the server: the Markdown is parsed, restructured into
  * the editorial layout, and its charts drawn to SVG, all before the HTML
- * leaves the machine. A blog page therefore ships no application JavaScript,
- * and a crawler that never runs a script still sees the whole article.
+ * leaves the machine. An editorial page therefore ships no application
+ * JavaScript, and a crawler that never runs a script still sees the whole
+ * article.
  *
  * The pipeline is the project's existing react-markdown stack plus three
  * plugins: GFM for tables and footnotes, directives for the `:::` containers,
@@ -35,8 +36,21 @@ function hasFlag(node: Element | undefined, name: string): boolean {
   return node ? name in node.properties : false;
 }
 
-export function PostBody({ post }: { post: Post }) {
-  const assets = postAssets(post.slug);
+/**
+ * `markdown` is the source; `assetBase` the public directory its bare image
+ * filenames resolve against (`/blog/<slug>` or `/portfolio/<slug>`); `lang`
+ * picks the footnote labels.
+ */
+export function PostBody({
+  markdown,
+  assetBase,
+  lang,
+}: {
+  markdown: string;
+  assetBase: string;
+  lang: PostLanguage;
+}) {
+  const assets = postAssets(assetBase);
 
   return (
     <Markdown
@@ -46,8 +60,8 @@ export function PostBody({ post }: { post: Post }) {
         [remarkPostStructure, { resolveImage: assets.resolve }],
       ]}
       remarkRehypeOptions={{
-        footnoteLabel: POST_COPY[post.lang].footnoteLabel,
-        footnoteBackLabel: POST_COPY[post.lang].footnoteBackLabel,
+        footnoteLabel: POST_COPY[lang].footnoteLabel,
+        footnoteBackLabel: POST_COPY[lang].footnoteBackLabel,
         footnoteLabelTagName: "h2",
         // The default hides the label with a `sr-only` class this project
         // does not define. The source list is part of the article: show it.
@@ -125,7 +139,7 @@ export function PostBody({ post }: { post: Post }) {
         },
       }}
     >
-      {post.body}
+      {markdown}
     </Markdown>
   );
 }

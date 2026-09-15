@@ -1,0 +1,36 @@
+/*
+ * Blog-only styles. Everything a post shares with a case — the shell, the
+ * meta bar, the title, the whole article body, the overview list — lives in
+ * `editorial.module.css`. What is left here is what only a post has: the
+ * draft banner and the footer stating where the piece was published first.
+ */
+
+/* ─── Draft banner ───────────────────────────────────────────────────────── */
+
+.draftBanner {
+  margin: 20px 0 0;
+  padding: 10px 14px;
+  border: 1px dashed var(--accent);
+  border-radius: 4px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(46, 230, 246, 0.06);
+}
+
+/* ─── Article footer ─────────────────────────────────────────────────────── */
+
+.origin {
+  margin-top: clamp(34px, 5vw, 60px);
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.origin a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

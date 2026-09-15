@@ -2,13 +2,21 @@
  * Canonical case data — THE single source of truth for HeadingFWD's portfolio.
  *
  * Every surface that shows a case derives from this one array:
- *   - `/portfolio` (fullscreen overlay) → list (name + `kind`) and detail (`body`)
- *   - `/llms.txt`  (agent file)         → `caseToAgentMarkdown` per case
- *   - `cases/*.md` (generated archive)  → `pnpm gen:cases` re-emits them
+ *   - `/portfolio`        (overview)  → one card per case: `n`, `title`, `kind`, `tags`
+ *   - `/portfolio/<slug>` (case page) → the metadata fields and the rendered `body`
+ *   - `/llms.txt`         (agent file)→ one link line: title, URL and `kind`
+ *   - `cases/*.md`        (archive)   → `pnpm gen:cases` re-emits them in full
  *
  * Editing a case here updates all of those at once, so they can never drift.
- * The Markdown surfaces (`/llms.txt`, `cases/*.md`) are GENERATED from this
- * module — never hand-edit them.
+ * The Markdown archive (`cases/*.md`) is GENERATED from this module — never
+ * hand-edit it.
+ *
+ * The `body` goes through the same renderer as a blog post, so it follows the
+ * post vocabulary in `CONTEXT.md`: the text before the first `##` is the LEAD,
+ * a `##` is a numbered SECTION and a `###` a numbered ITEM. Never open a body
+ * with a heading such as `## In short` — that turns the summary into section I
+ * and leaves the case without a lead. Numbers are added by the renderer;
+ * authors never type them.
  *
  * To add a case: append an entry to CASES with a unique slug, the next `n`
  * display index, a one-line `kind`, the metadata fields, and the full write-up
@@ -25,8 +33,8 @@ export type CaseStatus = "live" | "demo" | "experiment" | "concept";
  *
  *   - "published"   — appears everywhere with its full write-up (the default).
  *   - "coming-soon" — stays in the `/portfolio` list with a "coming soon" badge,
- *                     but its detail view shows a placeholder panel instead of
- *                     the write-up. Marked as such in `/llms.txt` and the
+ *                     but its page shows a placeholder panel instead of the
+ *                     write-up. Marked as such in `/llms.txt` and the
  *                     generated archive.
  *   - "hidden"      — excluded from every public surface as if it did not exist:
  *                     `/portfolio`, `/llms.txt` and `cases/*.md`.
@@ -39,10 +47,10 @@ export type CaseVisibility = "published" | "coming-soon" | "hidden";
 /**
  * A demo/reference video for a case.
  *
- * Single source for both the click-to-play preview in the `/portfolio` overlay
- * (thumbnail from the YouTube `id`, embedded on click) and the plain Markdown
- * link emitted on the agent/archive surfaces (`/llms.txt`, `cases/*.md`), which
- * can't play video. Populate `videos` instead of hand-writing links in `body`.
+ * Single source for both the click-to-play preview on the case page (thumbnail
+ * from the YouTube `id`, embedded on click) and the plain Markdown link
+ * emitted in the generated archive (`cases/*.md`), which can't play video.
+ * Populate `videos` instead of hand-writing links in `body`.
  */
 export interface CaseVideo {
   /** YouTube video id — drives the thumbnail and the embedded player. */
@@ -70,7 +78,7 @@ export interface Case {
   slug: string;
   /** Two-digit display index shown in the list ("01", "02", …). */
   n: string;
-  /** Case title, shown prominently in the list and detail views. */
+  /** Case title, shown prominently in the overview and on the case page. */
   title: string;
   /** One-line outcome/role summary — the `/portfolio` list subtitle. */
   kind: string;
@@ -100,11 +108,11 @@ export interface Case {
   sources?: string[];
   /** ISO date the case was last revised. */
   updated?: string;
-  /** Optional hero image for the detail view. */
+  /** Optional hero image for the case page. */
   image?: { src: string; alt: string };
   /** Optional external "read the full case" URL. */
   caseUrl?: string;
-  /** Demo/reference videos, shown as click-to-play previews in the overlay. */
+  /** Demo/reference videos, shown as click-to-play previews on the case page. */
   videos?: CaseVideo[];
   /** Full write-up as Markdown (no frontmatter, no leading H1). */
   body: string;
@@ -125,8 +133,6 @@ export const CASES: Case[] = [
     sources: ["headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/page.tsx", "headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/schrijfhulp-demo.tsx", "headingfwd-com/src/data/index/page.json (teaser \"AI Schrijfhulp\")", "dspy-writing-style (gerelateerd R&D-experiment)"],
     updated: "2026-07-10",
     body: `
-## In short
-
 A generative-AI writing assistant for a large public-sector organization. It rewrites
 any text to match the in-house style guide, approved word lists and B1 (plain-language)
 accessibility level — without a single sentence ever leaving the organization's own
@@ -210,8 +216,6 @@ organization.
     sources: ["headingfwd-demo-playground/src/app/cases/hintsay/page.tsx", "headingfwd-com/src/data/index/page.json (teaser \"LinkedIn Schrijfhulp\")", "vibes-chrome-li-extension (gerelateerd, los experiment)"],
     updated: "2026-07-10",
     body: `
-## In short
-
 Hintsay is an AI writing assistant that helps professionals build their personal brand
 on LinkedIn — turning a keyword or an idea into finished, on-brand posts in minutes
 instead of hours. I designed and built it end to end, from the AI that writes in your
@@ -319,8 +323,6 @@ the person out of the loop.
       },
     ],
     body: `
-## In short
-
 An employee app for the horticulture sector, built to lift employee satisfaction,
 productivity and day-to-day collaboration. I led it as **product manager** — from
 mapping what workers and team leaders actually needed, to shaping the roadmap, to
@@ -390,8 +392,6 @@ the product role over to the client after roughly two years.
     sources: ["headingfwd-demo-playground/src/app/showcase/briefwijzer/page.tsx", "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/briefwijzer-intro.tsx", "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/how-it-works.tsx", "headingfwd-com/src/data/index/page.json (teaser \"Briefwijzer\")", "headingfwd_toolkit (promptfoo-test verwijst naar briefwijzer)"],
     updated: "2025-07-03",
     body: `
-## In short
-
 BriefWijzer makes unreadable (government) letters understandable. Your customer takes a
 photo of the letter, and the app does the rest: a short, understandable summary, a
 directly clickable call-to-action, and an AI-driven chat to ask questions about the
@@ -491,8 +491,6 @@ bodies that want to make their letters more accessible.
       },
     ],
     body: `
-## In short
-
 Software that gives feedback on fitness videos, just like a coach or personal trainer
 would. The story: an experiment with **ChatGPT as a personal trainer fails**, while
 a **custom AI solution succeeds**. With custom software you can analyze complex movements
@@ -557,8 +555,6 @@ multimodal models fall short for movement analysis, while a custom approach with
     sources: ["headingfwd-demo-playground/src/data/projects.json (entry \"Chatbot: Vraagbaak voor je team\")", "headingfwd-demo-playground/src/app/showcase/coming-soon/page.tsx"],
     updated: "2025-06-19",
     body: `
-## In short
-
 A chatbot that acts as a Q&A hub for a team and saves a lot of time: chat instead of
 reading through manuals.
 
@@ -586,8 +582,6 @@ themselves.
     stack: [],
     sources: ["headingfwd-com/src/data/index/page.json (teaser \"Podcast transcriptie en segmentering\")", "whisperfwd (gerelateerde, echte transcriptie-tech)"],
     body: `
-## In short
-
 Upload your podcast and automatically get a full transcription plus a segment breakdown
 with timecodes — for example:
 
@@ -641,59 +635,11 @@ export function isComingSoonCase(c: Case): boolean {
 /**
  * The cases shown on public surfaces: everything except `hidden` ones.
  *
- * The `/portfolio` overlay, `/llms.txt` and the generated `cases/*.md` archive
- * all derive their list from this, so a `hidden` case disappears from every
- * surface at once — the same single-source guarantee as CASES itself.
+ * The `/portfolio` overview, the case pages, `/llms.txt` and the generated
+ * `cases/*.md` archive all derive their list from this, so a `hidden` case
+ * disappears from every surface at once — the same single-source guarantee as
+ * CASES itself.
  */
 export function visibleCases(cases: Case[] = CASES): Case[] {
   return cases.filter((c) => !isHiddenCase(c));
-}
-
-/**
- * Demote the Markdown heading levels inside a case body by one, so its `##`
- * sections nest under the `##` case heading in the generated agent file.
- */
-function demoteHeadings(body: string): string {
-  return body.replace(
-    /^(#{2,5}) /gm,
-    (_match, hashes: string) => "#".repeat(hashes.length + 1) + " ",
-  );
-}
-
-/**
- * Render one case as a Markdown block for the agent file (`/llms.txt`):
- * a heading, a compact metadata line, and the (heading-demoted) body.
- */
-export function caseToAgentMarkdown(c: Case): string {
-  const meta = [`Sector: ${c.sector}`];
-  if (c.period) meta.push(`Period: ${c.period}`);
-  meta.push(`Status: ${c.status}`);
-  if (c.role) meta.push(`Role: ${c.role}`);
-  if (c.client) meta.push(`Client: ${c.client}`);
-
-  const lines = [
-    `## ${c.n} — ${c.title}`,
-    `_${c.kind}_`,
-    "",
-    meta.join(" · "),
-    `Tags: ${c.tags.join(", ")}`,
-  ];
-  if (c.stack.length > 0) lines.push(`Stack: ${c.stack.join(", ")}`);
-  if (c.links && c.links.length > 0) lines.push(`Links: ${c.links.join(" · ")}`);
-  if (isComingSoonCase(c)) {
-    lines.push(
-      "",
-      "> Coming soon — the full write-up of this case is on its way.",
-    );
-  }
-  lines.push("", demoteHeadings(c.body));
-  if (c.videos && c.videos.length > 0) {
-    lines.push("", "### Videos");
-    for (const v of c.videos) {
-      const mark = v.result === "fail" ? "❌ " : v.result === "success" ? "✅ " : "";
-      const note = v.note ? ` — ${v.note}` : "";
-      lines.push(`- ${mark}[${v.title}](${v.url})${note}`);
-    }
-  }
-  return lines.join("\n");
 }

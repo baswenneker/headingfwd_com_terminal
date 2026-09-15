@@ -63,25 +63,21 @@ export type FeedLine =
 /**
  * What the terminal should do after parsing a command.
  *
- * `clear`     — empties the feed entirely.
- * `lines`     — appends the given line objects to the feed.
- * `portfolio` — appends the given lines (echo + launch message) and signals
- *               that the fullscreen portfolio overlay should open after a
- *               short delay. The terminal handles the state change.
- * `openurl`   — appends the given lines and signals the terminal to open
- *               `url` in a new tab. Used by `/linkedin`. The terminal opens
- *               the tab synchronously inside the triggering gesture so the
- *               browser does not treat it as an unsolicited popup.
- * `navigate`  — appends the given lines and signals the terminal to leave for
- *               `href`, a real page of its own. Used by `/blog`, which lives
- *               outside the terminal entirely: unlike the portfolio overlay
- *               there is nothing to show in place, and a full navigation is
- *               what drops the terminal bundle the blog does not load.
+ * `clear`    — empties the feed entirely.
+ * `lines`    — appends the given line objects to the feed.
+ * `openurl`  — appends the given lines and signals the terminal to open `url`
+ *              in a new tab. Used by `/linkedin`. The terminal opens the tab
+ *              synchronously inside the triggering gesture so the browser does
+ *              not treat it as an unsolicited popup.
+ * `navigate` — appends the given lines and signals the terminal to leave for
+ *              `href`, a real page of its own. Used by `/blog` and
+ *              `/portfolio`, which both live outside the terminal: a full
+ *              navigation is what drops the terminal bundle neither page
+ *              loads.
  */
 export type CommandResult =
   | { action: "clear" }
   | { action: "lines"; lines: FeedLine[] }
-  | { action: "portfolio"; lines: FeedLine[] }
   | { action: "openurl"; url: string; lines: FeedLine[] }
   | { action: "navigate"; href: string; lines: FeedLine[] };
 
@@ -94,7 +90,7 @@ function helpLines(): FeedLine[] {
     { kind: "head", text: "available commands" },
     { kind: "row", label: "/about",     desc: "who I am & how I work" },
     { kind: "row", label: "/services",  desc: "what I help teams with" },
-    { kind: "row", label: "/portfolio", desc: "browse my work in fullscreen ↵" },
+    { kind: "row", label: "/portfolio", desc: "browse my work ↵" },
     { kind: "row", label: "/blog",      desc: "long-form writing on AI engineering ↵" },
     { kind: "row", label: "/stack",     desc: "tools, models & tech" },
     { kind: "row", label: "/contact",   desc: "how to reach me" },
@@ -191,16 +187,17 @@ export interface CommandPage {
 
 /**
  * The commands that get their own shareable URL, in /help order. Single
- * source of truth for those pages: `src/app/(terminal)/[command]/page.tsx` derives its
- * routes + metadata from this array and `src/app/sitemap.ts` its sitemap
- * entries, so adding one entry here publishes a new URL everywhere at once.
+ * source of truth for those pages: `src/app/(terminal)/[command]/page.tsx`
+ * derives its routes + metadata from this array and `src/app/sitemap.ts` its
+ * sitemap entries, so adding one entry here publishes a new URL everywhere at
+ * once.
  *
  * Deliberately absent: `/clear` and `/cls` (they only mutate feed state —
  * there is no state to deep-link), the `/whoami`, `/ls` and `/llms`
  * easter-egg aliases, and `/portfolio` and `/blog`, which both have a real
- * route of their own (`src/app/(terminal)/portfolio/`, `src/app/(blog)/blog/`).
- * Registering `blog` here would generate a dead `/blog` page under the
- * `[command]` route and a duplicate sitemap entry.
+ * route of their own under `src/app/(editorial)/`. Registering either here
+ * would generate a dead page under the `[command]` route and a duplicate
+ * sitemap entry.
  */
 export const COMMAND_PAGES: CommandPage[] = [
   {
@@ -285,17 +282,18 @@ export function runCommand(raw: string): CommandResult {
   }
 
   if (token === "portfolio" || token === "pf") {
-    // Echo the command and the launch acknowledgement, then signal the
-    // terminal to open the portfolio overlay after a short delay.
+    // The portfolio is a real route outside the terminal: echo the command,
+    // then leave. See the `navigate` action above.
     return {
-      action: "portfolio",
-      lines: [echo, { kind: "out", text: "→ launching portfolio…" }],
+      action: "navigate",
+      href: "/portfolio",
+      lines: [echo, { kind: "out", text: "→ opening the portfolio…" }],
     };
   }
 
   if (token === "blog") {
-    // The blog is a real route outside the terminal, not an overlay: echo the
-    // command, then leave. See the `navigate` action above.
+    // The blog is a real route outside the terminal too: echo the command,
+    // then leave.
     return {
       action: "navigate",
       href: "/blog",

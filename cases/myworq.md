@@ -17,8 +17,6 @@ sources:
 
 # MyWorq: employee app for horticulture
 
-## In short
-
 An employee app for the horticulture sector, built to lift employee satisfaction,
 productivity and day-to-day collaboration. I led it as **product manager** — from
 mapping what workers and team leaders actually needed, to shaping the roadmap, to
