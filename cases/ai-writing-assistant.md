@@ -17,8 +17,6 @@ sources:
 
 # AI Writing Assistant
 
-## In short
-
 A generative-AI writing assistant for a large public-sector organization. It rewrites
 any text to match the in-house style guide, approved word lists and B1 (plain-language)
 accessibility level — without a single sentence ever leaving the organization's own

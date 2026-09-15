@@ -114,7 +114,8 @@ pnpm run deploy       # Merge main→production and push (triggers Vercel deploy
 content/
 └── blog/                     # Blog posts — one Markdown file per post
 public/
-└── blog/<slug>/              # Images belonging to one post
+├── blog/<slug>/              # Images belonging to one post
+└── portfolio/<slug>/         # Images belonging to one case
 docs/
 └── adr/                      # Architecture decision records
 src/
@@ -123,17 +124,19 @@ src/
 │   ├── (terminal)/           # Route group: everything that runs the terminal
 │   │   ├── layout.tsx        # TRPCReactProvider lives here, not in the root
 │   │   ├── page.tsx          # Homepage
-│   │   ├── [command]/        # /help, /about, … deep links
-│   │   └── portfolio/        # /portfolio and /portfolio/<slug>
-│   ├── (blog)/               # Route group: no tRPC, no terminal bundle
-│   │   ├── layout.tsx        # data-blog-root wrapper
-│   │   ├── blog.module.css   # Editorial layout styles
-│   │   └── blog/             # /blog, /blog/<slug>, /blog/rss.xml
+│   │   └── [command]/        # /help, /about, … deep links
+│   ├── (editorial)/          # Route group: no tRPC, no terminal bundle
+│   │   ├── layout.tsx        # data-editorial-root wrapper
+│   │   ├── editorial.module.css  # Shared reading layout (shell, body, list)
+│   │   ├── blog.module.css   # Blog-only: draft banner, origin footer
+│   │   ├── portfolio.module.css  # Case-only: kind, meta, tags, footer
+│   │   ├── blog/             # /blog, /blog/<slug>, /blog/rss.xml
+│   │   └── portfolio/        # /portfolio, /portfolio/<slug>
 │   ├── _components/          # React components
 │   │   ├── terminal.tsx      # Main terminal container
 │   │   ├── terminal-commands.ts  # Command registry & feed line model
-│   │   ├── portfolio-overlay.tsx
-│   │   ├── post-body.tsx     # Markdown → editorial layout (server-rendered)
+│   │   ├── video-previews.tsx    # Click-to-play case videos (client)
+│   │   ├── post-body.tsx     # Markdown → editorial layout (posts and cases)
 │   │   └── captcha-overlay.tsx
 │   ├── api/
 │   │   ├── chat/route.ts     # AI streaming endpoint (Vercel AI SDK)
@@ -172,7 +175,9 @@ src/
 
 - **`src/app/api/chat/route.ts`** - Main AI chat endpoint, uses Vercel AI SDK's `streamText`, includes `sendMessage` tool for email sending
 - **`src/server/services/command-executor.ts`** - All slash command handlers, returns markdown
-- **`src/app/_components/terminal-commands.ts`** - Command registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link routes and the sitemap
+- **`src/app/_components/terminal-commands.ts`** - Command registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link routes and the sitemap. `/portfolio` and `/blog` are absent from it on purpose: both have a real route under `src/app/(editorial)/`
+- **`src/content/cases.ts`** - Portfolio cases: the single source of truth for the `/portfolio` overview, the case pages, `/llms.txt` and the generated `cases/*.md` archive
+- **`src/app/_components/post-body.tsx`** - Renders one Markdown body through the remark pipeline. Used by both a post and a case; takes `{ markdown, assetBase, lang }`
 - **`src/content/posts.ts`** - Blog post loader: frontmatter schema, the `isPublished` predicate and the date formatting. Every blog surface derives from it
 - **`src/content/blog/remark-post-structure.ts`** - Turns a post's Markdown into the editorial layout (roman-numeral sections, numbered two-column items, charts, figures)
 - **`src/server/db/schema.ts`** - Database schema (modify tables here, then run `pnpm db:push`)
@@ -193,9 +198,16 @@ src/
 3. Drop any images in `public/blog/<slug>/` and reference them by filename
 4. `content/blog/post-template.md` is the reference: a permanent draft showing every supported element
 
-Sections (`##`) and items (`###`) are numbered automatically — never type the numbers. `CONTEXT.md` defines the vocabulary (kicker, lead, excerpt, item, section) and the visibility rules; `docs/adr/` records why posts are Markdown and why the blog sits outside the terminal.
+Sections (`##`) and items (`###`) are numbered automatically — never type the numbers. `CONTEXT.md` defines the vocabulary (kicker, lead, excerpt, item, section) and the visibility rules; `docs/adr/` records why posts are Markdown, why the blog sits outside the terminal, and why the portfolio moved onto the same layout.
 
 Drafts and future-dated posts are withheld from every public surface. Outside production (`ENVIRONMENT` is `development` or `test`) a draft is previewable with a banner and `noindex`; a future-dated post is never previewable.
+
+### Adding a Portfolio Case
+
+1. Append an entry to `CASES` in `src/content/cases.ts` with a unique slug, the next `n` index, a one-line `kind`, the metadata fields and the write-up as a Markdown string in `body`
+2. The body follows the post vocabulary: the text before the first `##` is the lead, a `##` is a numbered section, a `###` a numbered item. Never open a body with a heading
+3. Drop any images in `public/portfolio/<slug>/` and reference them by filename
+4. Run `pnpm gen:cases` to re-emit the `cases/*.md` archive — never hand-edit those files
 
 ### AI System Prompt
 

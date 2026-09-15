@@ -1,7 +1,8 @@
 import { type Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import styles from "../../blog.module.css";
+import styles from "../../editorial.module.css";
+import blog from "../../blog.module.css";
 import { PostBody } from "~/app/_components/post-body";
 import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
 import { POST_COPY } from "~/content/site-content";
@@ -173,7 +174,7 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
 
         {isDraft ? (
-          <p className={styles.draftBanner} data-post-draft-banner="">
+          <p className={blog.draftBanner} data-post-draft-banner="">
             Draft — not published. Visible here because this is not production.
           </p>
         ) : null}
@@ -181,7 +182,11 @@ export default async function PostPage({ params }: PostPageProps) {
         <h1 className={styles.title}>{post.title}</h1>
 
         <div className={styles.body}>
-          <PostBody post={post} />
+          <PostBody
+            markdown={post.body}
+            assetBase={`/blog/${post.slug}`}
+            lang={post.lang}
+          />
         </div>
       </article>
 
@@ -189,7 +194,7 @@ export default async function PostPage({ params }: PostPageProps) {
         In the post's own language: this notice is written for a visitor who
         arrived from a copy on LinkedIn, and it has to be read to land.
       */}
-      <footer className={styles.origin} lang={POST_LOCALES[post.lang].html}>
+      <footer className={blog.origin} lang={POST_LOCALES[post.lang].html}>
         <p>{copy.origin}</p>
         <p>
           <Link href="/blog">← {copy.allPosts}</Link>

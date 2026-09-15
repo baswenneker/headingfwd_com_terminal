@@ -9,22 +9,8 @@ import { env } from "~/env";
 import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
-import {
-  PortfolioOverlay,
-  isBrowserHandledClick,
-} from "./portfolio-overlay";
-import { visibleCases } from "~/content/cases";
 import { CaptchaOverlay } from "./captcha-overlay";
 import { MemoizedMarkdown } from "./memoized-markdown";
-
-/**
- * Cases shown in the fullscreen portfolio overlay: everything except `hidden`
- * ones. Computed once at module load (case data is static) so the overlay
- * receives a stable array reference across renders — no extra re-renders and no
- * index churn while navigating. Coming-soon cases stay in the list; the overlay
- * renders their detail as a placeholder.
- */
-const PORTFOLIO_CASES = visibleCases();
 
 // ── Feed block model ────────────────────────────────────────────────────────
 //
@@ -115,58 +101,22 @@ function readableError(err: unknown): string {
 /**
  * Props for the terminal.
  *
- * Each prop lets a route open the terminal straight into a given state, so
- * every state has a shareable URL:
- *
- *   - `initialMode="portfolio"` — `/portfolio` — fullscreen overlay, list view.
- *   - `initialCaseSlug`         — `/portfolio/<slug>` — overlay, case detail.
- *   - `initialCommand`          — `/help`, `/about`, … — terminal with that
- *     command already executed in the feed.
- *
- * Exiting the overlay (Esc) drops back to the normal terminal underneath.
- * Defaults to the normal terminal with an empty feed.
+ * `initialCommand` lets a route open the terminal with one command already
+ * executed in the feed — `/help`, `/about`, … — so each of those states has a
+ * shareable URL. Without it the terminal starts with an empty feed.
  */
 interface TerminalProps {
-  initialMode?: "terminal" | "portfolio";
   /** Command token (without the slash) to pre-execute into the feed on load. */
   initialCommand?: string;
-  /** Slug of the case to open in detail view; implies portfolio mode. */
-  initialCaseSlug?: string;
 }
 
-export function Terminal({
-  initialMode = "terminal",
-  initialCommand,
-  initialCaseSlug,
-}: TerminalProps = {}) {
+export function Terminal({ initialCommand }: TerminalProps = {}) {
   const [inputValue, setInputValue] = useState("");
   const [blocks, setBlocks] = useState<FeedBlock[]>(() =>
     initialCommandBlocks(initialCommand),
   );
   const [history, setHistory] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
-
-  // Portfolio overlay state — all three are reset when the overlay opens so
-  // each visit starts at the first project in list view. A case deep link
-  // (`initialCaseSlug`) instead starts inside the overlay on that case's
-  // detail view; an unknown slug falls back to plain initialMode behaviour.
-  const initialCaseIndex = initialCaseSlug
-    ? PORTFOLIO_CASES.findIndex((c) => c.slug === initialCaseSlug)
-    : -1;
-  const [mode, setMode] = useState<"terminal" | "portfolio">(
-    initialCaseIndex >= 0 ? "portfolio" : initialMode,
-  );
-  const [pfIndex, setPfIndex] = useState(Math.max(initialCaseIndex, 0));
-  const [pfDetail, setPfDetail] = useState(initialCaseIndex >= 0);
-
-  // Mirror `mode` into a ref so the deferred auto-focus timer below can read
-  // the live value when it fires — its effect runs once and would otherwise
-  // close over the mount-time mode. useRef(mode) seeds the correct value for a
-  // deep-link mount (mode already "portfolio"); the effect tracks later changes.
-  const modeRef = useRef(mode);
-  useEffect(() => {
-    modeRef.current = mode;
-  }, [mode]);
 
   // Session state for the AI chat.
   // sessionIdRef is the single source of truth read at request time by the
@@ -216,11 +166,6 @@ export function Terminal({
   useEffect(() => {
     if (!prefersAutoFocus()) return;
     const timer = setTimeout(() => {
-      // Skip while the portfolio overlay owns the screen. A /portfolio/<slug>
-      // deep link mounts the terminal underneath an already-open overlay;
-      // grabbing focus here (650ms after mount) would steal it from the
-      // overlay and silently break its arrow-key / Esc navigation.
-      if (modeRef.current !== "terminal") return;
       inputRef.current?.focus();
     }, 650);
     return () => clearTimeout(timer);
@@ -342,16 +287,12 @@ export function Terminal({
       void stop();
       setBlocks([]);
       setMessages([]);
-    } else if (result.action === "portfolio") {
-      setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
-      setTimeout(openPortfolio, 140);
     } else if (result.action === "navigate") {
       setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
       // A real page outside the terminal — see the `navigate` action in
       // terminal-commands.ts. A full navigation rather than router.push:
-      // the overlay writes the URL with history.replaceState behind the
-      // router's back, so the router's idea of the current route cannot be
-      // trusted here, and leaving for real is what drops the terminal bundle.
+      // leaving for real is what drops the terminal bundle those pages never
+      // load.
       setTimeout(() => window.location.assign(result.href), 140);
     } else if (result.action === "openurl") {
       setBlocks((prev) => [...prev, { type: "cmd", lines: result.lines }]);
@@ -410,62 +351,6 @@ export function Terminal({
       }
     }
   };
-
-  // ── Portfolio overlay ───────────────────────────────────────────────────
-
-  /**
-   * Keep the address bar in sync with the overlay while it is open:
-   * `/portfolio` for the list, `/portfolio/<slug>` for a detail view — so
-   * "what I'm looking at" is always shareable. Browsing (arrow keys,
-   * prev/next, opening a case) rewrites the URL via history.replaceState:
-   * shallow, so no reload, no history spam and no App Router round-trip.
-   *
-   * Terminal mode is deliberately left alone: the feed can hold many command
-   * outputs, so no single URL can represent it — and rewriting would destroy
-   * a command deep link like `/help` right after it loads. exitPortfolio()
-   * resets the URL to `/` when the visitor leaves the overlay.
-   */
-  useEffect(() => {
-    if (mode !== "portfolio") return;
-    const clamped = Math.max(0, Math.min(pfIndex, PORTFOLIO_CASES.length - 1));
-    const current = PORTFOLIO_CASES[clamped];
-    const path =
-      pfDetail && current ? `/portfolio/${current.slug}` : "/portfolio";
-    if (window.location.pathname !== path) {
-      window.history.replaceState(null, "", path);
-    }
-  }, [mode, pfIndex, pfDetail]);
-
-  /**
-   * Open the portfolio overlay on the case list, from the first case. Used by
-   * the "portfolio" link in the status bar; the `/portfolio` command runs the
-   * same three state changes after its own short output animation.
-   *
-   * The URL follows through the sync effect above, so the overlay and the
-   * address bar agree without a route navigation — the terminal underneath
-   * keeps its feed and its AI session.
-   */
-  function openPortfolio() {
-    setPfIndex(0);
-    setPfDetail(false);
-    setMode("portfolio");
-  }
-
-  /**
-   * Close the portfolio overlay and, on fine-pointer devices, return keyboard
-   * focus to the terminal input. The 40ms delay gives React time to finish
-   * the re-render so the input is visible before focus() is called.
-   */
-  function exitPortfolio() {
-    setMode("terminal");
-    // The overlay URL (/portfolio or /portfolio/<slug>) no longer matches
-    // what is on screen; reset to the terminal root. replaceState mirrors how
-    // the sync effect wrote the URL, keeping the history stack untouched.
-    window.history.replaceState(null, "", "/");
-    setTimeout(() => {
-      if (prefersAutoFocus()) inputRef.current?.focus();
-    }, 40);
-  }
 
   // ── Derived values for rendering ────────────────────────────────────────
 
@@ -592,7 +477,7 @@ export function Terminal({
             >
               /portfolio
             </button>
-            {" "}to browse my work fullscreen ·{" "}
+            {" "}to browse my work ·{" "}
             <button
               className={styles.tipCommand}
               onClick={(e) => {
@@ -860,28 +745,13 @@ export function Terminal({
           <span>main</span>
           <span>utf-8</span>
           {/*
-           * Crawl path into the case pages. `/portfolio` is reachable by
-           * typing the command too, but only a real anchor in the initial
-           * HTML gives crawlers (and visitors who don't type commands) a way
-           * in: home → list → case.
-           *
-           * A plain click is intercepted and opens the overlay in place, like
-           * every link inside the overlay itself. Letting it navigate for real
-           * would unmount the terminal — losing the feed, the AI session and
-           * the CAPTCHA — and would leave the App Router pointing at
-           * /portfolio while exitPortfolio() rewrites the URL back to `/`,
-           * after which a second click on this link does nothing at all.
+           * Crawl path into the case pages. `/portfolio` is a real route
+           * outside the terminal, so this is a plain link — clicking it leaves
+           * the page, exactly as the `/portfolio` command does. Only an anchor
+           * in the initial HTML gives crawlers (and visitors who don't type
+           * commands) the way in: home → list → case.
            */}
-          <Link
-            className={styles.statusLink}
-            href="/portfolio"
-            prefetch={false}
-            onClick={(e) => {
-              if (isBrowserHandledClick(e)) return;
-              e.preventDefault();
-              openPortfolio();
-            }}
-          >
+          <Link className={styles.statusLink} href="/portfolio" prefetch={false}>
             portfolio
           </Link>
           {/*
@@ -937,22 +807,6 @@ export function Terminal({
           />
         )}
       </div>
-
-      {/*
-       * Portfolio overlay — rendered on top of the window when the visitor
-       * opens /portfolio. Absolutely positioned inside .page so it covers the
-       * full viewport.
-       */}
-      {mode === "portfolio" && (
-        <PortfolioOverlay
-          cases={PORTFOLIO_CASES}
-          pfIndex={pfIndex}
-          pfDetail={pfDetail}
-          onSetPfIndex={setPfIndex}
-          onSetPfDetail={setPfDetail}
-          onExit={exitPortfolio}
-        />
-      )}
     </main>
   );
 }

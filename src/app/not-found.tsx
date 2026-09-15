@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 /** Working routes offered as terminal commands — all real, indexable pages. */
 const ROUTES = [
   { cmd: "cd ~", href: "/", desc: "back to the terminal" },
-  { cmd: "/portfolio", href: "/portfolio", desc: "browse my work fullscreen" },
+  { cmd: "/portfolio", href: "/portfolio", desc: "browse my work" },
   { cmd: "/blog", href: "/blog", desc: "long-form writing on AI engineering" },
   { cmd: "/services", href: "/services", desc: "what I help teams with" },
   { cmd: "/about", href: "/about", desc: "who I am & how I work" },

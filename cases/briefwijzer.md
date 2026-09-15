@@ -17,8 +17,6 @@ sources:
 
 # BriefWijzer
 
-## In short
-
 BriefWijzer makes unreadable (government) letters understandable. Your customer takes a
 photo of the letter, and the app does the rest: a short, understandable summary, a
 directly clickable call-to-action, and an AI-driven chat to ask questions about the
