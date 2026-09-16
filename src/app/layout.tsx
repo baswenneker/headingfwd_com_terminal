@@ -67,20 +67,14 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     locale: "en_US",
-    images: [
-      {
-        url: "/android-chrome-512x512.png",
-        width: 512,
-        height: 512,
-        alt: "HeadingFWD — AI engineering & consultancy",
-      },
-    ],
+    // No `images` here on purpose: an explicit entry beats Next's
+    // `opengraph-image` file convention, so the generated card in
+    // src/app/opengraph-image.tsx would never be used. Same for twitter.
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: ["/android-chrome-512x512.png"],
   },
   icons: [
     { rel: "icon", url: "/favicon.ico" },
