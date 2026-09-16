@@ -50,6 +50,10 @@
     ".next/dev/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    /* Generated Claude Design output — gitignored, so it exists only on a machine
+       that ran the design sync. Without this, the JavaScript glob above pulls its
+       bundle into the type check and fails the build locally but never in CI. */
+    "ds-bundle"
   ]
 }

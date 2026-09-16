@@ -55,3 +55,7 @@ tmp/db
 # beans (local issue tracker — keep out of repo)
 .beans/
 .beans.yml
+
+# design-sync build output (regenerated, not source)
+ds-bundle/
+.playwright-mcp/
