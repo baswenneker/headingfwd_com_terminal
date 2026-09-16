@@ -32,6 +32,31 @@ italic 400. Google serves all four upright weights from **one variable file**
 the Google Fonts css2 API and a desktop user-agent; the latin `@font-face`
 blocks are the ones to keep.
 
+## The logo
+
+`public/favicon.svg` is the whole identity: `>>` on a dark tile. Copied
+verbatim into `brand/logo.svg`, with `public/android-chrome-512x512.png` as
+`brand/logo-512.png`. There is no `>>` anywhere in the source — it exists only
+as an icon.
+
+**It predates the tokens and does not use them**: `#00ffff` on `#0a0a0a` in
+generic `monospace`, where the system says `--hf-accent` (`#2ee6f6`) on
+`--hf-ed-surface` (`#07090b`) in JetBrains Mono. Bas chose on 16 September 2026
+to ship it as-is and record the gap rather than align it, so the bundle matches
+the live site. The rejected options were recolouring only the bundle, or
+recolouring the bundle and `public/favicon.svg` together.
+
+Two things worth keeping:
+- The SVG draws the chevrons as **live text in generic `monospace`**, so the
+  shape depends on the renderer. `logo-512.png` is the stable reference.
+- The tile ground (`#0a0a0a`) is three values away from `--hf-ed-surface`
+  (`#07090b`), so the tile edge is invisible on an editorial page. Anywhere the
+  mark is shown, outline it — the Logo card does.
+
+Do not regenerate the PNG icons from the SVG. `favicon.ico` and the four PNGs
+were exported from some other renderer; re-exporting would silently change the
+glyph shape across the site.
+
 ## Verification
 
 Each card was served over `python3 -m http.server` and rendered in headless

@@ -19,6 +19,15 @@ the design renders on bare white.
 
 The system is dark only. There is no light mode; do not invent one.
 
+## The logo
+
+A double chevron, `brand/logo.svg` — a square dark tile with `>>` on it. It is
+the entire identity: no wordmark, no lockup, no variant with the company name
+beside it. It keeps its own tile, so place the tile on a surface rather than
+the bare chevrons, and never recolour it. Note that the mark predates the
+tokens and does not use them: it is pure `#00ffff` on `#0a0a0a`, not
+`--hf-accent` on `--hf-ed-surface`. Ship it as-is anyway.
+
 ## The idiom
 
 Not utility classes, not props — **CSS custom properties plus a small set of
