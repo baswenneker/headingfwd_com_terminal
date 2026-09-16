@@ -159,6 +159,18 @@ const jetBrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   weight: ["400", "500", "700", "800"],
   style: ["normal", "italic"],
+  // System monospace fonts to fall back on: when the webfont fails to load, and
+  // per glyph for characters outside the latin subset (e.g. box drawing).
+  fallback: [
+    "Menlo",
+    "Consolas",
+    "DejaVu Sans Mono",
+    "ui-monospace",
+    "monospace",
+  ],
+  // Next's automatic metrics fallback is Arial for anything non-serif, which is
+  // proportional and would break the terminal's column alignment.
+  adjustFontFallback: false,
 });
 
 export default function RootLayout({

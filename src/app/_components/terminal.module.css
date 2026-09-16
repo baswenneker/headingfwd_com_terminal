@@ -556,15 +556,6 @@
   color: #cfe2e7;
   font-size: 14px;
   line-height: 1.72;
-  /*
-   * Extend the font stack beyond the loaded JetBrains Mono latin subset.
-   * Box-drawing characters used in email previews (e.g. ━) fall outside
-   * the latin range, so including system monospace fonts that carry those
-   * glyphs prevents inconsistent glyph widths when the primary font
-   * falls back to the browser's default.
-   */
-  font-family: var(--font-jetbrains-mono), "Menlo", "Consolas",
-    "DejaVu Sans Mono", ui-monospace, monospace;
 }
 
 /* Blinking block cursor appended at the end of streaming content */
