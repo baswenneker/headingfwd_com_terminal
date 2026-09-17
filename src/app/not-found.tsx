@@ -23,9 +23,18 @@ export const metadata: Metadata = {
   description:
     "That route doesn’t exist on headingfwd.com. Head back to the terminal, " +
     "or jump to the portfolio, blog, services, about or contact pages.",
-  // The response already carries a 404 status; say noindex explicitly so no
-  // crawler ever keeps a soft-404 URL in its index.
+  // Both lines below override something the root layout would otherwise hand
+  // down to this page.
+  //
+  // `robots`: the layout sets `index: true, follow: true` for the real pages.
+  // Inheriting that here would contradict the `noindex` Next injects on every
+  // 404. The two tags then disagree, so say noindex explicitly instead.
   robots: { index: false, follow: true },
+  // `alternates`: the layout sets `canonical: "/"`. A 404 carrying it tells
+  // crawlers the homepage is this URL's real version, and Search Console files
+  // the URL under "Alternative page with proper canonical tag". A page that
+  // does not exist has no canonical, so drop it.
+  alternates: { canonical: null },
 };
 
 /** Working routes offered as terminal commands — all real, indexable pages. */
