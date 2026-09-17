@@ -115,7 +115,8 @@ content/
 └── blog/                     # Blog posts — one Markdown file per post
 public/
 ├── blog/<slug>/              # Images belonging to one post
-└── portfolio/<slug>/         # Images belonging to one case
+├── portfolio/<slug>/         # Images belonging to one case
+└── workshops/<slug>/         # Images belonging to one workshop page
 docs/
 └── adr/                      # Architecture decision records
 src/
@@ -130,8 +131,10 @@ src/
 │   │   ├── editorial.module.css  # Shared reading layout (shell, body, list)
 │   │   ├── blog.module.css   # Blog-only: draft banner, origin footer
 │   │   ├── portfolio.module.css  # Case-only: kind, meta, tags, footer
+│   │   ├── workshop.module.css   # Workshop-only: footer
 │   │   ├── blog/             # /blog, /blog/<slug>, /blog/rss.xml
-│   │   └── portfolio/        # /portfolio, /portfolio/<slug>
+│   │   ├── portfolio/        # /portfolio, /portfolio/<slug>
+│   │   └── workshops/        # /workshops/<slug> — unlisted offer pages
 │   ├── _components/          # React components
 │   │   ├── terminal.tsx      # Main terminal container
 │   │   ├── terminal-commands.ts  # Command registry & feed line model
@@ -147,6 +150,7 @@ src/
 ├── content/
 │   ├── cases.ts              # Portfolio cases (source of truth)
 │   ├── posts.ts              # Blog post loader, validation & visibility
+│   ├── workshops.ts          # Workshop offer pages (unlisted, noindex)
 │   ├── site-content.ts       # About, specialities, stack, contact
 │   └── blog/                 # Post rendering: remark plugin, charts, assets
 ├── server/
@@ -177,6 +181,7 @@ src/
 - **`src/server/services/command-executor.ts`** - All slash command handlers, returns markdown
 - **`src/app/_components/terminal-commands.ts`** - Command registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link routes and the sitemap. `/portfolio` and `/blog` are absent from it on purpose: both have a real route under `src/app/(editorial)/`
 - **`src/content/cases.ts`** - Portfolio cases: the single source of truth for the `/portfolio` overview, the case pages, `/llms.txt` and the generated `cases/*.md` archive
+- **`src/content/workshops.ts`** - The workshop offer page(s): source of truth for `/workshops/<slug>` and its `/llms.txt` line. Unlisted: no link anywhere, not in the sitemap, `noindex`. See `docs/adr/0004-unlisted-offer-page.md`
 - **`src/app/_components/post-body.tsx`** - Renders one Markdown body through the remark pipeline. Used by both a post and a case; takes `{ markdown, assetBase, lang }`
 - **`src/content/posts.ts`** - Blog post loader: frontmatter schema, the `isPublished` predicate and the date formatting. Every blog surface derives from it
 - **`src/content/blog/remark-post-structure.ts`** - Turns a post's Markdown into the editorial layout (roman-numeral sections, numbered two-column items, charts, figures)

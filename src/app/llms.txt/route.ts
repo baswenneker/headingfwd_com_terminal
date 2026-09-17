@@ -8,6 +8,7 @@
  *   - About / specialities / stack / contact → `~/content/site-content`
  *   - Portfolio cases                        → `~/content/cases` (CASES)
  *   - Blog posts                             → `~/content/posts`
+ *   - Workshops                              → `~/content/workshops`
  *
  * The short site copy is carried in full. The long-form writing is not: each
  * case and each post is one link line — title, URL and a one-line summary —
@@ -34,6 +35,7 @@ import {
 } from "~/content/site-content";
 import { isComingSoonCase, visibleCases } from "~/content/cases";
 import { postPath, publishedPosts } from "~/content/posts";
+import { AI_CODING_WORKSHOP, workshopPath } from "~/content/workshops";
 import { SITE_URL } from "~/config/site";
 
 export const dynamic = "force-static";
@@ -95,6 +97,18 @@ function buildAgentsTxt(): string {
           `- [${c.title}](${SITE_URL}/portfolio/${c.slug}): ${c.kind}` +
           (isComingSoonCase(c) ? " — coming soon" : ""),
       ),
+    ].join("\n"),
+  );
+
+  // ── Workshops ───────────────────────────────────────────────────────────
+  // The workshop page is UNLISTED: linked from nowhere, absent from the
+  // sitemap, `noindex`. This line is the one place that names it, so an agent
+  // asked about HeadingFWD's services can still find the offer.
+  blocks.push(
+    [
+      "## Workshops",
+      "",
+      `- [${AI_CODING_WORKSHOP.title}](${SITE_URL}${workshopPath(AI_CODING_WORKSHOP)}): ${AI_CODING_WORKSHOP.excerpt}`,
     ].join("\n"),
   );
 

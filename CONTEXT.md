@@ -1,7 +1,7 @@
 # CONTEXT
 
-The vocabulary of this repository. Two content types live here and they are not
-the same thing; several words mean something specific and are easy to confuse.
+The vocabulary of this repository. Three content types live here and they are
+not the same thing; several words mean something specific and are easy to confuse.
 Use these words as written.
 
 ## Content types
@@ -17,6 +17,11 @@ A post surfaces at `/blog`, at `/blog/<slug>`, in `/blog/rss.xml`, in the
 sitemap and in `/llms.txt` as a link.
 
 The inversion is deliberate. See `docs/adr/0001-markdown-posts.md`.
+
+**Workshop** — one offer page for a workshop Bas shares by link. The source of
+truth is a TypeScript entry in `src/content/workshops.ts`. A workshop surfaces
+at `/workshops/<slug>` and in `/llms.txt` as a link, and nowhere else: it is
+*unlisted* (see Visibility). See `docs/adr/0004-unlisted-offer-page.md`.
 
 A case body and a post body go through the same renderer, so both follow the
 vocabulary below: lead, section, item, and the rest. A case has no kicker and
@@ -80,6 +85,11 @@ banner and `noindex`.
 **Future-dated** — a date that has not arrived. Withheld everywhere, preview
 included; its URL is a hard 404. Because the routable set is computed at build
 time, a future-dated post appears only after the next deploy.
+
+**Unlisted** — reachable on its URL and named in `/llms.txt`, but linked from
+no page, absent from the sitemap and `noindex`. Anyone with the link reads it;
+nobody finds it by browsing. A workshop is always unlisted; a post or a case
+never is.
 
 `ENVIRONMENT` is not `NODE_ENV`. The end-to-end suite runs the dev server with
 `NODE_ENV=test`, and must see drafts the way the author does. An unset

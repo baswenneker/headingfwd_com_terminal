@@ -1,0 +1,65 @@
+<!--
+  The development loop the workshop ends with: seven steps, one cycle.
+
+  Two rows, so the drawing stays at 460 units wide and its 13-unit labels
+  still land near 9px in the narrowest body column (see the Geometry note in
+  src/content/blog/charts.ts — everything in a viewBox scales with the
+  rendered width, text included). Row one runs left to right, row two right
+  to left, and the last step's arrow climbs back to the first: the reader
+  follows one unbroken circuit rather than a line that stops at the edge.
+
+  Arrowheads are paths, not glyphs: JetBrains Mono has no arrows. No colour is
+  set; every stroke and fill follows currentColor, and the stylesheet paints
+  the figure with the page accent.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 170" role="presentation">
+  <g font-family="monospace" fill="currentColor">
+    <!-- Boxes -->
+    <g stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity=".08" rx="4">
+      <rect x="12"  y="24"  width="96" height="44" rx="4"/>
+      <rect x="122" y="24"  width="96" height="44" rx="4"/>
+      <rect x="232" y="24"  width="96" height="44" rx="4"/>
+      <rect x="342" y="24"  width="96" height="44" rx="4"/>
+      <rect x="342" y="102" width="96" height="44" rx="4"/>
+      <rect x="232" y="102" width="96" height="44" rx="4"/>
+      <rect x="122" y="102" width="96" height="44" rx="4"/>
+    </g>
+
+    <!-- Step labels -->
+    <g font-size="13" font-weight="700" text-anchor="middle">
+      <text x="60"  y="51">explore</text>
+      <text x="170" y="51">interview</text>
+      <text x="280" y="51">specify</text>
+      <text x="390" y="51">build</text>
+      <text x="390" y="129">check</text>
+      <text x="280" y="129">review</text>
+      <text x="170" y="129">capture</text>
+    </g>
+
+    <!-- Step numbers -->
+    <g font-size="9" opacity=".45">
+      <text x="18"  y="35">1</text>
+      <text x="128" y="35">2</text>
+      <text x="238" y="35">3</text>
+      <text x="348" y="35">4</text>
+      <text x="348" y="113">5</text>
+      <text x="238" y="113">6</text>
+      <text x="128" y="113">7</text>
+    </g>
+
+    <!-- Connectors -->
+    <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <!-- row one, left to right -->
+      <path d="M108 46h14M118 42.5l4 3.5-4 3.5"/>
+      <path d="M218 46h14M228 42.5l4 3.5-4 3.5"/>
+      <path d="M328 46h14M338 42.5l4 3.5-4 3.5"/>
+      <!-- build down to check -->
+      <path d="M390 68v34M386.5 98l3.5 4 3.5-4"/>
+      <!-- row two, right to left -->
+      <path d="M342 124h-14M332 120.5l-4 3.5 4 3.5"/>
+      <path d="M232 124h-14M222 120.5l-4 3.5 4 3.5"/>
+      <!-- capture back up to explore: the loop closes -->
+      <path d="M122 124H60V68M56.5 72 60 68l3.5 4"/>
+    </g>
+  </g>
+</svg>
