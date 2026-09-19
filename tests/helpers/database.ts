@@ -1,102 +1,22 @@
 import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
-import { chatSessions, chatMessages, rateLimitLogs } from "~/server/db/schema";
+import { chatSessions, rateLimitLogs } from "~/server/db/schema";
 
 /**
- * Database helper utilities for Playwright tests
- * Handles database cleanup and session management
+ * Database helper utilities for Playwright tests.
+ *
+ * Kept intentionally small: every export here is used by a real spec (see
+ * tests/e2e/session-lifecycle.spec.ts). A larger set of helpers
+ * (createTestSession, getSession, updateSessionMessageCount,
+ * cleanupDatabase, verifyTestDatabase) used to live here unreferenced by any
+ * spec — removed rather than kept as dead code (#13 T7).
  */
 
 /**
- * Clean up all test data from the database
- * Should be called before or after each test
- */
-export async function cleanupDatabase() {
-  try {
-    // Delete in reverse order of dependencies
-    // Silently ignore if tables don't exist yet
-    try {
-      await db.delete(chatMessages);
-    } catch (e) {
-      // Table might not exist yet, ignore
-    }
-    try {
-      await db.delete(rateLimitLogs);
-    } catch (e) {
-      // Table might not exist yet, ignore
-    }
-    try {
-      await db.delete(chatSessions);
-    } catch (e) {
-      // Table might not exist yet, ignore
-    }
-  } catch (error) {
-    console.error("Failed to cleanup database:", error);
-    throw error;
-  }
-}
-
-/**
- * Create a test session directly in the database
- * Useful for bypassing the CAPTCHA flow in tests
- */
-export async function createTestSession(options?: {
-  verified?: boolean;
-  messageCount?: number;
-  expiresInMinutes?: number;
-}) {
-  const sessionId = `session_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  const now = new Date();
-  const expiresAt = new Date(
-    now.getTime() + (options?.expiresInMinutes ?? 30) * 60 * 1000,
-  );
-
-  const [session] = await db
-    .insert(chatSessions)
-    .values({
-      sessionId,
-      verified: options?.verified ?? true,
-      messageCount: options?.messageCount ?? 0,
-      createdAt: now,
-      lastActivityAt: now,
-      expiresAt,
-    })
-    .returning();
-
-  return session;
-}
-
-/**
- * Get session by ID from the database
- */
-export async function getSession(sessionId: string) {
-  const [session] = await db
-    .select()
-    .from(chatSessions)
-    .where(eq(chatSessions.sessionId, sessionId));
-
-  return session;
-}
-
-/**
- * Update session message count
- */
-export async function updateSessionMessageCount(
-  sessionId: string,
-  count: number,
-) {
-  await db
-    .update(chatSessions)
-    .set({
-      messageCount: count,
-      lastActivityAt: new Date(),
-    })
-    .where(eq(chatSessions.sessionId, sessionId));
-}
-
-/**
- * Create expired test session
- * Useful for testing session expiry handling
+ * Create an expired test session directly in the database — a session whose
+ * `expiresAt` is already in the past, verified, never used. Useful for
+ * hitting the real /api/chat handler's expired-session branch without going
+ * through the CAPTCHA flow.
  */
 export async function createExpiredSession() {
   const sessionId = `session_expired_${Date.now()}`;
@@ -119,13 +39,29 @@ export async function createExpiredSession() {
 }
 
 /**
- * Add rate limit logs for a session
+ * Force an EXISTING session (one the browser already created for itself
+ * through the real CAPTCHA-disabled flow) into the past. `sessionIdRef` in
+ * terminal.tsx is only ever set by a real `initSession` tRPC call — there is
+ * no way to hand the browser a session id created out of band — so testing
+ * "the browser's own session expired under it" means aging the row the
+ * browser is already holding, rather than minting an unrelated one.
+ */
+export async function expireSession(sessionId: string) {
+  const expiredTime = new Date(Date.now() - 60 * 60 * 1000);
+  await db
+    .update(chatSessions)
+    .set({ expiresAt: expiredTime, lastActivityAt: expiredTime })
+    .where(eq(chatSessions.sessionId, sessionId));
+}
+
+/**
+ * Add rate limit logs for a session.
  * Useful for testing rate limiting behavior
  */
 export async function addRateLimitLogs(
   sessionId: string,
   count: number,
-  action: string = "message",
+  action = "message",
 ) {
   const now = Date.now();
 
@@ -135,19 +71,5 @@ export async function addRateLimitLogs(
       action,
       createdAt: new Date(now - i * 1000), // Spread across last N seconds
     });
-  }
-}
-
-/**
- * Verify database is using in-memory SQLite
- * This ensures we're not accidentally affecting real data
- */
-export function verifyTestDatabase() {
-  const dbUrl = process.env.DATABASE_URL;
-
-  if (dbUrl !== ":memory:" && !dbUrl?.includes("test")) {
-    throw new Error(
-      `Tests must use in-memory or test database. Current: ${dbUrl}`,
-    );
   }
 }
