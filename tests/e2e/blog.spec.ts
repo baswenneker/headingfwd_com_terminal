@@ -510,11 +510,14 @@ test.describe("Terminal integration", () => {
     ).toBeVisible();
   });
 
-  // The tip line above the prompt is the first thing a visitor reads, and its
-  // command tokens are real buttons so a touch visitor never has to type.
+  // The tip line above the prompt is the first thing a visitor reads. Its
+  // command tokens are anchors to the page each command opens (#13 D1), so a
+  // touch visitor never has to type and a crawler finds the blog from here.
   test("the tip line offers /blog and it navigates", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: "/blog", exact: true }).click();
+    const token = page.getByRole("link", { name: "/blog", exact: true });
+    await expect(token).toHaveAttribute("href", "/blog");
+    await token.click();
     await expect(page).toHaveURL("/blog");
   });
 
