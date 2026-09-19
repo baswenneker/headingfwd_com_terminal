@@ -455,38 +455,58 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             </div>
           </div>
 
-          {/* Hint line — command tokens are real buttons for touch visitors */}
+          {/*
+           * Hint line. Each token is an anchor to the command's own page whose
+           * click is intercepted and run in the terminal instead: a crawler
+           * following the homepage reaches /help, and a visitor clicking it
+           * stays here and sees the output in the feed (#13 D1). `/portfolio`
+           * and `/blog` are real pages outside the terminal, so their dispatch
+           * still leaves — the anchor and the command agree either way.
+           *
+           * prefetch={false}: these are the terminal's own route group, and
+           * prefetching several pages nobody asked for is the cost this file
+           * already avoids in the status bar.
+           */}
           <div className={styles.tip}>
             tip: type{" "}
-            <button
+            <Link
+              href="/help"
+              prefetch={false}
               className={styles.tipCommand}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 dispatchCommand("/help");
               }}
             >
               /help
-            </button>
+            </Link>
             {" "}for commands ·{" "}
-            <button
+            <Link
+              href="/portfolio"
+              prefetch={false}
               className={styles.tipCommand}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 dispatchCommand("/portfolio");
               }}
             >
               /portfolio
-            </button>
+            </Link>
             {" "}to browse my work ·{" "}
-            <button
+            <Link
+              href="/blog"
+              prefetch={false}
               className={styles.tipCommand}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 dispatchCommand("/blog");
               }}
             >
               /blog
-            </button>
+            </Link>
             {" "}to read what I write · or just ask
           </div>
 

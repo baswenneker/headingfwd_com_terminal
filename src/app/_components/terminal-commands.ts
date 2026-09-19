@@ -32,8 +32,20 @@ export type BulletLine = { kind: "bullet"; text: string };
 /**
  * Two-column label / description row.
  * Label is in accent, min-width 96px; description is slightly muted.
+ *
+ * `href` is set when the label's command also exists as a real page. The
+ * renderer then draws the label as an anchor to that page whose click is
+ * intercepted and run in the terminal instead — so a crawler following the
+ * document reaches every command page, while a visitor stays where they are
+ * (#13 D1). Rows without a page of their own (`/clear`, `/linkedin`) leave it
+ * unset and keep the plain button.
  */
-export type RowLine = { kind: "row"; label: string; desc: string };
+export type RowLine = {
+  kind: "row";
+  label: string;
+  desc: string;
+  href?: string;
+};
 
 /**
  * Clickable link row.
@@ -85,17 +97,38 @@ export type CommandResult =
 
 const sp: SpLine = { kind: "sp" };
 
+/**
+ * A `/help` row, carrying an `href` when the command has a page of its own.
+ *
+ * Declared as a function rather than a const so it can be used above the
+ * `COMMAND_PAGES` declaration it reads: function declarations hoist, a const
+ * set would sit in the temporal dead zone at module evaluation.
+ */
+function row(label: string, desc: string): RowLine {
+  const token = label.replace(/^\//, "");
+  // Every command page, plus the two editorial routes, which are real pages
+  // as well — `/portfolio` and `/blog` are absent from COMMAND_PAGES only
+  // because they are NOT rendered by the `[command]` route.
+  const routable =
+    COMMAND_PAGES.some((p) => p.token === token) ||
+    token === "portfolio" ||
+    token === "blog";
+  return routable
+    ? { kind: "row", label, desc, href: `/${token}` }
+    : { kind: "row", label, desc };
+}
+
 function helpLines(): FeedLine[] {
   return [
     { kind: "head", text: "available commands" },
-    { kind: "row", label: "/about",     desc: "who I am & how I work" },
-    { kind: "row", label: "/services",  desc: "what I help teams with" },
-    { kind: "row", label: "/portfolio", desc: "browse my work ↵" },
-    { kind: "row", label: "/blog",      desc: "long-form writing on AI engineering ↵" },
-    { kind: "row", label: "/stack",     desc: "tools, models & tech" },
-    { kind: "row", label: "/contact",   desc: "how to reach me" },
-    { kind: "row", label: "/agents",    desc: "plaintext version for agents (llms.txt)" },
-    { kind: "row", label: "/clear",     desc: "clear the screen" },
+    row("/about",     "who I am & how I work"),
+    row("/services",  "what I help teams with"),
+    row("/portfolio", "browse my work ↵"),
+    row("/blog",      "long-form writing on AI engineering ↵"),
+    row("/stack",     "tools, models & tech"),
+    row("/contact",   "how to reach me"),
+    row("/agents",    "plaintext version for agents (llms.txt)"),
+    row("/clear",     "clear the screen"),
     { kind: "dim", text: "tip: arrow keys recall history · or just type a question" },
   ];
 }

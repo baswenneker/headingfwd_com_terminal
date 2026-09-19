@@ -233,9 +233,11 @@
   color: rgba(245, 197, 68, 0.9);
 }
 
-/* Highlighted command tokens inside the tip line, rendered as inline buttons.
- * Button-reset rules strip browser chrome so the element looks identical to
- * the old <span> while remaining keyboard- and tap-accessible. */
+/* Highlighted command tokens inside the tip line, rendered as inline anchors
+ * to the command's own page (their click is intercepted and run in place).
+ * The reset rules strip both button and anchor chrome so the token looks
+ * identical to the surrounding text while staying keyboard- and tap-
+ * accessible. */
 .tipCommand {
   color: var(--accent);
   font-weight: 700;
@@ -247,6 +249,11 @@
   line-height: inherit;
   cursor: pointer;
   display: inline;
+  text-decoration: none;
+}
+
+.tipCommand:hover {
+  text-decoration: underline;
 }
 
 /* 1px rule separating the intro block from the (future) command feed */
@@ -480,8 +487,9 @@
   min-width: 96px;
 }
 
-/* Applied to .feedRowLabel when it is rendered as a <button> so the browser's
- * default button appearance is stripped while the visual style is preserved. */
+/* Applied to .feedRowLabel when it is rendered as a <button> or as an anchor
+ * to the command's own page, so the browser's default chrome for either is
+ * stripped while the visual style is preserved. */
 .feedRowLabelBtn {
   background: none;
   border: none;
@@ -492,6 +500,11 @@
   text-align: left;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
+}
+
+.feedRowLabelBtn:hover {
+  text-decoration: underline;
 }
 
 /* Right column of a row — description in a slightly muted tone */

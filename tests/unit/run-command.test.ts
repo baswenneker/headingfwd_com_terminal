@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { runCommand } from "~/app/_components/terminal-commands";
+import {
+  COMMAND_PAGES,
+  runCommand,
+} from "~/app/_components/terminal-commands";
 import { CONTACT } from "~/content/site-content";
 
 /**
@@ -17,6 +20,28 @@ describe("runCommand", () => {
     if (result.action !== "lines") return;
     expect(result.lines[0]).toEqual({ kind: "cmd", text: "/help" });
     expect(result.lines.some((l) => l.kind === "head")).toBe(true);
+  });
+
+  it("every /help row that has a page of its own carries its href", () => {
+    const result = runCommand("/help");
+    if (result.action !== "lines") throw new Error("expected lines");
+    const rows = result.lines.filter((l) => l.kind === "row");
+
+    // Every command page is offered as a link, so a crawler reading the
+    // server-rendered /help page reaches all six (#13 D1).
+    for (const page of COMMAND_PAGES) {
+      const row = rows.find((r) => r.label === `/${page.token}`);
+      if (!row) continue; // /help does not list itself
+      expect(row.href).toBe(`/${page.token}`);
+    }
+
+    // The two editorial routes are pages too, even though they are absent
+    // from COMMAND_PAGES (they have routes of their own, not `[command]`).
+    expect(rows.find((r) => r.label === "/portfolio")?.href).toBe("/portfolio");
+    expect(rows.find((r) => r.label === "/blog")?.href).toBe("/blog");
+
+    // /clear only mutates feed state: no page, no href.
+    expect(rows.find((r) => r.label === "/clear")?.href).toBeUndefined();
   });
 
   it("/clear and /cls both clear the feed", () => {

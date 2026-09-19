@@ -32,6 +32,57 @@ test.describe("Editorial landmarks", () => {
   }
 });
 
+test.describe("Terminal crawl paths", () => {
+  test("the homepage links to every command page in its served HTML", async ({
+    request,
+  }) => {
+    const html = await (await request.get("/")).text();
+
+    // The tip-line tokens are anchors, so a crawler that runs no script still
+    // reaches /help, /portfolio and /blog from the homepage.
+    for (const href of ["/help", "/portfolio", "/blog"]) {
+      expect(html).toContain(`href="${href}"`);
+    }
+  });
+
+  test("/help renders its command rows as links to the real pages", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByTestId("terminal-input").fill("/help");
+    await page.getByTestId("terminal-input").press("Enter");
+
+    for (const href of [
+      "/about",
+      "/services",
+      "/portfolio",
+      "/blog",
+      "/stack",
+      "/contact",
+      "/agents",
+    ]) {
+      await expect(page.locator(`a[href="${href}"]`).first()).toBeVisible();
+    }
+
+    // /clear has no page of its own, so it stays a button.
+    await expect(page.locator('a[href="/clear"]')).toHaveCount(0);
+  });
+
+  test("clicking a /help row runs the command instead of navigating", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.getByTestId("terminal-input").fill("/help");
+    await page.getByTestId("terminal-input").press("Enter");
+
+    await page.locator('a[href="/about"]').first().click();
+
+    // Still on the homepage, with the command's output in the feed.
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByText("$ whoami")).toBeVisible();
+  });
+});
+
 test.describe("Post author block", () => {
   test.skip(!FIRST_POST, "no published post to render");
 
