@@ -106,20 +106,23 @@ export default function NotFound() {
             ))}
           </nav>
 
+          {/* The tip used to end "or just ask me anything" on a page with no
+              input to ask it in (#13 U12). */}
           <p className={styles.tip}>
             tip: type{" "}
             <Link href="/help" className={styles.tipCommand}>
               /help
             </Link>{" "}
-            once you’re back, or just ask me anything
+            once you’re back.
           </p>
 
-          {/* Divider + a fresh prompt, ready for the next command */}
+          {/* Divider + a fresh prompt. It looked ready for a command that
+              could never be typed here, so it is the link back instead. */}
           <div className={styles.divider} />
-          <div className={styles.promptLine}>
-            {"bas@headingfwd:~$ "}
+          <Link href="/" className={`${styles.promptLine} ${nf.promptLink}`}>
+            {"bas@headingfwd:~$ cd ~"}
             <span className={nf.cursor} aria-hidden="true" />
-          </div>
+          </Link>
         </div>
 
         {/* ── Status bar ── */}

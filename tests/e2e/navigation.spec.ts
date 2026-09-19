@@ -67,6 +67,18 @@ test.describe("Terminal crawl paths", () => {
     }
   });
 
+  test("the 404 promises nothing it cannot deliver", async ({ page }) => {
+    await page.goto("/this-route-does-not-exist");
+
+    // No input on this page, so no invitation to ask anything (#13 U12).
+    await expect(page.getByText("just ask me anything")).toHaveCount(0);
+    await expect(page.getByTestId("terminal-input")).toHaveCount(0);
+
+    // The closing prompt is the way back rather than a dead decoration.
+    await page.getByRole("link", { name: /cd ~/ }).last().click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
   test("/help renders its command rows as links to the real pages", async ({
     page,
   }) => {

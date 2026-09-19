@@ -113,6 +113,23 @@
   color: rgba(207, 226, 231, 0.78);
 }
 
+/* ─── Prompt line as the way back ────────────────────────────────────────── */
+/*
+ * The foot of the body is a fresh prompt. It is also a link to the terminal,
+ * because a prompt you cannot type into is a decoration (#13 U12). Inherits
+ * the terminal's own .promptLine styling; only the link chrome is reset here.
+ */
+.promptLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.promptLink:hover,
+.promptLink:focus-visible {
+  color: var(--accent);
+}
+
 /* ─── Blinking cursor ────────────────────────────────────────────────────── */
 /*
  * Sits on the fresh prompt at the foot of the body, so the shell reads as
