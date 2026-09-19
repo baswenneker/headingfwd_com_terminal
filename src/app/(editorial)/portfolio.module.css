@@ -104,6 +104,12 @@
   line-height: 1.7;
 }
 
+.comingSoonText a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* ─── Case footer ────────────────────────────────────────────────────────── */
 
 .footer {

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { sendCommand, waitForTerminalReady } from "../helpers/session";
-import { visibleCases } from "~/content/cases";
+import { isComingSoonCase, visibleCases } from "~/content/cases";
 
 /**
  * Tests for the portfolio pages and the shareable command deep links.
@@ -74,12 +74,14 @@ test.describe("Case pages (/portfolio/<slug>)", () => {
   });
 
   test("prev and next are real links that wrap around", async ({ page }) => {
-    const cases = visibleCases();
-    const last = cases[cases.length - 1]!;
+    // The ring holds only written-up cases: a prev/next button promises
+    // something to read, so the coming-soon shells are skipped (#13 D6).
+    const ring = visibleCases().filter((c) => !isComingSoonCase(c));
+    const last = ring[ring.length - 1]!;
 
     await page.goto(`/portfolio/${CASE_1.slug}`);
 
-    // CASE_1 is the first case, so "prev" wraps to the last one.
+    // CASE_1 is the first case, so "prev" wraps to the last one in the ring.
     await expect(page.getByRole("link", { name: "← prev" })).toHaveAttribute(
       "href",
       `/portfolio/${last.slug}`,
@@ -121,6 +123,30 @@ test.describe("Case pages (/portfolio/<slug>)", () => {
     await expect(page.getByText("🚧 coming soon")).toBeVisible();
     // The placeholder replaces the body entirely — no rendered sections.
     await expect(page.locator("[data-post-section]")).toHaveCount(0);
+    // Its one offer to the reader is a link, not a sentence (#13 D6).
+    await expect(
+      page.getByRole("link", { name: "get in touch" }),
+    ).toHaveAttribute("href", "/contact");
+  });
+
+  test("no case hands the reader on to a coming-soon shell", async ({
+    page,
+  }) => {
+    const shells = visibleCases().filter(isComingSoonCase);
+    expect(shells.length).toBeGreaterThan(0);
+
+    for (const c of visibleCases()) {
+      await page.goto(`/portfolio/${c.slug}`);
+      for (const name of ["← prev", "next →"]) {
+        const href = await page
+          .getByRole("link", { name })
+          .getAttribute("href");
+        expect(
+          shells.map((s) => `/portfolio/${s.slug}`),
+          `${name} on /portfolio/${c.slug}`,
+        ).not.toContain(href);
+      }
+    }
   });
 
   test("the overview badges a coming-soon case", async ({ page }) => {
@@ -173,7 +199,9 @@ test.describe("Internal links & structured data", () => {
     await page.goto("/");
     await waitForTerminalReady(page);
 
-    await page.getByRole("link", { name: "portfolio" }).click();
+    // exact: true — the tip line carries a "/portfolio" token as well since
+    // #13 D1, and a loose name match would find both.
+    await page.getByRole("link", { name: "portfolio", exact: true }).click();
     await expect(page).toHaveURL("/portfolio");
     await expect(
       page.getByRole("heading", { level: 1, name: "Portfolio" }),

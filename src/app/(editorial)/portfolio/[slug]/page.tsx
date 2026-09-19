@@ -117,6 +117,41 @@ export async function generateMetadata({
 }
 
 /**
+ * The cases a reader is handed on to from one case page: the previous and the
+ * next written-up case, wrapping at both ends.
+ *
+ * The ring skips coming-soon shells — a "next →" that lands on a page saying
+ * the write-up is not ready is a dead end wearing a button. A shell's own page
+ * still offers both neighbours: the nearest real case before and after the
+ * position the shell occupies in the display order.
+ *
+ * Both are undefined only when no written-up case exists at all, which the
+ * footer below handles by rendering no ring.
+ */
+function neighbours(current: Case): { prev?: Case; next?: Case } {
+  const ring = CASES.filter((x) => !isComingSoonCase(x));
+  if (ring.length === 0) return {};
+
+  const inRing = ring.findIndex((x) => x.slug === current.slug);
+  if (inRing >= 0) {
+    return {
+      prev: ring[(inRing - 1 + ring.length) % ring.length],
+      next: ring[(inRing + 1) % ring.length],
+    };
+  }
+
+  // A shell: take the nearest written-up case on either side of its own
+  // position in the full list, wrapping the way the ring above does.
+  const pos = CASES.findIndex((x) => x.slug === current.slug);
+  const before = ring.filter((x) => CASES.indexOf(x) < pos).at(-1);
+  const after = ring.find((x) => CASES.indexOf(x) > pos);
+  return {
+    prev: before ?? ring.at(-1),
+    next: after ?? ring[0],
+  };
+}
+
+/**
  * The hero image, when a case sets one. Its intrinsic dimensions are read from
  * the file at build time, exactly as a post image is, so the box is reserved
  * before the bytes arrive and the page never jumps mid-read.
@@ -159,11 +194,13 @@ export default async function CasePage({ params }: CasePageProps) {
     c.role,
   ].filter(Boolean);
 
-  // Neighbouring cases, wrapping — the same order the overview shows.
-  const all = CASES;
-  const i = all.findIndex((x) => x.slug === c.slug);
-  const prev = all[(i - 1 + all.length) % all.length]!;
-  const next = all[(i + 1) % all.length]!;
+  // Neighbouring cases, wrapping — the same order the overview shows, minus
+  // the coming-soon shells. A prev/next button promises something to read,
+  // and `podcast-transcription`, a shell, was the "prev" of case 01 (#13 D6).
+  // The shells keep their place in the list and their badge; they are simply
+  // not offered as a next stop. A shell's own page hands the reader on to the
+  // nearest real cases on either side of where it sits.
+  const { prev, next } = neighbours(c);
 
   return (
     <div className={styles.shell}>
@@ -202,7 +239,13 @@ export default async function CasePage({ params }: CasePageProps) {
             <p className={pf.comingSoonMark}>🚧 coming soon</p>
             <p className={pf.comingSoonText}>
               This case is being written up soon. Want to know more now, or
-              build something similar? Feel free to get in touch.
+              build something similar? Feel free to{" "}
+              {/* Was plain text, on the one page that has nothing else to
+                  offer the reader (#13 D6). */}
+              <Link href="/contact" prefetch={false}>
+                get in touch
+              </Link>
+              .
             </p>
           </div>
         ) : (
@@ -222,20 +265,24 @@ export default async function CasePage({ params }: CasePageProps) {
 
       <footer className={pf.footer}>
         <nav className={pf.buttons} aria-label="Other cases">
-          <Link
-            href={`/portfolio/${prev.slug}`}
-            rel="prev"
-            className={pf.outlineBtn}
-          >
-            ← prev
-          </Link>
-          <Link
-            href={`/portfolio/${next.slug}`}
-            rel="next"
-            className={pf.outlineBtn}
-          >
-            next →
-          </Link>
+          {prev && (
+            <Link
+              href={`/portfolio/${prev.slug}`}
+              rel="prev"
+              className={pf.outlineBtn}
+            >
+              ← prev
+            </Link>
+          )}
+          {next && (
+            <Link
+              href={`/portfolio/${next.slug}`}
+              rel="next"
+              className={pf.outlineBtn}
+            >
+              next →
+            </Link>
+          )}
 
           {/*
            * "read the case study →" appears only when caseUrl is set. Add it in
