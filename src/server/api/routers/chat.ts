@@ -1,8 +1,10 @@
-import { randomUUID } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { env } from "~/env";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { chatSessions } from "~/server/db/schema";
+import { checkSessionRateLimit } from "~/server/services/rate-limiter";
 import { verifyTurnstileToken } from "~/server/services/turnstile";
 import { logError } from "~/lib/errors";
 
@@ -11,6 +13,21 @@ import { logError } from "~/lib/errors";
  */
 function generateSessionId(): string {
   return `session_${randomUUID()}`;
+}
+
+/**
+ * A stable, non-reversible key for the client behind this request: the first
+ * entry of `x-forwarded-for` (what Vercel sets), else `x-real-ip`, hashed so
+ * the address itself is never stored.
+ */
+function clientKey(headers: Headers): string {
+  const forwarded = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const ip = forwarded?.length
+    ? forwarded
+    : (headers.get("x-real-ip")?.trim() ?? "");
+  return createHash("sha256")
+    .update(ip.length > 0 ? ip : "unknown")
+    .digest("hex");
 }
 
 export const chatRouter = createTRPCRouter({
@@ -26,6 +43,22 @@ export const chatRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Cap how many sessions one client can mint, so a solved challenge buys
+      // a quota rather than an unlimited supply of them. Skipped wherever the
+      // CAPTCHA itself is switched off — the same gate, dev and the e2e suite.
+      if (env.NEXT_PUBLIC_DISABLE_CAPTCHA !== "true") {
+        const sessionLimit = await checkSessionRateLimit(
+          clientKey(ctx.headers),
+        );
+        if (!sessionLimit.allowed) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message:
+              "Too many sessions started from this network. Please try again later.",
+          });
+        }
+      }
+
       // Verify Turnstile token
       const verification = await verifyTurnstileToken(input.turnstileToken);
 
