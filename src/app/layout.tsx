@@ -155,7 +155,7 @@ const JSON_LD = {
       // result falls back to.
       image: `${SITE_URL}/android-chrome-512x512.png`,
       address: ADDRESS,
-      // Derived from the four specialities on the site, so the two can never
+      // Derived from the four specialties on the site, so the two can never
       // say different things about what Bas does.
       knowsAbout: SPECIALTIES.map((s) => s.title),
       worksFor: { "@id": ORGANIZATION_ID },

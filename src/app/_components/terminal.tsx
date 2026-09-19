@@ -665,17 +665,17 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
            */}
           <div className={styles.credentials}>{CREDENTIALS}</div>
 
-          {/* "// specialities" is terminal-style comment decoration.
+          {/* "// specialties" is terminal-style comment decoration.
               The grid comes from SPECIALTIES, the same list /services and
               /llms.txt read: the hand-written copy here had drifted into a
               different order and different wording (#13 F6). Titles only —
               the blurb after the em dash belongs to /services, where there is
               room to read it. */}
-          <div className={styles.specialitiesLabel}>{'// specialities'}</div>
-          <div className={styles.specialitiesGrid}>
+          <div className={styles.specialtiesLabel}>{'// specialties'}</div>
+          <div className={styles.specialtiesGrid}>
             {SPECIALTIES.map((s) => (
               <div key={s.title}>
-                <span className={styles.specialityBullet}>*</span>
+                <span className={styles.specialtyBullet}>*</span>
                 {s.title}
               </div>
             ))}

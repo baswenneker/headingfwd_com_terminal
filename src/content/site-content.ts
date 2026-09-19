@@ -94,7 +94,7 @@ export const ABOUT = {
 } as const;
 
 /**
- * The four specialities. `title` is the headline; `blurb` is the short
+ * The four specialties. `title` is the headline; `blurb` is the short
  * "what it means" tail rendered after an em dash in both surfaces.
  */
 export const SPECIALTIES = [

@@ -211,14 +211,14 @@
   color: rgba(214, 230, 234, 0.72);
 }
 
-/* "// specialities" comment */
-.specialitiesLabel {
+/* "// specialties" comment */
+.specialtiesLabel {
   margin-top: 22px;
   color: rgba(160, 178, 182, 0.7);
 }
 
-/* Responsive two-column grid of speciality items */
-.specialitiesGrid {
+/* Responsive two-column grid of specialty items */
+.specialtiesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 6px 26px;
@@ -226,9 +226,9 @@
   max-width: 70ch;
 }
 
-/* Accent bullet character before each speciality — bold accent so the mark
+/* Accent bullet character before each specialty — bold accent so the mark
  * reads as a distinct marker, clearly set apart from the body text color. */
-.specialityBullet {
+.specialtyBullet {
   color: var(--accent);
   font-weight: 700;
   margin-right: 0.5em;
@@ -723,7 +723,7 @@
 /*
  * When the page container is 560px wide or less, collapse the layout:
  * the window goes full-height, title bar and prompt are shortened,
- * and the specialities grid drops to one column.
+ * and the specialties grid drops to one column.
  *
  * Additional rules below prevent horizontal overflow in the command feed
  * and enlarge tap targets on the tappable row labels.
@@ -764,7 +764,7 @@
     display: inline;
   }
 
-  .specialitiesGrid {
+  .specialtiesGrid {
     grid-template-columns: 1fr;
   }
 

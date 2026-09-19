@@ -121,7 +121,7 @@ export interface Case {
   visibility?: CaseVisibility;
   /** My role on the engagement (frontmatter `rol`). */
   role?: string;
-  /** Client name, when not anonymised (frontmatter `klant`). */
+  /** Client name, when not anonymized (frontmatter `klant`). */
   client?: string;
   /** Methodology / technology labels, rendered as chips. */
   tags: string[];
@@ -275,7 +275,7 @@ the person out of the loop.
 
 - Generates posts from proven, high-performing templates
 - Turns a keyword into ready-to-use topic suggestions
-- Personalises to your LinkedIn profile so it sounds like you
+- Personalizes to your LinkedIn profile so it sounds like you
 - Works in English and Dutch
 - Keeps your personal voice and style intact
 
@@ -283,9 +283,9 @@ the person out of the loop.
 
 | Phase | What happened |
 |---|---|
-| Research & discovery | Analysed LinkedIn posting patterns, interviewed content creators, ran competitive and performance analysis |
+| Research & discovery | Analyzed LinkedIn posting patterns, interviewed content creators, ran competitive and performance analysis |
 | Design & prototyping | Minimalist, speed-first UI; iterated on UX and A/B-tested key features |
-| AI integration | Trained on high-performing posts, built personalisation, added quality checks and a continuous-improvement loop |
+| AI integration | Trained on high-performing posts, built personalization, added quality checks and a continuous-improvement loop |
 
 ### How it works
 
@@ -293,7 +293,7 @@ the person out of the loop.
 
 - AI-written posts from a keyword or idea
 - Proven templates for different content types
-- Personalisation based on your LinkedIn profile
+- Personalization based on your LinkedIn profile
 - Adjustable tone of voice
 - English & Dutch (EN/NL)
 - Real-time preview and inline editing
@@ -319,13 +319,13 @@ the person out of the loop.
 ### Tech & stack
 
 - **Frontend & UX** — modern React interface, real-time content preview, responsive design, fast load times
-- **AI & backend** — LLM-powered generation with a personalisation layer, a continuous-learning pipeline, secure API architecture, and scalable cloud infrastructure
+- **AI & backend** — LLM-powered generation with a personalization layer, a continuous-learning pipeline, secure API architecture, and scalable cloud infrastructure
 
 ### Key takeaways
 
 1. **AI as assistant, not replacement** — people want to stay in control of what goes out under their name.
 2. **Speed is the product** — professionals have little time; every second of friction costs a post.
-3. **Personalisation is non-negotiable** — generic content doesn't land; context is everything.
+3. **Personalization is non-negotiable** — generic content doesn't land; context is everything.
 4. **Keep up or fall behind** — LinkedIn's algorithm keeps shifting, so the tool has to keep learning.
 
 ### Status
@@ -402,14 +402,14 @@ largely deskless workforce.
 4. 💻 **Building** — engineers build the feature into the app
 5. 🧪 **Testing** — test the new feature thoroughly
 6. 🚀 **Rollout** — ship the update to users
-7. 🔄 **Iterate** — analyse data, gather feedback, and start again
+7. 🔄 **Iterate** — analyze data, gather feedback, and start again
 
 ## Outcome
 
 ### Role
 
 This is a **product-management case**. The app itself was built by an external software
-agency — my job was to own the product: discovery with real users, prioritisation, and
+agency — my job was to own the product: discovery with real users, prioritization, and
 steering design and engineering toward what mattered most. In other words: I was
 accountable for *what* got built and *why*, not for writing the code.
 

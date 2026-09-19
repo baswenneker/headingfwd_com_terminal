@@ -5,7 +5,7 @@
  * here (see `next.config.js`).
  *
  * The file is generated from the same content the site renders:
- *   - About / specialities / stack / contact → `~/content/site-content`
+ *   - About / specialties / stack / contact → `~/content/site-content`
  *   - Portfolio cases                        → `~/content/cases` (CASES)
  *   - Blog posts                             → `~/content/posts`
  *
@@ -72,10 +72,10 @@ function buildAgentsTxt(): string {
     ].join("\n"),
   );
 
-  // ── Specialities ────────────────────────────────────────────────────────
+  // ── Specialties ────────────────────────────────────────────────────────
   blocks.push(
     [
-      "## Specialities",
+      "## Specialties",
       "",
       ...SPECIALTIES.map((s) => `- ${s.title} — ${s.blurb}`),
     ].join("\n"),

@@ -93,7 +93,7 @@ export default function NotFound() {
           </p>
 
           {/* Terminal-style comment label above the routes */}
-          <div className={styles.specialitiesLabel}>{"// available routes"}</div>
+          <div className={styles.specialtiesLabel}>{"// available routes"}</div>
           <nav className={nf.routes} aria-label="Working routes">
             {ROUTES.map((r) => (
               <Link key={r.href} href={r.href} className={nf.route}>
