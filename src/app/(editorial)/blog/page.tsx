@@ -75,7 +75,11 @@ export default function BlogIndexPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd()) }}
       />
       <div className={styles.metaBar}>
-        <span className={styles.kicker}>Bas Wenneker · Journal</span>
+        {/* "Journal" was the blog's third name, after the h1 ("Blog") and
+            /help ("long-form writing on AI engineering") — and the only one a
+            reader met before the page had said anything (#13 F11). It matches
+            "Bas Wenneker · Portfolio" now, as the two overviews should. */}
+        <span className={styles.kicker}>Bas Wenneker · Blog</span>
         <Link href="/" prefetch={false} className={styles.backLink}>
           ← back to the terminal
         </Link>
