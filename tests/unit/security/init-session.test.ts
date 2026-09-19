@@ -7,7 +7,11 @@ import { migratedDb, truncateAll, db } from "../helpers/db";
  * stubbed: the unit layer never calls Cloudflare.
  */
 const { verifyTurnstileToken } = vi.hoisted(() => ({
-  verifyTurnstileToken: vi.fn(async () => ({ success: true })),
+  verifyTurnstileToken: vi.fn(
+    async (): Promise<{ success: boolean; error?: string }> => ({
+      success: true,
+    }),
+  ),
 }));
 vi.mock("~/server/services/turnstile", () => ({ verifyTurnstileToken }));
 
