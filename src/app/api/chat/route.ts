@@ -13,6 +13,7 @@ import {
 } from "~/server/services/rate-limiter";
 import { sendContactEmail } from "~/server/services/email";
 import { env } from "~/env";
+import { STACK } from "~/content/site-content";
 import {
   createErrorJsonResponse,
   logError,
@@ -268,7 +269,7 @@ Also, if being asked questions outside your knowledge, respond with "I'm sorry, 
 - AI Lead/Engineer specializing in Generative AI implementations
 - Expertise in LangChain, LangGraph, OpenAI, Anthropic, and other LLM providers
 - Builds production-ready AI agents, assistants, virtual employees and workflows
-- Uses modern web stacks like Python, FastAPI, TypeScript and Next.js.
+- Stack: ${STACK.join(" · ")}
 - LinkedIn profile: https://www.linkedin.com/in/baswenneker
 
 If being asked about his experience, mention:

@@ -101,10 +101,18 @@ export const SPECIALTIES = [
   },
 ] as const;
 
-/** Tech / methodology stack lines. */
+/**
+ * Tech / methodology stack lines, read by `/stack`, by `/llms.txt` and by the
+ * AI assistant's system prompt.
+ *
+ * Line 1 is what the work is built with, line 2 what it is built in, line 3
+ * how it is run. Ruby on Rails was on line 2 and appears in no case and in no
+ * prompt; LangGraph, FastAPI and Next.js drive several cases and were absent
+ * (#13 F9).
+ */
 export const STACK = [
-  "LLMs · agents · RAG · evals · prompt + context engineering",
-  "Python · TypeScript · React · Ruby on Rails · Docker",
+  "LLMs · agents · LangGraph · RAG · evals · prompt + context engineering",
+  "Python · FastAPI · TypeScript · Next.js · React · Docker",
   "Lean Startup · Design Thinking · Service Design · Scrum",
 ] as const;
 

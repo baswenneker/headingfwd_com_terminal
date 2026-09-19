@@ -287,9 +287,12 @@ export const COMMAND_PAGES: CommandPage[] = [
   {
     token: "stack",
     title: "Stack — tools, models & tech",
+    // Derived in spirit from STACK, not from the literal: a meta description
+    // is prose with commas, not the terminal's middle dots. Kept in step with
+    // it by hand — the two lines above are the source (#13 F9).
     description:
-      "The HeadingFWD stack: LLMs, agents, RAG, evals, prompt + context " +
-      "engineering · Python, TypeScript, React, Ruby on Rails, Docker.",
+      "The HeadingFWD stack: LLMs, agents, LangGraph, RAG, evals, prompt + " +
+      "context engineering · Python, FastAPI, TypeScript, Next.js, Docker.",
   },
   {
     token: "contact",
