@@ -49,6 +49,9 @@ type FeedBlock    = CommandBlock | AiTurnBlock;
  */
 const TERMINAL_ERROR_ID = "terminal-error";
 
+/** Id of the command input — the skip link's target (#13 U11). */
+const TERMINAL_INPUT_ID = "terminal-input";
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -533,6 +536,16 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
 
   return (
     <main className={styles.page}>
+      {/*
+       * First focusable element on the page. Without it a keyboard visitor
+       * who lands before the autofocus fires tabs through the tip tokens and
+       * the whole feed before reaching the one control that does anything
+       * (#13 U11). Hidden until focused.
+       */}
+      <a href={`#${TERMINAL_INPUT_ID}`} className={styles.skipLink}>
+        Skip to command input
+      </a>
+
       {/* Faint repeating dot grid — sits behind the terminal window */}
       <div className={styles.grid} aria-hidden="true" />
 
@@ -935,6 +948,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             </span>
             <input
               ref={inputRef}
+              id={TERMINAL_INPUT_ID}
               className={styles.input}
               type="text"
               aria-label="Terminal command input — type a command like /help or ask a question"

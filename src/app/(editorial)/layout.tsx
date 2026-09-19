@@ -50,6 +50,11 @@ export default function EditorialLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div data-editorial-root="" className={styles.root}>
+      {/* First focusable element, hidden until focused (#13 U11). */}
+      <a href="#content" className={styles.skipLink}>
+        Skip to content
+      </a>
+
       <main id="content">{children}</main>
 
       <footer className={styles.siteFooter}>

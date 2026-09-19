@@ -105,6 +105,33 @@ test.describe("Terminal crawl paths", () => {
   });
 });
 
+test.describe("Skip links", () => {
+  test("the terminal's first tab stop jumps to the command input", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const skip = page.getByRole("link", { name: "Skip to command input" });
+    await skip.focus();
+    await expect(skip).toBeVisible();
+    await skip.press("Enter");
+
+    await expect(page.getByTestId("terminal-input")).toBeFocused();
+  });
+
+  test("an editorial page's first tab stop jumps to the content", async ({
+    page,
+  }) => {
+    await page.goto("/blog");
+
+    const skip = page.getByRole("link", { name: "Skip to content" });
+    await skip.focus();
+    await expect(skip).toBeVisible();
+    await expect(skip).toHaveAttribute("href", "#content");
+    await expect(page.getByRole("main")).toHaveAttribute("id", "content");
+  });
+});
+
 test.describe("Without JavaScript", () => {
   test("the homepage says the terminal needs script, with links out", async ({
     request,

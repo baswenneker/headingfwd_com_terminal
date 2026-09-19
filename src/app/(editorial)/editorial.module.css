@@ -82,6 +82,31 @@
   padding-inline: clamp(16px, 4vw, 56px);
 }
 
+/*
+ * Skip link (#13 U11): off-screen until focused, then a plain bordered chip
+ * in the top-left corner, in the same register as the meta bar below.
+ */
+.skipLink {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  transform: translateY(-200%);
+  padding: 8px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.skipLink:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ─── Meta bar ───────────────────────────────────────────────────────────── */
 
 .metaBar {
