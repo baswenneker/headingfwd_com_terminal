@@ -73,7 +73,7 @@ export interface EmailToolOptions {
  *   → tool-output-available → finish-step → finish → [DONE]
  *
  * When success is true, the tool output is `{ success: true }` and the
- * terminal renders "✓ message sent to bas@headingfwd.com".
+ * terminal renders "✓ message sent to Bas".
  *
  * When success is false, the tool output is `{ success: false, error }` and
  * the terminal renders the error string in red inside the assistant-message
@@ -166,7 +166,7 @@ export async function mockRateLimitError(page: Page) {
 
 /**
  * Mock /api/chat to return a sendMessage tool stream with a successful result.
- * The terminal renders "✓ message sent to bas@headingfwd.com" inside the
+ * The terminal renders "✓ message sent to Bas" inside the
  * assistant-message element.
  */
 export async function mockEmailToolSuccess(

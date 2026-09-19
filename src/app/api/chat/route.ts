@@ -13,7 +13,6 @@ import {
 } from "~/server/services/rate-limiter";
 import { sendContactEmail } from "~/server/services/email";
 import { env } from "~/env";
-import { CONTACT } from "~/content/site-content";
 import {
   createErrorJsonResponse,
   logError,
@@ -311,7 +310,7 @@ Once you have both email and message, call the previewMessage tool with them, th
 
 From: [their email]
 
-To: bas@headingfwd.com
+To: Bas
 
 Message:
 
@@ -330,7 +329,7 @@ If user says "no", "wait", "stop", "cancel" → DO NOT send. Respond with exactl
 
 STEP 4 - AFTER SENDING:
 After you call sendMessage, you MUST immediately generate a text response to confirm success. Do not just rely on the tool's return value - you must explicitly respond to the user with a message like:
-"✅ Your message has been sent to Bas! He'll receive it at bas@headingfwd.com and typically responds within 24-48 hours."
+"✅ Your message has been sent to Bas! He reads every one himself and replies within two working days."
 
 IMPORTANT: Always include text in your response after calling the tool. The tool call alone is not enough - the user needs to see your confirmation message.
 `,
@@ -401,7 +400,10 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
                 "",
                 `From: ${senderEmail.trim()}`,
                 "",
-                `To: ${CONTACT.email}`,
+                // "To: Bas", not the address. /contact deliberately does not
+              // publish the address, and the preview used to hand it to
+              // anyone who typed two lines into the chat (#13 F5).
+              "To: Bas",
                 "",
                 "Message:",
                 "",

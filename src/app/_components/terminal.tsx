@@ -842,7 +842,10 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                                   key={partIdx}
                                   className={styles.toolSent}
                                 >
-                                  {"✓ message sent to bas@headingfwd.com"}
+                                  {/* "to Bas", not the address: the site
+                                      does not publish it and the preview
+                                      above no longer does either (#13 F5). */}
+                                  {"✓ message sent to Bas"}
                                 </div>
                               );
                             }
