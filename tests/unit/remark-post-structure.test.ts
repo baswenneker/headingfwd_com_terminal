@@ -25,7 +25,7 @@ async function render(markdown: string): Promise<HastRoot> {
     .use(remarkRehype);
 
   const mdast = processor.parse(markdown);
-  return (await processor.run(mdast)) as HastRoot;
+  return await processor.run(mdast);
 }
 
 function isElement(node: RootContent): node is Element {
@@ -128,7 +128,7 @@ describe("remarkPostStructure", () => {
     const lead = findAll(tree.children, (el) => hasProp(el, "data-post-lead"))[0];
     expect(lead, "no lead wrapper was produced").toBeDefined();
 
-    const strayHeading = findAll(lead!.children as RootContent[], (el) => el.tagName === "h3");
+    const strayHeading = findAll(lead!.children, (el) => el.tagName === "h3");
     expect(strayHeading).toHaveLength(1);
     expect(text(strayHeading[0]!)).toBe("Stray heading");
 
