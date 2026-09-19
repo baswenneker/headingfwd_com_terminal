@@ -175,11 +175,23 @@ function stackLines(): FeedLine[] {
   ];
 }
 
+/**
+ * `/contact` — the two ways to reach Bas, and what happens after.
+ *
+ * The old version said "I'll pass it to Bas", in a first person the visitor
+ * had no way to place: nothing on the page said the thing answering is an AI
+ * assistant, and nothing said a human ever reads what it takes down (#13
+ * F3/F5). It also promised no response time, while the assistant told anyone
+ * who asked "24–48 hours". Both surfaces now say two working days.
+ */
 function contactLines(): FeedLine[] {
   return [
     { kind: "head", text: "let's talk →" },
     { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
-    { kind: "out",  text: "or just type your message right here — I'll pass it to Bas." },
+    { kind: "out",  text: "Or type your message here — what you're building, where it's" },
+    { kind: "out",  text: "stuck, and roughly when. An AI assistant takes it down and shows" },
+    { kind: "out",  text: "it to you before it goes; Bas reads every one himself and replies" },
+    { kind: "out",  text: "within two working days." },
     { kind: "dim",  text: CONTACT.note },
   ];
 }

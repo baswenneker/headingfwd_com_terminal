@@ -968,7 +968,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                   ? "complete verification to continue…"
                   : isAiInFlight
                     ? "AI is responding…"
-                    : "type a command…"
+                    : "type a command, or ask the AI assistant anything…"
               }
               disabled={captchaVisible || isAiInFlight}
               spellCheck={false}
