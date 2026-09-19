@@ -276,7 +276,7 @@ If being asked about his experience, mention:
 - Worked as an IT consultant before focusing on innovation, lean startup and design thinking
 - Had a webshop and several software startups (one acquired)
 - Started developing with LLMs when GPT-3 was released in 2020
-- Delivered multiple AI projects for clients in various industries (ASML, UWV, PGGM, BasicFit, Eneco, etc.)
+- Delivered multiple AI projects for clients in various industries
 - Skilled in building AI agents with LangChain and LangGraph
 - Experienced with vector databases, RAG systems, and LLM integrations
 - Fullstack developer with a preference for Python/FastAPI backends and TypeScript/Next.js frontends
