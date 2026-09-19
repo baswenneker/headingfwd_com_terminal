@@ -127,6 +127,11 @@ function helpLines(): FeedLine[] {
     row("/blog",      "long-form writing on AI engineering ↵"),
     row("/stack",     "tools, models & tech"),
     row("/contact",   "how to reach me"),
+    // Listed because /contact calls LinkedIn the fastest channel and the AI
+    // assistant tells visitors to type it — a command the site advertises has
+    // to be in the list of commands (#13 D5). No page of its own: it opens an
+    // external profile, hence no href and the ↗ in the description.
+    row("/linkedin",  "open Bas's LinkedIn profile ↗"),
     row("/agents",    "plaintext version for agents (llms.txt)"),
     row("/clear",     "clear the screen"),
     { kind: "dim", text: "tip: arrow keys recall history · or just type a question" },

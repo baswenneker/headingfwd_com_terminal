@@ -40,8 +40,18 @@ describe("runCommand", () => {
     expect(rows.find((r) => r.label === "/portfolio")?.href).toBe("/portfolio");
     expect(rows.find((r) => r.label === "/blog")?.href).toBe("/blog");
 
-    // /clear only mutates feed state: no page, no href.
+    // /clear only mutates feed state and /linkedin leaves for an external
+    // profile: neither has a page here, so neither carries an href.
     expect(rows.find((r) => r.label === "/clear")?.href).toBeUndefined();
+    expect(rows.find((r) => r.label === "/linkedin")?.href).toBeUndefined();
+  });
+
+  it("/help lists /linkedin, the command the assistant advertises", () => {
+    const result = runCommand("/help");
+    if (result.action !== "lines") throw new Error("expected lines");
+    expect(
+      result.lines.some((l) => l.kind === "row" && l.label === "/linkedin"),
+    ).toBe(true);
   });
 
   it("/clear and /cls both clear the feed", () => {

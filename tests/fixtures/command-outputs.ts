@@ -27,6 +27,7 @@ export const COMMAND_TEXT = {
       "/portfolio",
       "/stack",
       "/contact",
+      "/linkedin",
       "/clear",
     ],
     /** Dim tip line at the bottom of the help output. */
