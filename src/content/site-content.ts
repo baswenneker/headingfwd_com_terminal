@@ -23,7 +23,7 @@
  * crawlers the whole site changed on every deploy. A hand-maintained date is
  * the honest answer: slightly stale beats confidently wrong.
  */
-export const SITE_CONTENT_UPDATED = "2026-09-18";
+export const SITE_CONTENT_UPDATED = "2026-09-19";
 
 /** One-sentence value proposition, mirrored by the hero paragraph. */
 export const INTRO =
@@ -75,6 +75,15 @@ export const CONTACT = {
   email: "bas@headingfwd.com",
   linkedin: "https://www.linkedin.com/in/baswenneker",
   note: "fastest reply: drop me a DM on LinkedIn.",
+} as const;
+
+/**
+ * The one line the editorial footer states about who runs the site, shown
+ * under every post and every case. English whatever the post's language is:
+ * the footer is chrome, like the draft badge on the overview, not content.
+ */
+export const EDITORIAL_FOOTER = {
+  tagline: "HeadingFWD — AI engineering & consultancy, Delft",
 } as const;
 
 /**
