@@ -486,10 +486,19 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
               };
             }
 
-            // One preview, one send.
-            await db
+            // One preview, one send: claim the row atomically, so two
+            // overlapping confirmations cannot both pass the lookup above.
+            const claimed = await db
               .delete(pendingEmails)
-              .where(eq(pendingEmails.id, pending.id));
+              .where(eq(pendingEmails.id, pending.id))
+              .returning({ id: pendingEmails.id });
+            if (claimed.length !== 1) {
+              return {
+                success: false,
+                error:
+                  "This preview was already confirmed. Ask the user whether they want to send another message.",
+              };
+            }
 
             // Check email rate limit
             const rateLimit = await checkEmailRateLimit(sessionId);

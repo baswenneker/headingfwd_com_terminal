@@ -170,6 +170,24 @@ describe("/api/chat email confirmation", () => {
     expect(sendContactEmailMock).toHaveBeenCalledTimes(1);
   });
 
+  it("sends once when two confirmations of one preview overlap", async () => {
+    await POST(chatRequest([userMessage("I would like to write to Bas")]));
+    await runTool("previewMessage", { senderEmail: SENDER, message: MESSAGE });
+
+    const input = {
+      senderEmail: SENDER,
+      message: MESSAGE,
+      userConfirmed: true,
+    };
+    const results = await Promise.all([
+      runTool("sendMessage", input),
+      runTool("sendMessage", input),
+      runTool("sendMessage", input),
+    ]);
+    expect(results.filter((r) => r.success)).toHaveLength(1);
+    expect(sendContactEmailMock).toHaveBeenCalledTimes(1);
+  });
+
   it("refuses a message that differs from the previewed one", async () => {
     await POST(chatRequest([userMessage("I would like to write to Bas")]));
     await runTool("previewMessage", {
