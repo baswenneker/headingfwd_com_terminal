@@ -299,13 +299,22 @@ export default async function CasePage({ params }: CasePageProps) {
             </a>
           )}
 
+          {/*
+           * The one call to action on a case used to leave the site for
+           * LinkedIn, on the page where a reader is most convinced (#13 D7).
+           * It points at /contact now, with LinkedIn kept beside it as the
+           * second choice rather than the only one.
+           */}
+          <Link href="/contact" prefetch={false} className={pf.ctaBtn}>
+            work with me →
+          </Link>
           <a
             href={CONTACT.linkedin}
             target="_blank"
             rel="noreferrer"
-            className={pf.ctaBtn}
+            className={pf.secondaryLink}
           >
-            work with me →
+            or connect on LinkedIn
           </a>
         </nav>
 

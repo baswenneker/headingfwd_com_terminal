@@ -105,6 +105,35 @@ test.describe("Terminal crawl paths", () => {
   });
 });
 
+test.describe("Portfolio calls to action", () => {
+  test("the overview leads with contact and keeps LinkedIn second", async ({
+    page,
+  }) => {
+    await page.goto("/portfolio");
+
+    const lead = page.locator("p", {
+      has: page.getByRole("link", { name: "→ start a conversation" }),
+    });
+    await expect(
+      lead.getByRole("link", { name: "→ start a conversation" }),
+    ).toHaveAttribute("href", "/contact");
+    await expect(
+      lead.getByRole("link", { name: "or connect on LinkedIn" }),
+    ).toHaveAttribute("href", /linkedin\.com/);
+  });
+
+  test("a case's work-with-me button points at /contact", async ({ page }) => {
+    await page.goto(`/portfolio/${FIRST_CASE.slug}`);
+
+    await expect(
+      page.getByRole("link", { name: "work with me →" }),
+    ).toHaveAttribute("href", "/contact");
+    await expect(
+      page.getByRole("link", { name: "or connect on LinkedIn" }),
+    ).toHaveAttribute("href", /linkedin\.com/);
+  });
+});
+
 test.describe("Post author block", () => {
   test.skip(!FIRST_POST, "no published post to render");
 

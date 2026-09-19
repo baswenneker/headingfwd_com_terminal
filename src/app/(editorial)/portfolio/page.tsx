@@ -71,10 +71,19 @@ export default function PortfolioPage() {
       </div>
 
       <h1 className={styles.title}>Portfolio</h1>
+      {/*
+       * The overview's one call to action used to be a LinkedIn profile link,
+       * so the page that shows the work sent whoever it convinced off the
+       * site (#13 D7). /contact leads now; LinkedIn stays as the alternative.
+       */}
       <p className={styles.overviewLead}>
         Selected work — AI engineering &amp; product design.{" "}
+        <Link href="/contact" prefetch={false}>
+          → start a conversation
+        </Link>
+        {" · "}
         <a href={CONTACT.linkedin} target="_blank" rel="noreferrer">
-          → or view my LinkedIn profile
+          or connect on LinkedIn
         </a>
       </p>
 
