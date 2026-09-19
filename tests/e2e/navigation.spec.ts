@@ -169,7 +169,10 @@ test.describe("Touch targets", () => {
 
     for (let i = 0; i < count; i++) {
       const box = await links.nth(i).boundingBox();
-      expect(box?.height ?? 0, await links.nth(i).innerText()).toBeGreaterThanOrEqual(24);
+      expect(
+        box?.height ?? 0,
+        await links.nth(i).innerText(),
+      ).toBeGreaterThanOrEqual(24);
     }
 
     // The bar's own padding was cut to pay for those 24px, so the chrome is
@@ -275,9 +278,7 @@ test.describe("Editorial footer", () => {
       for (const href of FOOTER_HREFS) {
         await expect(footer.locator(`a[href="${href}"]`)).toHaveCount(1);
       }
-      await expect(
-        footer.locator('a[href*="linkedin.com"]'),
-      ).toHaveCount(1);
+      await expect(footer.locator('a[href*="linkedin.com"]')).toHaveCount(1);
     });
   }
 });

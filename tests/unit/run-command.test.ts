@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  COMMAND_PAGES,
-  runCommand,
-} from "~/app/_components/terminal-commands";
+import { COMMAND_PAGES, runCommand } from "~/app/_components/terminal-commands";
 import { CONTACT } from "~/content/site-content";
 
 /**
