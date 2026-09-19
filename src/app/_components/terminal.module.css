@@ -349,7 +349,18 @@
   border-radius: 50%;
   background: var(--prompt);
   box-shadow: 0 0 8px var(--prompt);
-  animation: statusPulse 2s ease-in-out infinite;
+}
+
+/*
+ * The pulse runs forever, so it only runs for visitors who have not asked for
+ * less motion. Without the query it kept going on a machine set to reduce
+ * motion, while the 404 page already honoured the setting (#13 U9). The dot
+ * itself stays: it is the indicator, the animation is decoration.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .statusDot {
+    animation: statusPulse 2s ease-in-out infinite;
+  }
 }
 
 /* Plain accent link in the status bar (e.g. "portfolio"). */
@@ -592,7 +603,14 @@
   background: var(--accent);
   margin-left: 2px;
   vertical-align: text-bottom;
-  animation: cursorBlink 1s step-start infinite;
+}
+
+/* Same as the status dot: a solid block for anyone who asked for less motion,
+ * a blinking one for everyone else. */
+@media (prefers-reduced-motion: no-preference) {
+  .aiCursor {
+    animation: cursorBlink 1s step-start infinite;
+  }
 }
 
 /* Error line rendered when the AI request returns an error status */
