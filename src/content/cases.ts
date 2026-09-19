@@ -601,7 +601,6 @@ multimodal models fall short for movement analysis, while a custom approach with
     sector: "Government",
     date: "2025-06-19",
     status: "concept",
-    visibility: "coming-soon",
     tags: ["RAG", "LLM", "Chatbot", "Marketing"],
     stack: [],
     sources: ["headingfwd-demo-playground/src/data/projects.json (entry \"Chatbot: Vraagbaak voor je team\")", "headingfwd-demo-playground/src/app/showcase/coming-soon/page.tsx"],
@@ -634,17 +633,13 @@ themselves.
     sector: "Media",
     date: "2025-06-19",
     status: "concept",
-    visibility: "coming-soon",
     tags: ["Transcription", "LLM", "Audio"],
     stack: [],
     sources: ["headingfwd-com/src/data/index/page.json (teaser \"Podcast transcriptie en segmentering\")", "whisperfwd (gerelateerde, echte transcriptie-tech)"],
     body: `
-Upload your podcast and automatically get a full transcription plus a segment breakdown
-with timecodes — for example:
-
-- \`0:00–1:30\` Introduction
-- \`1:30–3:00\` Collaboration in healthcare
-- …
+Upload your podcast and get a full transcription back, together with a segment breakdown
+carrying timecodes — so a two-hour episode becomes something a listener can navigate and
+search instead of scrub through.
 
 ## The work
 
@@ -652,7 +647,11 @@ with timecodes — for example:
 
 Audio is automatically converted to text (transcription), after which a model divides the
 content into logical segments with timecodes. This makes a long episode searchable and
-easy to navigate.
+easy to navigate. A breakdown reads like this:
+
+- \`0:00–1:30\` Introduction
+- \`1:30–3:00\` Collaboration in healthcare
+- …
 
 ## Outcome
 

@@ -13,8 +13,8 @@
 | 03 | MyWorq: employee app for horticulture | Horticulture | 🟢 live | Mobile App, Product Management, Design Thinking | [myworq.md](./myworq.md) |
 | 04 | BriefWijzer | Communication | 🔵 demo | RAG, OCR, LLM, Marketing | [briefwijzer.md](./briefwijzer.md) |
 | 05 | AI Personal Trainer | Sports & Fitness | 🟡 experiment | LLM, Multimodal, Motion recognition, Python | [ai-personal-trainer.md](./ai-personal-trainer.md) |
-| 06 | Chatbot: a Q&A hub for your team | Government | ⚪ concept · 🔜 coming soon | RAG, LLM, Chatbot, Marketing | [chatbot-qa-hub.md](./chatbot-qa-hub.md) |
-| 07 | Podcast transcription and segmentation | Media | ⚪ concept · 🔜 coming soon | Transcription, LLM, Audio | [podcast-transcription.md](./podcast-transcription.md) |
+| 06 | Chatbot: a Q&A hub for your team | Government | ⚪ concept | RAG, LLM, Chatbot, Marketing | [chatbot-qa-hub.md](./chatbot-qa-hub.md) |
+| 07 | Podcast transcription and segmentation | Media | ⚪ concept | Transcription, LLM, Audio | [podcast-transcription.md](./podcast-transcription.md) |
 
 ## Status legend
 

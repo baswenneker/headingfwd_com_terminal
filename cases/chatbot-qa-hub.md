@@ -3,7 +3,6 @@ title: "Chatbot: a Q&A hub for your team"
 slug: chatbot-qa-hub
 sector: Government
 status: concept
-visibility: coming-soon
 tags: [RAG, LLM, Chatbot, Marketing]
 stack: []
 updated: 2025-06-19
