@@ -98,6 +98,16 @@ export async function POST(req: Request) {
       );
     }
 
+    // A session only counts once it has passed the CAPTCHA at initSession.
+    if (session.verified !== true) {
+      logError("Chat API", "Session not verified", { sessionId });
+      return createErrorJsonResponse(
+        "Session not found. Please refresh and start a new session.",
+        403,
+        ErrorCode.FORBIDDEN,
+      );
+    }
+
     const now = new Date();
     if (session.expiresAt < now) {
       logError("Chat API", "Session expired", { sessionId });

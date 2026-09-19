@@ -104,6 +104,25 @@ describe("/api/chat session handling", () => {
     expect(await db.query.rateLimitLogs.findMany()).toHaveLength(0);
   });
 
+  it("answers 403 for a session that never passed the CAPTCHA", async () => {
+    const db = await migratedDb();
+    await insertSession("session_unverified", false);
+
+    const res = await POST(
+      chatRequest({
+        messages: [userMessage("hello")],
+        sessionId: "session_unverified",
+      }),
+    );
+
+    expect(res.status).toBe(403);
+    expect((await res.json()) as { code?: string }).toMatchObject({
+      code: "FORBIDDEN",
+    });
+    expect(streamTextSpy).not.toHaveBeenCalled();
+    expect(await db.query.rateLimitLogs.findMany()).toHaveLength(0);
+  });
+
   it("lets a live session through and rate-limits it", async () => {
     const db = await migratedDb();
     await insertSession("session_live", true);
