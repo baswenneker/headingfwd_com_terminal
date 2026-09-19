@@ -494,7 +494,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             >
               /portfolio
             </Link>
-            {" "}to browse my work ·{" "}
+            {" "}for the work ·{" "}
             <Link
               href="/blog"
               prefetch={false}
@@ -507,7 +507,20 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             >
               /blog
             </Link>
-            {" "}to read what I write · or just ask
+            {" "}to read what I write ·{" "}
+            <Link
+              href="/contact"
+              prefetch={false}
+              className={styles.tipCommand}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatchCommand("/contact");
+              }}
+            >
+              /contact
+            </Link>
+            {" "}to reach me · or just ask
           </div>
 
           {/* Divider separating the intro from the chronological feed */}
@@ -781,6 +794,15 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
            */}
           <Link className={styles.statusLink} href="/blog" prefetch={false}>
             blog
+          </Link>
+          {/*
+           * The one way to reach Bas that does not require typing. The status
+           * bar offered the work and the writing and nothing else, so the
+           * homepage had no contact affordance at all (#13 D4). `/contact` is
+           * a terminal page, so this is a normal in-app link.
+           */}
+          <Link className={styles.statusLink} href="/contact" prefetch={false}>
+            contact
           </Link>
           {/*
            * Plain-text source for AI agents & crawlers. Points at the

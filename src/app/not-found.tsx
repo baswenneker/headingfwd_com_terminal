@@ -130,6 +130,20 @@ export default function NotFound() {
           </span>
           <span>main</span>
           <span>utf-8</span>
+          {/*
+           * The same three links the terminal's status bar carries. The 404
+           * dropped them, so the one page a visitor reaches by mistake offered
+           * less of a way on than the page they meant to reach (#13 D4).
+           */}
+          <Link className={styles.statusLink} href="/portfolio">
+            portfolio
+          </Link>
+          <Link className={styles.statusLink} href="/blog">
+            blog
+          </Link>
+          <Link className={styles.statusLink} href="/contact">
+            contact
+          </Link>
           <a
             className={styles.statusAgents}
             href="/llms.txt"

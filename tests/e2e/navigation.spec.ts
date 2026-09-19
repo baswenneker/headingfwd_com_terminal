@@ -45,6 +45,28 @@ test.describe("Terminal crawl paths", () => {
     }
   });
 
+  test("the status bar offers contact alongside the work and the writing", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    // Two anchors to /contact: the tip-line token and the status-bar link.
+    await expect(page.locator('a[href="/contact"]')).toHaveCount(2);
+    await expect(
+      page.getByRole("link", { name: "contact", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "/contact", exact: true }),
+    ).toBeVisible();
+  });
+
+  test("the 404 status bar carries the same three links", async ({ page }) => {
+    await page.goto("/this-route-does-not-exist");
+
+    for (const href of ["/portfolio", "/blog", "/contact"]) {
+      await expect(page.locator(`a[href="${href}"]`).first()).toBeVisible();
+    }
+  });
+
   test("/help renders its command rows as links to the real pages", async ({
     page,
   }) => {
