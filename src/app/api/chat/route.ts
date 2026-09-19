@@ -83,22 +83,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check rate limits FIRST (cheapest operation, prevents DB exhaustion)
-    const rateLimit = await checkMessageRateLimit(sessionId);
-    if (!rateLimit.allowed) {
-      logError("Chat API", "Rate limit exceeded", {
-        sessionId,
-        remaining: rateLimit.remaining,
-      });
-      return createErrorJsonResponse(
-        `Rate limit exceeded. Please wait before sending more messages. (${rateLimit.remaining} remaining)`,
-        429,
-        ErrorCode.RATE_LIMIT_EXCEEDED,
-        { remaining: rateLimit.remaining },
-      );
-    }
-
-    // Validate session exists and is not expired
+    // Validate the session BEFORE the rate limiter, so an identifier that is
+    // not a real session never reaches the rate-limit table.
     const session = await db.query.chatSessions.findFirst({
       where: eq(chatSessions.sessionId, sessionId),
     });
@@ -119,6 +105,21 @@ export async function POST(req: Request) {
         "Session expired. Please refresh and start a new session.",
         403,
         ErrorCode.SESSION_EXPIRED,
+      );
+    }
+
+    // Rate limit the validated session
+    const rateLimit = await checkMessageRateLimit(sessionId);
+    if (!rateLimit.allowed) {
+      logError("Chat API", "Rate limit exceeded", {
+        sessionId,
+        remaining: rateLimit.remaining,
+      });
+      return createErrorJsonResponse(
+        `Rate limit exceeded. Please wait before sending more messages. (${rateLimit.remaining} remaining)`,
+        429,
+        ErrorCode.RATE_LIMIT_EXCEEDED,
+        { remaining: rateLimit.remaining },
       );
     }
 
