@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { api } from "~/trpc/react";
@@ -9,8 +10,24 @@ import { env } from "~/env";
 import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
-import { CaptchaOverlay } from "./captcha-overlay";
 import { MemoizedMarkdown } from "./memoized-markdown";
+
+/**
+ * The CAPTCHA overlay, loaded the first time it is shown rather than with the
+ * page.
+ *
+ * `@marsidev/react-turnstile` is the single largest thing the terminal used to
+ * ship — around 730 KB raw in one chunk — and it is needed only once a visitor
+ * types a free-text message, which most never do (#13 P2). A static import put
+ * it in the initial script list of `/` and of all six command pages.
+ *
+ * `ssr: false` because the widget has no server rendering to contribute: the
+ * overlay is mounted from an event handler, never during the first paint.
+ */
+const CaptchaOverlay = dynamic(
+  () => import("./captcha-overlay").then((m) => m.CaptchaOverlay),
+  { ssr: false },
+);
 
 // ── Feed block model ────────────────────────────────────────────────────────
 //
