@@ -5,7 +5,8 @@ import styles from "../../editorial.module.css";
 import blog from "../../blog.module.css";
 import { PostBody } from "~/app/_components/post-body";
 import { socialMeta } from "~/config/metadata";
-import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
+import { articleGraph } from "~/config/structured-data";
+import { SITE_URL } from "~/config/site";
 import { POST_COPY } from "~/content/site-content";
 import {
   draftPreviewEnabled,
@@ -66,49 +67,27 @@ export const dynamicParams = true;
  *
  * `dateModified` comes from `updated` when set — the same single source the
  * sitemap's `lastModified` uses, so the two can never drift.
+ *
+ * The shape itself lives in `~/config/structured-data`, shared with the case
+ * page and the two overviews.
  */
 function postJsonLd(post: Post) {
   const url = `${SITE_URL}${postPath(post)}`;
 
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Article",
-        "@id": `${url}#article`,
-        url,
-        mainEntityOfPage: url,
-        headline: post.title,
-        description: post.excerpt,
-        inLanguage: POST_LOCALES[post.lang].html,
-        datePublished: post.date,
-        dateModified: lastModified(post),
-        author: { "@id": PERSON_ID },
-        publisher: { "@id": ORGANIZATION_ID },
-        ...(post.tags ? { keywords: post.tags } : {}),
-        ...(post.image ? { image: `${SITE_URL}${post.image}` } : {}),
-      },
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${url}#breadcrumb`,
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: SITE_NAME,
-            item: `${SITE_URL}/`,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Blog",
-            item: `${SITE_URL}/blog`,
-          },
-          { "@type": "ListItem", position: 3, name: post.title, item: url },
-        ],
-      },
+  return articleGraph({
+    url,
+    headline: post.title,
+    description: post.excerpt,
+    inLanguage: POST_LOCALES[post.lang].html,
+    datePublished: post.date,
+    dateModified: lastModified(post),
+    keywords: post.tags,
+    ...(post.image ? { image: `${SITE_URL}${post.image}` } : {}),
+    trail: [
+      { name: "Blog", path: "/blog" },
+      { name: post.title, path: postPath(post) },
     ],
-  };
+  });
 }
 
 export async function generateMetadata({

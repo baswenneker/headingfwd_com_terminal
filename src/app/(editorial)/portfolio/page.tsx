@@ -3,6 +3,8 @@ import Link from "next/link";
 import styles from "../editorial.module.css";
 import pf from "../portfolio.module.css";
 import { socialMeta } from "~/config/metadata";
+import { SITE_URL } from "~/config/site";
+import { collectionGraph } from "~/config/structured-data";
 import { isComingSoonCase, visibleCases } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
 
@@ -30,11 +32,37 @@ export const metadata: Metadata = {
   }),
 };
 
+/**
+ * Structured data for the overview: a `CollectionPage`, the `ItemList` of the
+ * visible cases in display order and the two-step breadcrumb. A coming-soon
+ * case is listed — it has a real, linkable page; a hidden one is absent here
+ * as it is everywhere, because both come from `visibleCases()`.
+ */
+function portfolioJsonLd() {
+  return collectionGraph({
+    url: `${SITE_URL}/portfolio`,
+    type: "CollectionPage",
+    name: "Portfolio",
+    description: DESCRIPTION,
+    items: visibleCases().map((c) => ({
+      path: `/portfolio/${c.slug}`,
+      name: c.title,
+      description: c.kind,
+    })),
+    trail: [{ name: "Portfolio", path: "/portfolio" }],
+  });
+}
+
 export default function PortfolioPage() {
   const cases = visibleCases();
 
   return (
     <div className={styles.shell}>
+      <script
+        type="application/ld+json"
+        // Built from static case data — safe to inline as JSON-LD.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioJsonLd()) }}
+      />
       <div className={styles.metaBar}>
         <span className={styles.kicker}>Bas Wenneker · Portfolio</span>
         <Link href="/" className={styles.backLink}>

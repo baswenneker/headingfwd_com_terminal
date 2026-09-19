@@ -10,12 +10,8 @@ import { postAssets } from "~/content/blog/assets";
 import { isComingSoonCase, visibleCases, type Case } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
 import { socialMeta } from "~/config/metadata";
-import {
-  ORGANIZATION_ID,
-  PERSON_ID,
-  SITE_NAME,
-  SITE_URL,
-} from "~/config/site";
+import { articleGraph } from "~/config/structured-data";
+import { SITE_URL } from "~/config/site";
 
 /**
  * `/portfolio/<slug>` — one case, server-rendered on the editorial layout.
@@ -75,47 +71,22 @@ function caseDescription(c: Case): string {
 function caseJsonLd(c: Case) {
   const url = `${SITE_URL}/portfolio/${c.slug}`;
 
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Article",
-        "@id": `${url}#article`,
-        url,
-        mainEntityOfPage: url,
-        headline: c.title,
-        description: caseDescription(c),
-        inLanguage: "en",
-        author: { "@id": PERSON_ID },
-        publisher: { "@id": ORGANIZATION_ID },
-        articleSection: c.sector,
-        keywords: c.tags,
-        datePublished: c.date,
-        // A case that was never revised is unchanged since publication, so it
-        // says so rather than leaving a crawler to guess.
-        dateModified: c.updated ?? c.date,
-      },
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${url}#breadcrumb`,
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: SITE_NAME,
-            item: `${SITE_URL}/`,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Portfolio",
-            item: `${SITE_URL}/portfolio`,
-          },
-          { "@type": "ListItem", position: 3, name: c.title, item: url },
-        ],
-      },
+  return articleGraph({
+    url,
+    headline: c.title,
+    description: caseDescription(c),
+    inLanguage: "en",
+    datePublished: c.date,
+    // A case that was never revised is unchanged since publication, so it says
+    // so rather than leaving a crawler to guess.
+    dateModified: c.updated ?? c.date,
+    keywords: c.tags,
+    articleSection: c.sector,
+    trail: [
+      { name: "Portfolio", path: "/portfolio" },
+      { name: c.title, path: `/portfolio/${c.slug}` },
     ],
-  };
+  });
 }
 
 export async function generateMetadata({
