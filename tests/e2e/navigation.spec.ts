@@ -105,6 +105,27 @@ test.describe("Terminal crawl paths", () => {
   });
 });
 
+test.describe("Touch targets", () => {
+  test("every status-bar link is at least 24px tall", async ({ page }) => {
+    await page.goto("/");
+
+    const bar = page.locator("footer, div").filter({ hasText: "utf-8" }).last();
+    const links = bar.locator("a");
+    const count = await links.count();
+    expect(count).toBeGreaterThan(0);
+
+    for (let i = 0; i < count; i++) {
+      const box = await links.nth(i).boundingBox();
+      expect(box?.height ?? 0, await links.nth(i).innerText()).toBeGreaterThanOrEqual(24);
+    }
+
+    // The bar's own padding was cut to pay for those 24px, so the chrome is
+    // the height it always was rather than a band across the bottom.
+    const barBox = await bar.boundingBox();
+    expect(barBox?.height ?? 0).toBeLessThanOrEqual(34);
+  });
+});
+
 test.describe("Editorial pages never pull the terminal bundle", () => {
   /**
    * `/blog` and `/portfolio` both render a link back to the terminal in the

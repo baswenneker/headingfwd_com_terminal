@@ -250,6 +250,9 @@
   cursor: pointer;
   display: inline;
   text-decoration: none;
+  /* Vertical padding on an inline element grows the hit box without moving
+     the line: the tip tokens were exactly on the 24px floor (WCAG 2.5.8). */
+  padding: 4px 0;
 }
 
 .tipCommand:hover {
@@ -327,7 +330,9 @@
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 7px 16px;
+  /* 3px, not 7px: the links below carry a 24px minimum height of their own
+     since #13 U10, which would otherwise make the bar ~9px taller. */
+  padding: 3px 16px;
   background: #0d1115;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   font-size: 11px;
@@ -363,8 +368,15 @@
   }
 }
 
-/* Plain accent link in the status bar (e.g. "portfolio"). */
+/*
+ * Plain accent link in the status bar (e.g. "portfolio"). 24px tall at the
+ * minimum: at 11px type the text box was 17px, under the WCAG 2.5.8 floor
+ * (#13 U10). The bar's own padding was cut to keep its height unchanged.
+ */
 .statusLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   color: var(--accent);
   text-decoration: none;
 }
@@ -378,6 +390,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 24px;
   color: var(--accent);
   text-decoration: none;
 }
