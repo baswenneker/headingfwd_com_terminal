@@ -30,6 +30,14 @@ export type DimLine = { kind: "dim"; text: string };
 export type BulletLine = { kind: "bullet"; text: string };
 
 /**
+ * Failure notice, in the same red as an AI error. `dim` was the only line the
+ * terminal had for "something did not work", and a dim grey line is exactly
+ * what a visitor skips (#13 U5). Carries the `error-message` test id, like the
+ * AI error line, since both are the same thing to a reader.
+ */
+export type ErrorLine = { kind: "error"; text: string };
+
+/**
  * Two-column label / description row.
  * Label is in accent, min-width 96px; description is slightly muted.
  *
@@ -67,6 +75,7 @@ export type FeedLine =
   | OutLine
   | DimLine
   | BulletLine
+  | ErrorLine
   | RowLine
   | LinkLine;
 

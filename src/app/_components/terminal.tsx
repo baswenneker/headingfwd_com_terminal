@@ -232,6 +232,31 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
     }
   }
 
+  /**
+   * What the terminal does when a session could not be created: say so, and
+   * give the message back.
+   *
+   * Every path into `initSession` used to fail silently — the overlay closed,
+   * the input was empty and the typed message was gone, with nothing in the
+   * feed to explain it (#13 U5). The text goes back into the input so the
+   * visitor only has to press Enter again.
+   */
+  function reportSessionFailure(text: string | null) {
+    setBlocks((prev) => [
+      ...prev,
+      {
+        type: "cmd",
+        lines: [
+          {
+            kind: "error",
+            text: "→ Couldn't start a session. Please try again.",
+          },
+        ],
+      },
+    ]);
+    if (text) setInputValue(text);
+  }
+
   // ── AI message dispatch ─────────────────────────────────────────────────
 
   /**
@@ -271,9 +296,11 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
       // placeholder token. The server's Turnstile service returns success
       // when DISABLE_CAPTCHA is true, so any token string works here.
       const ok = await initSession("dev-bypass-token");
+      pendingMessageRef.current = null;
       if (ok) {
-        pendingMessageRef.current = null;
         dispatchAiMessage(text);
+      } else {
+        reportSessionFailure(text);
       }
       return;
     }
@@ -291,10 +318,12 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   async function handleCaptchaSuccess(token: string) {
     setCaptchaVisible(false);
     const ok = await initSession(token);
+    const pending = pendingMessageRef.current;
+    pendingMessageRef.current = null;
     if (ok) {
-      const pending = pendingMessageRef.current;
-      pendingMessageRef.current = null;
       if (pending) dispatchAiMessage(pending);
+    } else {
+      reportSessionFailure(pending);
     }
   }
 
@@ -874,8 +903,13 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               void handleCaptchaSuccess(token);
             }}
             onError={() => {
+              // A rejected or dismissed challenge used to close the overlay
+              // and drop the message without a word (#13 U5). Same treatment
+              // as a failed session call: say so, hand the text back.
               setCaptchaVisible(false);
+              const pending = pendingMessageRef.current;
               pendingMessageRef.current = null;
+              reportSessionFailure(pending);
             }}
           />
         )}

@@ -74,6 +74,19 @@ export function renderFeedLine(
         </div>
       );
 
+    case "error":
+      // role="alert" so the failure is announced, not only drawn (#13 U4).
+      return (
+        <div
+          key={key}
+          className={`${styles.feedLine} ${styles.aiError}`}
+          role="alert"
+          data-testid="error-message"
+        >
+          {line.text}
+        </div>
+      );
+
     case "bullet":
       return (
         <div key={key} className={`${styles.feedLine} ${styles.feedBullet}`}>

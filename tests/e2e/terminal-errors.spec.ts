@@ -21,6 +21,24 @@ test.describe("Terminal error handling", () => {
     await waitForTerminalReady(page);
   });
 
+  test("a failed session start says so and hands the message back", async ({
+    page,
+  }) => {
+    // The session is created over tRPC before the first AI message. Kill it.
+    await page.route("**/api/trpc/**", (route) => route.abort("failed"));
+
+    const input = page.getByTestId("terminal-input");
+    await input.fill("Can you help me?");
+    await input.press("Enter");
+
+    const error = page.getByTestId("error-message").last();
+    await expect(error).toBeVisible({ timeout: 10000 });
+    await expect(error).toContainText("Couldn't start a session");
+
+    // The typed message is back in the input, not lost.
+    await expect(input).toHaveValue("Can you help me?");
+  });
+
   test("a dropped connection is reported in plain words", async ({ page }) => {
     // Bootstrap a real session so the failure below is the chat request, not
     // the session call.
