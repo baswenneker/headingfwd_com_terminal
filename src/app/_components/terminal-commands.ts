@@ -218,7 +218,12 @@ const COMMANDS: Record<string, () => FeedLine[]> = {
   contact:  contactLines,
   agents:   agentsLines,
   llms:     agentsLines,
-  whoami:   () => [{ kind: "out", text: "guest@headingfwd — welcome :)" }],
+  // An easter egg that still answers in the shell's own voice: the old
+  // "welcome :)" broke the character the rest of the terminal keeps (#13 F20).
+  whoami:   () => [
+    { kind: "out", text: "guest@headingfwd — logged in as a visitor." },
+    { kind: "out", text: "Try /about for the host." },
+  ],
   ls:       () => [{ kind: "out", text: "about/  services/  stack/  contact/" }],
 };
 
