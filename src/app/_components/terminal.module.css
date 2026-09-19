@@ -301,6 +301,19 @@
   caret-color: var(--accent);
 }
 
+/*
+ * Visible focus. `outline: none` above left a keyboard visitor with no idea
+ * where they were: tabbing to the one control on the page showed nothing
+ * (WCAG 2.4.7). A ring in the accent colour rather than the UA outline, which
+ * would draw a box around the full-width field; :focus-visible so a mouse
+ * click does not paint it. The caret keeps its own colour.
+ */
+.input:focus-visible {
+  outline: none;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
 .input::placeholder {
   /* Muted but AA-legible (~5:1) so the placeholder hint is readable while still
      clearly dimmer than typed input (#eafbfe). */
