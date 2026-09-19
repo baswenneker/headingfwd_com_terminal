@@ -1,4 +1,4 @@
-import { and, eq, gte, lt } from "drizzle-orm";
+import { and, asc, eq, gte, lt, lte, or } from "drizzle-orm";
 import { db } from "~/server/db";
 import { rateLimitLogs } from "~/server/db/schema";
 
@@ -9,7 +9,19 @@ interface RateLimitResult {
 }
 
 /**
+ * The longest window any caller below uses. Rows older than this are of no use
+ * to any identifier, so every call sweeps them away regardless of identifier.
+ */
+const MAX_WINDOW_MS = 60 * 60 * 1000;
+
+/**
  * Check if a rate limit has been exceeded
+ *
+ * The row for this request is written *before* the count is taken, so two
+ * calls that overlap can never both read a stale count: the n-th writer always
+ * counts at least n rows. A request that lands over the cap keeps its row for
+ * the rest of the window — the window counts attempts, not successes.
+ *
  * @param identifier - Unique identifier (session ID or IP hash)
  * @param action - Action type ('message' | 'session_create')
  * @param maxRequests - Maximum number of requests allowed in the time window
@@ -23,39 +35,47 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   const now = new Date();
   const windowStart = new Date(now.getTime() - windowMs);
+  const globalCutoff = new Date(now.getTime() - MAX_WINDOW_MS);
 
-  // Clean up old logs (older than window)
+  // Housekeeping in one statement: this identifier's rows that fell out of its
+  // window, plus every row older than the longest window we ever look at.
   await db
     .delete(rateLimitLogs)
+    .where(
+      or(
+        lt(rateLimitLogs.createdAt, globalCutoff),
+        and(
+          eq(rateLimitLogs.identifier, identifier),
+          eq(rateLimitLogs.action, action),
+          lt(rateLimitLogs.createdAt, windowStart),
+        ),
+      ),
+    );
+
+  // Claim a slot first, then count the slots claimed up to and including this
+  // one. The row id orders the claims, so overlapping calls each see their own
+  // position in the queue instead of a shared, stale total.
+  const [claim] = await db
+    .insert(rateLimitLogs)
+    .values({ identifier, action, createdAt: now })
+    .returning({ id: rateLimitLogs.id });
+
+  const recentLogs = await db
+    .select({ createdAt: rateLimitLogs.createdAt })
+    .from(rateLimitLogs)
     .where(
       and(
         eq(rateLimitLogs.identifier, identifier),
         eq(rateLimitLogs.action, action),
-        lt(rateLimitLogs.createdAt, windowStart),
+        gte(rateLimitLogs.createdAt, windowStart),
+        claim ? lte(rateLimitLogs.id, claim.id) : undefined,
       ),
-    );
-
-  // Count requests in current window
-  const recentLogs = await db.query.rateLimitLogs.findMany({
-    where: and(
-      eq(rateLimitLogs.identifier, identifier),
-      eq(rateLimitLogs.action, action),
-      gte(rateLimitLogs.createdAt, windowStart),
-    ),
-  });
+    )
+    .orderBy(asc(rateLimitLogs.createdAt));
 
   const requestCount = recentLogs.length;
   const remaining = Math.max(0, maxRequests - requestCount);
-  const allowed = requestCount < maxRequests;
-
-  if (allowed) {
-    // Log this request
-    await db.insert(rateLimitLogs).values({
-      identifier,
-      action,
-      createdAt: now,
-    });
-  }
+  const allowed = requestCount <= maxRequests;
 
   const resetAt = new Date(
     (recentLogs[0]?.createdAt?.getTime() ?? now.getTime()) + windowMs,
@@ -76,12 +96,14 @@ export async function checkMessageRateLimit(
 }
 
 /**
- * Check session creation rate limit (5 sessions per hour)
+ * Check session creation rate limit (default: 5 sessions per hour)
+ * Configurable via SESSION_RATE_LIMIT environment variable
  */
 export async function checkSessionRateLimit(
   identifier: string,
 ): Promise<RateLimitResult> {
-  return checkRateLimit(identifier, "session_create", 5, 60 * 60 * 1000);
+  const limit = parseInt(process.env.SESSION_RATE_LIMIT ?? "5", 10);
+  return checkRateLimit(identifier, "session_create", limit, MAX_WINDOW_MS);
 }
 
 /**
@@ -90,5 +112,5 @@ export async function checkSessionRateLimit(
 export async function checkEmailRateLimit(
   identifier: string,
 ): Promise<RateLimitResult> {
-  return checkRateLimit(identifier, "email_send", 3, 60 * 60 * 1000);
+  return checkRateLimit(identifier, "email_send", 3, MAX_WINDOW_MS);
 }

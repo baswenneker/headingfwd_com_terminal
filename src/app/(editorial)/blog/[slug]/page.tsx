@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import styles from "../../editorial.module.css";
 import blog from "../../blog.module.css";
 import { PostBody } from "~/app/_components/post-body";
-import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
+import { socialMeta } from "~/config/metadata";
+import { articleGraph } from "~/config/structured-data";
+import { SITE_URL } from "~/config/site";
 import { POST_COPY } from "~/content/site-content";
 import {
   draftPreviewEnabled,
@@ -65,49 +67,27 @@ export const dynamicParams = true;
  *
  * `dateModified` comes from `updated` when set — the same single source the
  * sitemap's `lastModified` uses, so the two can never drift.
+ *
+ * The shape itself lives in `~/config/structured-data`, shared with the case
+ * page and the two overviews.
  */
 function postJsonLd(post: Post) {
   const url = `${SITE_URL}${postPath(post)}`;
 
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Article",
-        "@id": `${url}#article`,
-        url,
-        mainEntityOfPage: url,
-        headline: post.title,
-        description: post.excerpt,
-        inLanguage: POST_LOCALES[post.lang].html,
-        datePublished: post.date,
-        dateModified: lastModified(post),
-        author: { "@id": PERSON_ID },
-        publisher: { "@id": ORGANIZATION_ID },
-        ...(post.tags ? { keywords: post.tags } : {}),
-        ...(post.image ? { image: `${SITE_URL}${post.image}` } : {}),
-      },
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${url}#breadcrumb`,
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: SITE_NAME,
-            item: `${SITE_URL}/`,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Blog",
-            item: `${SITE_URL}/blog`,
-          },
-          { "@type": "ListItem", position: 3, name: post.title, item: url },
-        ],
-      },
+  return articleGraph({
+    url,
+    headline: post.title,
+    description: post.excerpt,
+    inLanguage: POST_LOCALES[post.lang].html,
+    datePublished: post.date,
+    dateModified: lastModified(post),
+    keywords: post.tags,
+    ...(post.image ? { image: `${SITE_URL}${post.image}` } : {}),
+    trail: [
+      { name: "Blog", path: "/blog" },
+      { name: post.title, path: postPath(post) },
     ],
-  };
+  });
 }
 
 export async function generateMetadata({
@@ -119,27 +99,31 @@ export async function generateMetadata({
 
   const isDraft = Boolean(post.draft);
 
+  const social = socialMeta({
+    title: post.title,
+    description: post.excerpt,
+    path: postPath(post),
+    type: "article",
+    locale: POST_LOCALES[post.lang].og,
+    publishedTime: post.date,
+    modifiedTime: lastModified(post),
+    authors: ["Bas Wenneker"],
+    ...(post.tags ? { tags: post.tags } : {}),
+    // A post that sets `image` in its frontmatter still wins over the
+    // generated card: an explicit `images` entry beats the file convention.
+    ...(post.image ? { images: [{ url: post.image }] } : {}),
+  });
+
   return {
     title: post.title,
     description: post.excerpt,
-    alternates: {
-      canonical: postPath(post),
-      types: { "application/rss+xml": "/blog/rss.xml" },
-    },
     // A draft is only ever reachable outside production, but say noindex
     // explicitly so a preview deployment can never be indexed.
     ...(isDraft ? { robots: { index: false, follow: false } } : {}),
-    openGraph: {
-      type: "article",
-      url: postPath(post),
-      title: `${post.title} — HeadingFWD`,
-      description: post.excerpt,
-      locale: POST_LOCALES[post.lang].og,
-      publishedTime: post.date,
-      modifiedTime: lastModified(post),
-      authors: ["Bas Wenneker"],
-      ...(post.tags ? { tags: post.tags } : {}),
-      ...(post.image ? { images: [{ url: post.image }] } : {}),
+    ...social,
+    alternates: {
+      ...social.alternates,
+      types: { "application/rss+xml": "/blog/rss.xml" },
     },
   };
 }
@@ -174,8 +158,11 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
 
         {isDraft ? (
+          /* The banner speaks to whoever is reading the draft, so it speaks
+             the draft's own language — it sat here as an English literal,
+             which put an English notice on top of a Dutch post (#13 F21). */
           <p className={blog.draftBanner} data-post-draft-banner="">
-            Draft — not published. Visible here because this is not production.
+            {copy.draftBanner}
           </p>
         ) : null}
 
@@ -191,6 +178,24 @@ export default async function PostPage({ params }: PostPageProps) {
       </article>
 
       {/*
+        Who wrote this and where to go next. A post used to end on "all posts ·
+        back to the terminal" and nothing else, so the piece that brings in the
+        most readers said least about the person who wrote it (#13 D3). In the
+        post's own language, like everything else a reader reads here.
+      */}
+      <aside className={blog.author} lang={POST_LOCALES[post.lang].html}>
+        <p>{copy.author}</p>
+        <p className={blog.authorLinks}>
+          <Link href="/portfolio" prefetch={false}>
+            → {copy.seeTheWork}
+          </Link>
+          <Link href="/contact" prefetch={false}>
+            → {copy.getInTouch}
+          </Link>
+        </p>
+      </aside>
+
+      {/*
         In the post's own language: this notice is written for a visitor who
         arrived from a copy on LinkedIn, and it has to be read to land.
       */}
@@ -199,7 +204,9 @@ export default async function PostPage({ params }: PostPageProps) {
         <p>
           <Link href="/blog">← {copy.allPosts}</Link>
           {" · "}
-          <Link href="/">{copy.backToTerminal}</Link>
+          <Link href="/" prefetch={false}>
+            {copy.backToTerminal}
+          </Link>
         </p>
       </footer>
     </div>

@@ -75,6 +75,16 @@ export function createErrorJsonResponse(
 }
 
 /**
+ * Shorten a session id for a log line. A session id is what a request
+ * authenticates with, so only enough of it to follow one visitor through the
+ * log goes in; the rest stays out of it.
+ */
+export function redactSessionId(sessionId: string | undefined | null): string {
+  if (!sessionId) return "none";
+  return `${sessionId.slice(0, 14)}…`;
+}
+
+/**
  * Log error with structured context
  */
 export function logError(

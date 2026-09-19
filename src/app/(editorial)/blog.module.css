@@ -19,6 +19,49 @@
   background: rgba(46, 230, 246, 0.06);
 }
 
+/* ─── Author block ───────────────────────────────────────────────────────── */
+/*
+ * Sits between the end of the post and the origin notice: who wrote this, and
+ * the two places to go next. Boxed rather than ruled, so it reads as an aside
+ * about the author and not as a second closing paragraph of the piece.
+ */
+
+.author {
+  margin-top: clamp(34px, 5vw, 60px);
+  padding: 18px 20px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.author p {
+  margin: 0;
+}
+
+.authorLinks {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
+.authorLinks a {
+  /* 24px minimum hit box (WCAG 2.5.8) without changing the line rhythm. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.authorLinks a:hover,
+.authorLinks a:focus-visible {
+  border-bottom-color: var(--accent);
+}
+
 /* ─── Article footer ─────────────────────────────────────────────────────── */
 
 .origin {

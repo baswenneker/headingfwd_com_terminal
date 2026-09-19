@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { sendCommand, waitForTerminalReady } from "../helpers/session";
-import { visibleCases } from "~/content/cases";
+import { isComingSoonCase, visibleCases } from "~/content/cases";
 
 /**
  * Tests for the portfolio pages and the shareable command deep links.
@@ -23,11 +23,10 @@ const CASE_2 = {
   slug: "hintsay-linkedin",
   title: "Hintsay: AI writing assistant for LinkedIn",
 };
-// A coming-soon case renders its teaser placeholder instead of a write-up.
-const TEASER = {
-  slug: "chatbot-qa-hub",
-  title: "Chatbot: a Q&A hub for your team",
-};
+// Both former coming-soon shells are published concepts now (#13 F14), so no
+// case renders the teaser placeholder. The placeholder and the `coming-soon`
+// visibility it hangs off still exist; `tests/unit/cases.test.ts` covers the
+// predicate that drives them, on a fixture rather than on live content.
 
 test.describe("Case pages (/portfolio/<slug>)", () => {
   test("direct load renders the case page, not the terminal", async ({
@@ -74,12 +73,14 @@ test.describe("Case pages (/portfolio/<slug>)", () => {
   });
 
   test("prev and next are real links that wrap around", async ({ page }) => {
-    const cases = visibleCases();
-    const last = cases[cases.length - 1]!;
+    // The ring holds only written-up cases: a prev/next button promises
+    // something to read, so the coming-soon shells are skipped (#13 D6).
+    const ring = visibleCases().filter((c) => !isComingSoonCase(c));
+    const last = ring[ring.length - 1]!;
 
     await page.goto(`/portfolio/${CASE_1.slug}`);
 
-    // CASE_1 is the first case, so "prev" wraps to the last one.
+    // CASE_1 is the first case, so "prev" wraps to the last one in the ring.
     await expect(page.getByRole("link", { name: "← prev" })).toHaveAttribute(
       "href",
       `/portfolio/${last.slug}`,
@@ -110,26 +111,25 @@ test.describe("Case pages (/portfolio/<slug>)", () => {
     ).toBeVisible();
   });
 
-  test("a coming-soon case shows its teaser instead of a write-up", async ({
+  test("every case a reader is handed on to has a write-up", async ({
     page,
   }) => {
-    await page.goto(`/portfolio/${TEASER.slug}`);
+    // The invariant behind #13 D6: a prev/next button promises something to
+    // read, so the ring only ever contains written-up cases. It holds whether
+    // or not a coming-soon shell exists right now (#13 F14).
+    const readable = visibleCases()
+      .filter((c) => !isComingSoonCase(c))
+      .map((c) => `/portfolio/${c.slug}`);
 
-    await expect(
-      page.getByRole("heading", { level: 1, name: TEASER.title }),
-    ).toBeVisible();
-    await expect(page.getByText("🚧 coming soon")).toBeVisible();
-    // The placeholder replaces the body entirely — no rendered sections.
-    await expect(page.locator("[data-post-section]")).toHaveCount(0);
-  });
-
-  test("the overview badges a coming-soon case", async ({ page }) => {
-    await page.goto("/portfolio");
-
-    const row = page.locator("li", {
-      has: page.locator(`a[href="/portfolio/${TEASER.slug}"]`),
-    });
-    await expect(row.getByText("coming soon")).toBeVisible();
+    for (const c of visibleCases()) {
+      await page.goto(`/portfolio/${c.slug}`);
+      for (const name of ["← prev", "next →"]) {
+        const href = await page
+          .getByRole("link", { name })
+          .getAttribute("href");
+        expect(readable, `${name} on /portfolio/${c.slug}`).toContain(href);
+      }
+    }
   });
 
   test("an unknown slug is a hard 404", async ({ page }) => {
@@ -173,7 +173,9 @@ test.describe("Internal links & structured data", () => {
     await page.goto("/");
     await waitForTerminalReady(page);
 
-    await page.getByRole("link", { name: "portfolio" }).click();
+    // exact: true — the tip line carries a "/portfolio" token as well since
+    // #13 D1, and a loose name match would find both.
+    await page.getByRole("link", { name: "portfolio", exact: true }).click();
     await expect(page).toHaveURL("/portfolio");
     await expect(
       page.getByRole("heading", { level: 1, name: "Portfolio" }),
@@ -275,8 +277,8 @@ test.describe("Sitemap", () => {
     expect(res.status()).toBe(200);
     const xml = await res.text();
 
-    for (const slug of [CASE_1.slug, CASE_2.slug, TEASER.slug]) {
-      expect(xml).toContain(`https://headingfwd.com/portfolio/${slug}`);
+    for (const c of visibleCases()) {
+      expect(xml).toContain(`https://headingfwd.com/portfolio/${c.slug}`);
     }
     for (const token of [
       "help",
@@ -297,8 +299,10 @@ test.describe("Sitemap", () => {
     const xml = await res.text();
 
     const dated = visibleCases().find((c) => c.updated);
-    expect(dated, "no visible case has an `updated` value to assert on")
-      .toBeDefined();
+    expect(
+      dated,
+      "no visible case has an `updated` value to assert on",
+    ).toBeDefined();
 
     // The <url> block for that case must carry a <lastmod>.
     const block = xml

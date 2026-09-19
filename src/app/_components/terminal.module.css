@@ -204,14 +204,21 @@
   font-weight: 500;
 }
 
-/* "// specialities" comment */
-.specialitiesLabel {
+/* Proof line under the value proposition — one factual claim, set apart from
+ * the paragraph above it without competing with it (#13 F1). */
+.credentials {
+  margin-top: 14px;
+  color: rgba(214, 230, 234, 0.72);
+}
+
+/* "// specialties" comment */
+.specialtiesLabel {
   margin-top: 22px;
   color: rgba(160, 178, 182, 0.7);
 }
 
-/* Responsive two-column grid of speciality items */
-.specialitiesGrid {
+/* Responsive two-column grid of specialty items */
+.specialtiesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 6px 26px;
@@ -219,9 +226,9 @@
   max-width: 70ch;
 }
 
-/* Accent bullet character before each speciality — bold accent so the mark
+/* Accent bullet character before each specialty — bold accent so the mark
  * reads as a distinct marker, clearly set apart from the body text color. */
-.specialityBullet {
+.specialtyBullet {
   color: var(--accent);
   font-weight: 700;
   margin-right: 0.5em;
@@ -233,9 +240,11 @@
   color: rgba(245, 197, 68, 0.9);
 }
 
-/* Highlighted command tokens inside the tip line, rendered as inline buttons.
- * Button-reset rules strip browser chrome so the element looks identical to
- * the old <span> while remaining keyboard- and tap-accessible. */
+/* Highlighted command tokens inside the tip line, rendered as inline anchors
+ * to the command's own page (their click is intercepted and run in place).
+ * The reset rules strip both button and anchor chrome so the token looks
+ * identical to the surrounding text while staying keyboard- and tap-
+ * accessible. */
 .tipCommand {
   color: var(--accent);
   font-weight: 700;
@@ -247,6 +256,56 @@
   line-height: inherit;
   cursor: pointer;
   display: inline;
+  text-decoration: none;
+  /* Vertical padding on an inline element grows the hit box without moving
+     the line: the tip tokens were exactly on the 24px floor (WCAG 2.5.8). */
+  padding: 4px 0;
+}
+
+.tipCommand:hover {
+  text-decoration: underline;
+}
+
+/*
+ * Present to assistive technology, absent from the screen. Used for the
+ * progress announcements the feed already shows visually (#13 U4) and for the
+ * skip link (#13 U11), which takes itself out of this when focused.
+ */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * Skip link (#13 U11). Out of the way until it is focused, then a normal
+ * terminal-looking button in the top-left corner.
+ */
+.skipLink {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 60;
+  transform: translateY(-200%);
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #0d1115;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.skipLink:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* 1px rule separating the intro block from the (future) command feed */
@@ -294,11 +353,37 @@
   caret-color: var(--accent);
 }
 
+/*
+ * Visible focus. `outline: none` above left a keyboard visitor with no idea
+ * where they were: tabbing to the one control on the page showed nothing
+ * (WCAG 2.4.7). A ring in the accent colour rather than the UA outline, which
+ * would draw a box around the full-width field; :focus-visible so a mouse
+ * click does not paint it. The caret keeps its own colour.
+ */
+.input:focus-visible {
+  outline: none;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
 .input::placeholder {
   /* Muted but AA-legible (~5:1) so the placeholder hint is readable while still
      clearly dimmer than typed input (#eafbfe). */
   color: #7a8488;
   opacity: 1;
+}
+
+/* Notice shown in place of nothing when scripting is off (#13 U8). */
+.noscript {
+  margin-top: 10px;
+  color: rgba(245, 197, 68, 0.9);
+  font-size: 13px;
+}
+
+.noscript a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* ─── Status bar ─────────────────────────────────────────────────────── */
@@ -307,7 +392,9 @@
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 7px 16px;
+  /* 3px, not 7px: the links below carry a 24px minimum height of their own
+     since #13 U10, which would otherwise make the bar ~9px taller. */
+  padding: 3px 16px;
   background: #0d1115;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   font-size: 11px;
@@ -329,11 +416,29 @@
   border-radius: 50%;
   background: var(--prompt);
   box-shadow: 0 0 8px var(--prompt);
-  animation: statusPulse 2s ease-in-out infinite;
 }
 
-/* Plain accent link in the status bar (e.g. "portfolio"). */
+/*
+ * The pulse runs forever, so it only runs for visitors who have not asked for
+ * less motion. Without the query it kept going on a machine set to reduce
+ * motion, while the 404 page already honoured the setting (#13 U9). The dot
+ * itself stays: it is the indicator, the animation is decoration.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .statusDot {
+    animation: statusPulse 2s ease-in-out infinite;
+  }
+}
+
+/*
+ * Plain accent link in the status bar (e.g. "portfolio"). 24px tall at the
+ * minimum: at 11px type the text box was 17px, under the WCAG 2.5.8 floor
+ * (#13 U10). The bar's own padding was cut to keep its height unchanged.
+ */
 .statusLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   color: var(--accent);
   text-decoration: none;
 }
@@ -347,6 +452,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 24px;
   color: var(--accent);
   text-decoration: none;
 }
@@ -480,8 +586,9 @@
   min-width: 96px;
 }
 
-/* Applied to .feedRowLabel when it is rendered as a <button> so the browser's
- * default button appearance is stripped while the visual style is preserved. */
+/* Applied to .feedRowLabel when it is rendered as a <button> or as an anchor
+ * to the command's own page, so the browser's default chrome for either is
+ * stripped while the visual style is preserved. */
 .feedRowLabelBtn {
   background: none;
   border: none;
@@ -492,6 +599,11 @@
   text-align: left;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
+}
+
+.feedRowLabelBtn:hover {
+  text-decoration: underline;
 }
 
 /* Right column of a row — description in a slightly muted tone */
@@ -566,7 +678,14 @@
   background: var(--accent);
   margin-left: 2px;
   vertical-align: text-bottom;
-  animation: cursorBlink 1s step-start infinite;
+}
+
+/* Same as the status dot: a solid block for anyone who asked for less motion,
+ * a blinking one for everyone else. */
+@media (prefers-reduced-motion: no-preference) {
+  .aiCursor {
+    animation: cursorBlink 1s step-start infinite;
+  }
 }
 
 /* Error line rendered when the AI request returns an error status */
@@ -604,7 +723,7 @@
 /*
  * When the page container is 560px wide or less, collapse the layout:
  * the window goes full-height, title bar and prompt are shortened,
- * and the specialities grid drops to one column.
+ * and the specialties grid drops to one column.
  *
  * Additional rules below prevent horizontal overflow in the command feed
  * and enlarge tap targets on the tappable row labels.
@@ -645,7 +764,7 @@
     display: inline;
   }
 
-  .specialitiesGrid {
+  .specialtiesGrid {
     grid-template-columns: 1fr;
   }
 

@@ -41,12 +41,17 @@ export function VideoPreviews({ videos }: { videos: CaseVideo[] }) {
                   aria-label={`Play video: ${v.title}`}
                 >
                   {/* External YouTube thumbnail (facade). A plain <img> avoids
-                      next/image remote-pattern config for a decorative preview. */}
+                      next/image remote-pattern config for a decorative preview.
+                      `hqdefault.jpg` is always 480×360; stating it reserves the
+                      box before the bytes arrive, so a case page with five
+                      previews never shifts mid-read. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     className={styles.videoThumbImg}
                     src={`https://img.youtube.com/vi/${v.id}/hqdefault.jpg`}
-                    alt=""
+                    width={480}
+                    height={360}
+                    alt={v.title}
                     loading="lazy"
                   />
                   <span className={styles.videoPlay} aria-hidden="true">

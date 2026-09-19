@@ -13,11 +13,73 @@
  * files are generated from that module (`pnpm gen:cases`).
  */
 
+/**
+ * The day the copy in this file last changed — BUMP IT when you edit any
+ * string below.
+ *
+ * It is the `lastModified` the sitemap reports for every surface built from
+ * this copy: the terminal home, the six command pages and `/llms.txt`. Those
+ * pages have no date of their own, and a build-time `Date.now()` would tell
+ * crawlers the whole site changed on every deploy. A hand-maintained date is
+ * the honest answer: slightly stale beats confidently wrong.
+ */
+export const SITE_CONTENT_UPDATED = "2026-09-19";
+
 /** One-sentence value proposition, mirrored by the hero paragraph. */
 export const INTRO =
   "Bas helps teams get real value from Generative AI — designing and building " +
   "agents, assistants and AI workflows that actually make it to production, " +
   "training dev teams, and consulting on AI strategy.";
+
+/**
+ * The same sentence in the first person, for the terminal hero — the one
+ * place on the site where Bas speaks rather than being described.
+ *
+ * Derived rather than written out again: the hero, `/llms.txt` and the meta
+ * description used to carry three hand-kept variants of this sentence, and
+ * they had already drifted apart (#13 F6). The swap is the whole difference
+ * between the two voices, so it is the whole transformation.
+ */
+export const INTRO_FIRST_PERSON = INTRO.replace("Bas helps", "I help");
+
+/**
+ * The site-wide meta description, in the brand's third-person voice — what a
+ * search result and a social card show for `/`.
+ *
+ * Derived from `INTRO` the same way `INTRO_FIRST_PERSON` is, with the byline
+ * a search result needs and the hero does not. It was a third literal in
+ * `layout.tsx` until #13 F6.
+ */
+export const SITE_DESCRIPTION =
+  INTRO.replace("Bas helps", "HeadingFWD helps") +
+  " By Bas Wenneker, AI Lead / Engineer.";
+
+/**
+ * The one proof line above the fold — the homepage's only factual claim about
+ * track record, shown under the value proposition, in `/about` and in the
+ * About block of `/llms.txt`.
+ *
+ * Every clause is backed by something else on this site: the years by
+ * `ABOUT.lines`, the production claim by case 01 in `cases.ts`, which runs
+ * live inside a large public-sector organization. No client is named here —
+ * publishing client names is Bas's call and the site does not make it (#13
+ * F1/F7).
+ */
+export const CREDENTIALS =
+  "15+ yrs shipping software · GenAI in production at a large Dutch " +
+  "public-sector organization";
+
+/**
+ * Who the site is for, and from where — one line under the hero subtitle and
+ * one line in the About block of `/llms.txt`.
+ *
+ * The site said this nowhere, which left a visitor to guess from a Dutch post
+ * on an English shell (#13 F18). Said once, out loud, the language mix
+ * becomes a choice rather than an accident. It matches the `address` and
+ * `areaServed` already in the structured data.
+ */
+export const AUDIENCE =
+  "Delft, NL · works with Dutch and European engineering teams";
 
 /** Short "who I am" block, shown by `/about` and the agent file's About section. */
 export const ABOUT = {
@@ -32,7 +94,7 @@ export const ABOUT = {
 } as const;
 
 /**
- * The four specialities. `title` is the headline; `blurb` is the short
+ * The four specialties. `title` is the headline; `blurb` is the short
  * "what it means" tail rendered after an em dash in both surfaces.
  */
 export const SPECIALTIES = [
@@ -51,10 +113,18 @@ export const SPECIALTIES = [
   },
 ] as const;
 
-/** Tech / methodology stack lines. */
+/**
+ * Tech / methodology stack lines, read by `/stack`, by `/llms.txt` and by the
+ * AI assistant's system prompt.
+ *
+ * Line 1 is what the work is built with, line 2 what it is built in, line 3
+ * how it is run. Ruby on Rails was on line 2 and appears in no case and in no
+ * prompt; LangGraph, FastAPI and Next.js drive several cases and were absent
+ * (#13 F9).
+ */
 export const STACK = [
-  "LLMs · agents · RAG · evals · prompt + context engineering",
-  "Python · TypeScript · React · Ruby on Rails · Docker",
+  "LLMs · agents · LangGraph · RAG · evals · prompt + context engineering",
+  "Python · FastAPI · TypeScript · Next.js · React · Docker",
   "Lean Startup · Design Thinking · Service Design · Scrum",
 ] as const;
 
@@ -63,6 +133,15 @@ export const CONTACT = {
   email: "bas@headingfwd.com",
   linkedin: "https://www.linkedin.com/in/baswenneker",
   note: "fastest reply: drop me a DM on LinkedIn.",
+} as const;
+
+/**
+ * The one line the editorial footer states about who runs the site, shown
+ * under every post and every case. English whatever the post's language is:
+ * the footer is chrome, like the draft badge on the overview, not content.
+ */
+export const EDITORIAL_FOOTER = {
+  tagline: "HeadingFWD — AI engineering & consultancy, Delft",
 } as const;
 
 /**
@@ -98,8 +177,15 @@ export const POST_COPY = {
     origin:
       "Origineel gepubliceerd op headingfwd.com. Lees je dit ergens anders, " +
       "dan is deze pagina het origineel.",
+    draftBanner:
+      "Concept — niet gepubliceerd. Hier zichtbaar omdat dit geen productie is.",
     allPosts: "alle posts",
     backToTerminal: "terug naar de terminal",
+    author:
+      "Geschreven door Bas Wenneker — AI engineering & consultancy, Delft. " +
+      "Hij bouwt agents, assistants en AI-workflows die de productie halen.",
+    seeTheWork: "bekijk het werk",
+    getInTouch: "neem contact op",
   },
   en: {
     footnoteLabel: "Sources",
@@ -107,7 +193,14 @@ export const POST_COPY = {
     origin:
       "Originally published on headingfwd.com. If you are reading a copy " +
       "elsewhere, this page is the original.",
+    draftBanner:
+      "Draft — not published. Visible here because this is not production.",
     allPosts: "all posts",
     backToTerminal: "back to the terminal",
+    author:
+      "Written by Bas Wenneker — AI engineering & consultancy, Delft. He " +
+      "builds agents, assistants and AI workflows that reach production.",
+    seeTheWork: "see the work",
+    getInTouch: "get in touch",
   },
 } as const;

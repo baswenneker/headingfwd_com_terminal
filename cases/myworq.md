@@ -60,14 +60,14 @@ largely deskless workforce.
 4. 💻 **Building** — engineers build the feature into the app
 5. 🧪 **Testing** — test the new feature thoroughly
 6. 🚀 **Rollout** — ship the update to users
-7. 🔄 **Iterate** — analyse data, gather feedback, and start again
+7. 🔄 **Iterate** — analyze data, gather feedback, and start again
 
 ## Outcome
 
 ### Role
 
 This is a **product-management case**. The app itself was built by an external software
-agency — my job was to own the product: discovery with real users, prioritisation, and
+agency — my job was to own the product: discovery with real users, prioritization, and
 steering design and engineering toward what mattered most. In other words: I was
 accountable for *what* got built and *why*, not for writing the code.
 

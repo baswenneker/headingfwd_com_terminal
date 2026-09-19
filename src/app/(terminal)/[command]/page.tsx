@@ -1,6 +1,7 @@
 import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Terminal } from "~/app/_components/terminal";
+import { socialMeta } from "~/config/metadata";
 import {
   COMMAND_PAGES,
   type CommandPage,
@@ -45,15 +46,13 @@ export async function generateMetadata({
   return {
     title: page.title,
     description: page.description,
-    alternates: {
-      canonical: `/${page.token}`,
-    },
-    openGraph: {
-      type: "website",
-      url: `/${page.token}`,
-      title: `${page.title} — HeadingFWD`,
+    // Open Graph, Twitter and the canonical from one source, so the card text
+    // is this page's and never the root layout's. See ~/config/metadata.
+    ...socialMeta({
+      title: page.title,
       description: page.description,
-    },
+      path: `/${page.token}`,
+    }),
   };
 }
 

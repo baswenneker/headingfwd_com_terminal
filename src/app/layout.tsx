@@ -4,22 +4,17 @@ import { type Metadata, type Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { CONTACT } from "~/content/site-content";
+import { CONTACT, SITE_DESCRIPTION, SPECIALTIES } from "~/content/site-content";
 // Canonical production origin + brand name. `metadataBase` lets Next resolve
 // every relative URL below (canonical, Open Graph, icons) to an absolute URL,
 // which crawlers and social scrapers require.
-import {
-  ORGANIZATION_ID,
-  PERSON_ID,
-  SITE_NAME,
-  SITE_URL,
-} from "~/config/site";
+import { socialMeta } from "~/config/metadata";
+import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
 
 const TITLE = "HeadingFWD — AI Engineering & Consultancy";
-const DESCRIPTION =
-  "HeadingFWD helps teams get real value from Generative AI — designing and " +
-  "building agents, assistants and AI workflows that reach production, training " +
-  "dev teams, and consulting on AI strategy. By Bas Wenneker, AI Lead / Engineer.";
+// The third hand-kept variant of one sentence, until #13 F6. It is derived
+// from INTRO now, in site-content.ts, like the hero paragraph is.
+const DESCRIPTION = SITE_DESCRIPTION;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -57,25 +52,14 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: SITE_NAME,
-    title: TITLE,
-    description: DESCRIPTION,
-    locale: "en_US",
-    // No `images` here on purpose: an explicit entry beats Next's
-    // `opengraph-image` file convention, so the generated card in
-    // src/app/opengraph-image.tsx would never be used. Same for twitter.
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-  },
+  // Open Graph, Twitter and the canonical from the same builder every page
+  // uses (~/config/metadata). No `images` is passed on purpose: an explicit
+  // entry beats Next's `opengraph-image` file convention, so the generated
+  // card in src/app/opengraph-image.tsx would never be used.
+  //
+  // These are the site-wide DEFAULTS. Next replaces `openGraph` and `twitter`
+  // wholesale for a page that sets them, which is why every page sets both.
+  ...socialMeta({ title: TITLE, description: DESCRIPTION, path: "/" }),
   icons: [
     { rel: "icon", url: "/favicon.ico" },
     { rel: "icon", type: "image/svg+xml", url: "/favicon.svg" },
@@ -107,6 +91,18 @@ export const viewport: Viewport = {
 // Structured data (schema.org) so search engines can model the site as an
 // organisation and a person, and connect the two. Rendered as a single JSON-LD
 // graph in the document head.
+/**
+ * Where HeadingFWD is based. Shared by the organisation and the person, which
+ * is the pair a search engine uses to place a one-person consultancy on a map
+ * and in local results. Street level is deliberately absent: the city is what
+ * is public.
+ */
+const ADDRESS = {
+  "@type": "PostalAddress",
+  addressLocality: "Delft",
+  addressCountry: "NL",
+};
+
 const JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
@@ -128,7 +124,12 @@ const JSON_LD = {
         "AI engineering & consultancy — building agents, assistants and AI " +
         "workflows that reach production.",
       logo: `${SITE_URL}/android-chrome-512x512.png`,
+      image: `${SITE_URL}/android-chrome-512x512.png`,
       founder: { "@id": PERSON_ID },
+      address: ADDRESS,
+      // Where the work is done, not where a client happens to sit: Dutch
+      // engagements on site, European ones remote.
+      areaServed: ["NL", "EU"],
       sameAs: [CONTACT.linkedin],
     },
     {
@@ -140,6 +141,14 @@ const JSON_LD = {
       // of page source; LinkedIn (sameAs) is the public contact channel. The
       // terminal chat still relays messages to Bas server-side.
       url: SITE_URL,
+      // The brand mark, not a portrait: there is no photo of Bas under
+      // public/. Swap this for one when there is — it is also what a search
+      // result falls back to.
+      image: `${SITE_URL}/android-chrome-512x512.png`,
+      address: ADDRESS,
+      // Derived from the four specialties on the site, so the two can never
+      // say different things about what Bas does.
+      knowsAbout: SPECIALTIES.map((s) => s.title),
       worksFor: { "@id": ORGANIZATION_ID },
       sameAs: [CONTACT.linkedin],
     },
@@ -167,6 +176,9 @@ const jetBrainsMono = JetBrains_Mono({
   adjustFontFallback: false,
 });
 
+/** True on a Vercel deployment, false locally and in CI. */
+const onVercel = process.env.VERCEL === "1";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -179,8 +191,19 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
         />
         {children}
-        <Analytics />
-        <SpeedInsights />
+        {/*
+          Both scripts are served by Vercel's edge, so off Vercel they 404 on
+          every page load: noise in local and CI logs, and a Lighthouse Best
+          Practices score capped at 96 for a console error that says nothing
+          about this site. `VERCEL` is set to "1" on every Vercel deployment
+          and nowhere else, so production is unchanged.
+        */}
+        {onVercel ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
       </body>
     </html>
   );

@@ -97,7 +97,14 @@ export function PostBody({
               alt={alt ?? ""}
               width={Number(width) || 1200}
               height={Number(height) || 675}
-              sizes="(max-width: 900px) 100vw, 760px"
+              // The reading column, not the viewport: the editorial shell is
+              // `max-width: 1180px` with `padding-inline: clamp(16px, 4vw,
+              // 56px)`, so below 900px the widest a figure can be is the
+              // viewport minus 2×16px (the gutter's floor — it only grows from
+              // there, which makes this an upper bound at every width).
+              // `100vw` asked for ~2× the pixels the column renders on a
+              // phone.
+              sizes="(max-width: 900px) calc(100vw - 32px), 760px"
               data-post-image=""
             />
           );
