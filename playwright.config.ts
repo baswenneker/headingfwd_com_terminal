@@ -21,6 +21,16 @@ if (dbUrl.startsWith("file:")) {
 }
 
 /**
+ * `E2E_SERVER=prod` runs the suite against a production build
+ * (`next build && next start`) instead of `next dev --turbo`. Without this,
+ * the suite only ever exercised Turbopack dev — a real production build
+ * behaves differently enough (minification, RSC payloads, static
+ * generation) that it is worth its own CI run alongside dev, not instead of
+ * it (see .github/workflows/ci.yml's e2e-prod job).
+ */
+const isProdServer = process.env.E2E_SERVER === "prod";
+
+/**
  * Playwright configuration for terminal integration tests
  * See https://playwright.dev/docs/test-configuration
  */
@@ -73,12 +83,19 @@ export default defineConfig({
     timeout: 5000, // 5 seconds for expect assertions
   },
 
-  /* Run your local dev server before starting the tests */
+  /* Run your local dev server (or, with E2E_SERVER=prod, a production build)
+   * before starting the tests. */
   webServer: {
-    command: "pnpm dev -p 3099",
+    command: isProdServer
+      ? "pnpm build && pnpm start -p 3099"
+      : "pnpm dev -p 3099",
     url: "http://localhost:3099",
-    reuseExistingServer: !process.env.CI,
-    timeout: 60000, // 1 minute to start
+    // A production build changes files under .next while it runs, so a
+    // leftover dev server must never be reused for it either.
+    reuseExistingServer: !process.env.CI && !isProdServer,
+    // The build itself can take a couple of minutes on top of the usual
+    // server-start wait; the dev server keeps its original 1-minute budget.
+    timeout: isProdServer ? 300000 : 60000,
     env: {
       ...process.env,
       NEXT_PUBLIC_DISABLE_CAPTCHA: "true",
