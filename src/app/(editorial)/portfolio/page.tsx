@@ -16,9 +16,13 @@ import { CONTACT } from "~/content/site-content";
  * occupies on the blog overview.
  */
 
+// "AI engineering & product design" promised a fifth service the site never
+// offers — it existed only because case 03 is a product-management engagement,
+// which that case's card now says for itself (#13 F10). One string for the
+// meta tag, both social cards and the JSON-LD; the OG image route repeats it.
 const DESCRIPTION =
-  "Selected AI engineering & product design work by Bas Wenneker / HeadingFWD — " +
-  "agents, assistants and AI workflows built to reach production.";
+  "Selected work by Bas Wenneker / HeadingFWD — agents, assistants and AI " +
+  "workflows in production.";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -77,7 +81,7 @@ export default function PortfolioPage() {
        * site (#13 D7). /contact leads now; LinkedIn stays as the alternative.
        */}
       <p className={styles.overviewLead}>
-        Selected work — AI engineering &amp; product design.{" "}
+        Selected work — agents, assistants and AI workflows in production.{" "}
         <Link href="/contact" prefetch={false}>
           → start a conversation
         </Link>
@@ -100,6 +104,7 @@ export default function PortfolioPage() {
                   )}
                 </h2>
                 <p className={styles.listSummary}>{c.kind}</p>
+                {c.note && <p className={pf.listNote}>{c.note}</p>}
                 <p className={pf.listTags}>{c.tags.join(" · ")}</p>
               </div>
             </Link>

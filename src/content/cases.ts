@@ -92,6 +92,14 @@ export interface Case {
   title: string;
   /** One-line outcome/role summary — the `/portfolio` list subtitle. */
   kind: string;
+  /**
+   * A caveat the overview card states beside `kind`, when the case is not
+   * what the list around it implies. Only case 03 carries one: it is a
+   * product-management engagement in a list of AI builds, and saying so on
+   * the card is what stopped `/portfolio` claiming "product design" as a
+   * fifth service (#13 F10).
+   */
+  note?: string;
   /** Sector / domain label. */
   sector: string;
   /**
@@ -332,6 +340,7 @@ the person out of the loop.
     n: "03",
     title: "MyWorq: employee app for horticulture",
     kind: "Employee app for horticulture — live with thousands of users",
+    note: "A product-management case, not an AI build.",
     sector: "Horticulture",
     date: "2026-07-15",
     period: "2022–2024",

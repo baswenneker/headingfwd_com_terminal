@@ -17,8 +17,8 @@ export default async function Image() {
     kicker: "Portfolio",
     title: "Selected work",
     lead: [
-      "AI engineering & product design by Bas Wenneker.",
-      "Agents, assistants and AI workflows built to reach production.",
+      "Selected work by Bas Wenneker / HeadingFWD —",
+      "agents, assistants and AI workflows in production.",
     ],
     cta: "Bekijk het werk",
     footerUrl: "headingfwd.com/portfolio",
