@@ -177,6 +177,8 @@ export const POST_COPY = {
     origin:
       "Origineel gepubliceerd op headingfwd.com. Lees je dit ergens anders, " +
       "dan is deze pagina het origineel.",
+    draftBanner:
+      "Concept — niet gepubliceerd. Hier zichtbaar omdat dit geen productie is.",
     allPosts: "alle posts",
     backToTerminal: "terug naar de terminal",
     author:
@@ -191,6 +193,8 @@ export const POST_COPY = {
     origin:
       "Originally published on headingfwd.com. If you are reading a copy " +
       "elsewhere, this page is the original.",
+    draftBanner:
+      "Draft — not published. Visible here because this is not production.",
     allPosts: "all posts",
     backToTerminal: "back to the terminal",
     author:

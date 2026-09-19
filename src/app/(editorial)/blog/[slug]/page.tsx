@@ -158,8 +158,11 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
 
         {isDraft ? (
+          /* The banner speaks to whoever is reading the draft, so it speaks
+             the draft's own language — it sat here as an English literal,
+             which put an English notice on top of a Dutch post (#13 F21). */
           <p className={blog.draftBanner} data-post-draft-banner="">
-            Draft — not published. Visible here because this is not production.
+            {copy.draftBanner}
           </p>
         ) : null}
 
