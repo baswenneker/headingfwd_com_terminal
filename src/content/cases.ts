@@ -94,6 +94,13 @@ export interface Case {
   kind: string;
   /** Sector / domain label. */
   sector: string;
+  /**
+   * ISO date (`YYYY-MM-DD`) the case was first published on this site. Drives
+   * `Article.datePublished` and `article:published_time`, and — with `updated`
+   * absent — the sitemap's `lastModified`. Required: a case with no date at
+   * all is a case a crawler cannot place in time.
+   */
+  date: string;
   /** Engagement period, shown in the metadata line (e.g. "Q1 2025", "2024–2025"). */
   period?: string;
   /** Lifecycle status. */
@@ -135,6 +142,7 @@ export const CASES: Case[] = [
     title: "AI Writing Assistant",
     kind: "AI writing assistant that guards the house style — data stays in-house",
     sector: "Government",
+    date: "2026-07-10",
     period: "Q1 2025",
     status: "live",
     role: "Initiator / AI engineer",
@@ -221,6 +229,7 @@ organization.
     title: "Hintsay: AI writing assistant for LinkedIn",
     kind: "Months of LinkedIn content in minutes, in your own voice",
     sector: "Marketing",
+    date: "2026-07-10",
     period: "2022–2023",
     status: "live",
     role: "Maker / AI engineer",
@@ -324,6 +333,7 @@ the person out of the loop.
     title: "MyWorq: employee app for horticulture",
     kind: "Employee app for horticulture — live with thousands of users",
     sector: "Horticulture",
+    date: "2026-07-15",
     period: "2022–2024",
     status: "live",
     role: "Product Manager",
@@ -407,6 +417,7 @@ the product role over to the client after roughly two years.
     title: "BriefWijzer",
     kind: "Make unreadable letters understandable with a single photo",
     sector: "Communication",
+    date: "2025-07-03",
     status: "demo",
     role: "AI engineer",
     tags: ["RAG", "OCR", "LLM", "Marketing"],
@@ -481,6 +492,7 @@ bodies that want to make their letters more accessible.
     title: "AI Personal Trainer",
     kind: "Custom AI that analyzes fitness videos where ChatGPT fails",
     sector: "Sports & Fitness",
+    date: "2025-06-19",
     status: "experiment",
     role: "Maker / AI engineer",
     tags: ["LLM", "Multimodal", "Motion recognition", "Python"],
@@ -578,6 +590,7 @@ multimodal models fall short for movement analysis, while a custom approach with
     title: "Chatbot: a Q&A hub for your team",
     kind: "Chat with your manuals instead of searching them",
     sector: "Government",
+    date: "2025-06-19",
     status: "concept",
     visibility: "coming-soon",
     tags: ["RAG", "LLM", "Chatbot", "Marketing"],
@@ -610,6 +623,7 @@ themselves.
     title: "Podcast transcription and segmentation",
     kind: "Automatically transcribe and segment podcasts with timecodes",
     sector: "Media",
+    date: "2025-06-19",
     status: "concept",
     visibility: "coming-soon",
     tags: ["Transcription", "LLM", "Audio"],

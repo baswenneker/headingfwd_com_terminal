@@ -68,8 +68,9 @@ function caseDescription(c: Case): string {
  * Case". Coming-soon cases emit the same shape — they are real, linkable
  * pages; hidden cases have no page and therefore no structured data.
  *
- * `dateModified` comes from the case's `updated` field, the same single
- * source the sitemap's `lastModified` uses.
+ * `datePublished` comes from the case's `date` and `dateModified` from
+ * `updated ?? date` — the same single source, and the same fallback, the
+ * sitemap's `lastModified` uses.
  */
 function caseJsonLd(c: Case) {
   const url = `${SITE_URL}/portfolio/${c.slug}`;
@@ -89,7 +90,10 @@ function caseJsonLd(c: Case) {
         publisher: { "@id": ORGANIZATION_ID },
         articleSection: c.sector,
         keywords: c.tags,
-        ...(c.updated ? { dateModified: c.updated } : {}),
+        datePublished: c.date,
+        // A case that was never revised is unchanged since publication, so it
+        // says so rather than leaving a crawler to guess.
+        dateModified: c.updated ?? c.date,
       },
       {
         "@type": "BreadcrumbList",
@@ -135,7 +139,8 @@ export async function generateMetadata({
       type: "article",
       tags: c.tags,
       authors: ["Bas Wenneker"],
-      ...(c.updated ? { modifiedTime: c.updated } : {}),
+      publishedTime: c.date,
+      modifiedTime: c.updated ?? c.date,
     }),
   };
 }
