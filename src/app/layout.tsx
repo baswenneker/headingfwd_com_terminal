@@ -182,6 +182,9 @@ const jetBrainsMono = JetBrains_Mono({
   adjustFontFallback: false,
 });
 
+/** True on a Vercel deployment, false locally and in CI. */
+const onVercel = process.env.VERCEL === "1";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -194,8 +197,19 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
         />
         {children}
-        <Analytics />
-        <SpeedInsights />
+        {/*
+          Both scripts are served by Vercel's edge, so off Vercel they 404 on
+          every page load: noise in local and CI logs, and a Lighthouse Best
+          Practices score capped at 96 for a console error that says nothing
+          about this site. `VERCEL` is set to "1" on every Vercel deployment
+          and nowhere else, so production is unchanged.
+        */}
+        {onVercel ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
       </body>
     </html>
   );
