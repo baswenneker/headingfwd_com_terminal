@@ -8,6 +8,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { api } from "~/trpc/react";
 import { env } from "~/env";
 import {
+  AUDIENCE,
   CONTACT,
   CREDENTIALS,
   INTRO_FIRST_PERSON,
@@ -643,6 +644,11 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
           <div className={styles.subtitle}>
             AI engineering &amp; consultancy · Bas Wenneker — AI Lead / Engineer
           </div>
+
+          {/* Who this is for, and from where. The site said it nowhere, so a
+              visitor had to infer the audience from a Dutch post on an
+              English shell (#13 F18). */}
+          <div className={styles.subtitle}>{AUDIENCE}</div>
 
           {/* Value proposition — one sentence, derived from INTRO rather than
               written out a second time (#13 F6). The highlighting is applied

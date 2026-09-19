@@ -69,6 +69,18 @@ export const CREDENTIALS =
   "15+ yrs shipping software · GenAI in production at a large Dutch " +
   "public-sector organization";
 
+/**
+ * Who the site is for, and from where — one line under the hero subtitle and
+ * one line in the About block of `/llms.txt`.
+ *
+ * The site said this nowhere, which left a visitor to guess from a Dutch post
+ * on an English shell (#13 F18). Said once, out loud, the language mix
+ * becomes a choice rather than an accident. It matches the `address` and
+ * `areaServed` already in the structured data.
+ */
+export const AUDIENCE =
+  "Delft, NL · works with Dutch and European engineering teams";
+
 /** Short "who I am" block, shown by `/about` and the agent file's About section. */
 export const ABOUT = {
   /** Headline identity line. */
