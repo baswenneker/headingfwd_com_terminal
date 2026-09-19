@@ -35,11 +35,11 @@ export async function GET() {
     // Log the error for debugging
     console.error("[Health Check] Database connection failed:", errorMessage);
 
+    // The detail stays in the log: this endpoint is public.
     return Response.json(
       {
         status: "unhealthy",
         database: "disconnected",
-        error: errorMessage,
         code: ErrorCode.DATABASE_CONNECTION_FAILED,
         timestamp: new Date().toISOString(),
       },

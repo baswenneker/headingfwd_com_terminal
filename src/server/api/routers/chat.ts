@@ -1,9 +1,10 @@
 import { createHash, randomUUID } from "crypto";
 import { TRPCError } from "@trpc/server";
+import { inArray, lt } from "drizzle-orm";
 import { z } from "zod";
 import { env } from "~/env";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { chatSessions } from "~/server/db/schema";
+import { chatMessages, chatSessions, pendingEmails } from "~/server/db/schema";
 import { checkSessionRateLimit } from "~/server/services/rate-limiter";
 import { verifyTurnstileToken } from "~/server/services/turnstile";
 import { logError } from "~/lib/errors";
@@ -84,6 +85,29 @@ export const chatRouter = createTRPCRouter({
       const sessionId = generateSessionId();
       const now = new Date();
       const expiresAt = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes
+
+      // Housekeeping, on the one call a visitor makes at most a few times an
+      // hour: sessions a day past their expiry, the turns stored under them,
+      // and any preview left unconfirmed.
+      const staleBefore = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const expired = await ctx.db
+        .delete(chatSessions)
+        .where(lt(chatSessions.expiresAt, staleBefore))
+        .returning({ sessionId: chatSessions.sessionId });
+      if (expired.length > 0) {
+        const ids = expired.map((row) => row.sessionId);
+        await ctx.db
+          .delete(chatMessages)
+          .where(inArray(chatMessages.sessionId, ids));
+        await ctx.db
+          .delete(pendingEmails)
+          .where(inArray(pendingEmails.sessionId, ids));
+      }
+      await ctx.db
+        .delete(pendingEmails)
+        .where(
+          lt(pendingEmails.createdAt, new Date(now.getTime() - 60 * 60 * 1000)),
+        );
 
       // Create session in database
       await ctx.db.insert(chatSessions).values({

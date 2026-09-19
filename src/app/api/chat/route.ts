@@ -14,9 +14,17 @@ import {
 import { sendContactEmail } from "~/server/services/email";
 import { env } from "~/env";
 import { CONTACT } from "~/content/site-content";
-import { createErrorJsonResponse, logError, ErrorCode } from "~/lib/errors";
+import {
+  createErrorJsonResponse,
+  logError,
+  redactSessionId,
+  ErrorCode,
+} from "~/lib/errors";
 
-// Wrap AI SDK with LangSmith for tracing
+// Wrap AI SDK with LangSmith for tracing.
+// NOTE: with LANGSMITH_TRACING=true this sends the full prompt, the user's
+// text and every tool input — including the sender's email address — to
+// LangSmith. Keep it off unless a trace is actually being read.
 const { streamText } = wrapAISDK(ai);
 
 // Allow streaming responses up to 30 seconds
@@ -149,7 +157,9 @@ export async function POST(req: Request) {
 
     // Validate OpenAI API key is configured
     if (!env.OPENAI_API_KEY) {
-      logError("Chat API", "OpenAI API key not configured", { sessionId });
+      logError("Chat API", "OpenAI API key not configured", {
+        session: redactSessionId(sessionId),
+      });
       return createErrorJsonResponse(
         "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.",
         500,
@@ -164,7 +174,9 @@ export async function POST(req: Request) {
     });
 
     if (!session) {
-      logError("Chat API", "Session not found", { sessionId });
+      logError("Chat API", "Session not found", {
+        session: redactSessionId(sessionId),
+      });
       return createErrorJsonResponse(
         "Session not found. Please refresh and start a new session.",
         404,
@@ -174,7 +186,9 @@ export async function POST(req: Request) {
 
     // A session only counts once it has passed the CAPTCHA at initSession.
     if (session.verified !== true) {
-      logError("Chat API", "Session not verified", { sessionId });
+      logError("Chat API", "Session not verified", {
+        session: redactSessionId(sessionId),
+      });
       return createErrorJsonResponse(
         "Session not found. Please refresh and start a new session.",
         403,
@@ -184,7 +198,9 @@ export async function POST(req: Request) {
 
     const now = new Date();
     if (session.expiresAt < now) {
-      logError("Chat API", "Session expired", { sessionId });
+      logError("Chat API", "Session expired", {
+        session: redactSessionId(sessionId),
+      });
       return createErrorJsonResponse(
         "Session expired. Please refresh and start a new session.",
         403,
@@ -196,7 +212,7 @@ export async function POST(req: Request) {
     const rateLimit = await checkMessageRateLimit(sessionId);
     if (!rateLimit.allowed) {
       logError("Chat API", "Rate limit exceeded", {
-        sessionId,
+        session: redactSessionId(sessionId),
         remaining: rateLimit.remaining,
       });
       return createErrorJsonResponse(
