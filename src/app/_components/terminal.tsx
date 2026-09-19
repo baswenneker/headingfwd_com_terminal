@@ -113,6 +113,31 @@ function readableError(err: unknown): string {
   return raw.trim() || "Something went wrong. Please try again.";
 }
 
+/**
+ * Reads the error code out of a failed /api/chat response, when it carries
+ * one of the two that mean "this session is no longer valid".
+ *
+ * The route answers `{"error":"…","code":"SESSION_EXPIRED"}` (see
+ * `~/lib/errors`), and the AI SDK hands the raw body over as the Error's
+ * message. Anything else — a rate limit, a network failure, a malformed
+ * body — returns null and is shown to the visitor as it always was.
+ */
+function sessionErrorCode(err: unknown): string | null {
+  const raw = err instanceof Error ? err.message : "";
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const code =
+      parsed && typeof parsed === "object" && "code" in parsed
+        ? (parsed as { code?: unknown }).code
+        : undefined;
+    return code === "SESSION_EXPIRED" || code === "SESSION_NOT_FOUND"
+      ? code
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 /**
@@ -150,13 +175,20 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   const [histIdx, setHistIdx] = useState(-1);
 
   // Session state for the AI chat.
-  // sessionIdRef is the single source of truth read at request time by the
-  // transport body callback; hasSession drives the UI gating logic.
+  //
+  // sessionIdRef is the single source of truth, read at request time by the
+  // transport body callback and by the free-text router below. It used to be
+  // shadowed by a `hasSession` boolean that no JSX read; the two could not
+  // disagree until the session-expiry recovery (#13 U6) had to clear the
+  // session from inside a callback, at which point a stale boolean would have
+  // routed the retry straight back into the expired session.
   const [captchaVisible, setCaptchaVisible] = useState(false);
-  const [hasSession, setHasSession] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
   // Holds the visitor's free-text message while the CAPTCHA overlay is open.
   const pendingMessageRef = useRef<string | null>(null);
+  // The last free-text message dispatched to the AI, kept so an expired
+  // session can be recovered by sending exactly that message again.
+  const lastFreeTextRef = useRef<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -181,8 +213,15 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
       }),
       onError: (err: Error) => {
         console.error("[AI Chat Error]", err.message);
+        // Through a ref, so the handler always sees the current feed rather
+        // than the one that existed when useChat was first configured.
+        chatErrorRef.current(err);
       },
     });
+
+  // Latest chat-error handler, refreshed on every render. Declared after
+  // useChat because the handler it holds needs setMessages.
+  const chatErrorRef = useRef<(err: Error) => void>(() => undefined);
 
   // Abort any in-flight stream when the component unmounts.
   useEffect(() => {
@@ -221,7 +260,6 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
     try {
       const result = await initSessionMutation.mutateAsync({ turnstileToken });
       sessionIdRef.current = result.sessionId;
-      setHasSession(true);
       return true;
     } catch (err) {
       console.error(
@@ -270,6 +308,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
    */
   function dispatchAiMessage(text: string) {
     if (!sessionIdRef.current) return;
+    lastFreeTextRef.current = text;
     setBlocks((prev) => [...prev, { type: "ai", userText: text }]);
     void sendMessage({ text });
   }
@@ -284,7 +323,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
    * until the visitor solves the challenge.
    */
   async function handleFreeText(text: string) {
-    if (hasSession) {
+    if (sessionIdRef.current) {
       dispatchAiMessage(text);
       return;
     }
@@ -326,6 +365,60 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
       reportSessionFailure(pending);
     }
   }
+
+  /**
+   * Recover from a session the server no longer accepts.
+   *
+   * After thirty minutes /api/chat answers 403 with `SESSION_EXPIRED`, and a
+   * session cleared from the database answers `SESSION_NOT_FOUND`. The
+   * terminal used to print "Session expired. Please refresh and start a new
+   * session." and leave the visitor to do exactly that, losing the message
+   * they had just typed (#13 U6).
+   *
+   * Instead the failed turn is taken back out of the feed and out of the
+   * useChat history, the session is cleared, and the same message is sent
+   * again through the normal route — which puts the CAPTCHA back up in place
+   * and, once it is solved, delivers the message. Nothing is reloaded.
+   */
+  function handleChatError(err: Error) {
+    const code = sessionErrorCode(err);
+    if (!code) return;
+
+    const text = lastFreeTextRef.current;
+    if (!text) return;
+
+    sessionIdRef.current = null;
+
+    // Drop the turn that failed. Block and message indices stay in step
+    // because the count of remaining AI blocks decides where messages is cut:
+    // the N-th AI block owns messages[N*2] and messages[N*2+1].
+    const remainingTurns = Math.max(
+      0,
+      blocks.filter((b) => b.type === "ai").length - 1,
+    );
+    setMessages(messages.slice(0, remainingTurns * 2));
+    setBlocks((prev) => {
+      const last = prev.map((b) => b.type).lastIndexOf("ai");
+      const kept = last >= 0 ? prev.filter((_, i) => i !== last) : prev;
+      return [
+        ...kept,
+        {
+          type: "cmd",
+          lines: [{ kind: "dim", text: "→ session expired, one more check…" }],
+        },
+      ];
+    });
+
+    void handleFreeText(text);
+  }
+
+  // Keep the ref that useChat's onError reaches through pointing at the
+  // handler built from this render's state. In an effect rather than during
+  // render: an error can only follow an interaction, and every interaction
+  // comes after the commit that updated this.
+  useEffect(() => {
+    chatErrorRef.current = handleChatError;
+  });
 
   // ── Slash-command dispatch ──────────────────────────────────────────────
 

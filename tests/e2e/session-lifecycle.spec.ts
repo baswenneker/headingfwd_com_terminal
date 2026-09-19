@@ -11,7 +11,11 @@ import {
   addRateLimitLogs,
   expireSession,
 } from "../helpers/database";
-import { mockChatSuccess, clearChatMock } from "../helpers/api-mocks";
+import {
+  clearChatMock,
+  createTextStream,
+  mockChatSuccess,
+} from "../helpers/api-mocks";
 
 /**
  * The parts of the session lifecycle that only the REAL /api/chat handler can
@@ -44,7 +48,9 @@ test.describe("Session lifecycle against the real handler", () => {
     await waitForTerminalReady(page);
   });
 
-  test("an expired session shows a visible error line", async ({ page }) => {
+  test("an expired session is replaced and the message still goes through", async ({
+    page,
+  }) => {
     // Bootstrap a real session via the real tRPC initSession call, with
     // /api/chat mocked just for this one message so no real OpenAI call is
     // made yet.
@@ -53,18 +59,44 @@ test.describe("Session lifecycle against the real handler", () => {
 
     const sessionId = await latestSessionId();
     await expireSession(sessionId);
-
-    // Remove the mock so the next request reaches the real /api/chat route,
-    // which checks expiry before anything else that could involve OpenAI.
     await clearChatMock(page);
+
+    // The first attempt reaches the real /api/chat, which rejects the expired
+    // session with 403 SESSION_EXPIRED before anything that could involve
+    // OpenAI. The terminal takes that turn back out, starts a new session —
+    // the CAPTCHA is bypassed in the test environment — and re-sends. Mock
+    // the SECOND attempt so no real model call is made either.
+    let attempts = 0;
+    await page.route("**/api/chat", async (route) => {
+      attempts += 1;
+      if (attempts === 1) return route.fallback();
+      await route.fulfill({
+        status: 200,
+        headers: {
+          "content-type": "text/event-stream",
+          "cache-control": "no-cache",
+          "x-vercel-ai-ui-message-stream": "v1",
+        },
+        body: createTextStream("Still here."),
+      });
+    });
 
     const input = page.getByTestId("terminal-input");
     await input.fill("Are you still there?");
     await input.press("Enter");
 
-    const errorEl = page.locator('[data-testid="error-message"]').last();
-    await expect(errorEl).toBeVisible({ timeout: 10000 });
-    await expect(errorEl).toContainText("Session expired");
+    // What the visitor sees: a note that the check is being redone, then the
+    // answer — never "please refresh the page", and never a lost message.
+    await expect(page.getByText("session expired, one more check")).toBeVisible(
+      { timeout: 10000 },
+    );
+    await expect(
+      page.getByTestId("assistant-message").last(),
+    ).toContainText("Still here.", { timeout: 15000 });
+
+    // A second, valid session row was created for the retry.
+    const recovered = await latestSessionId();
+    expect(recovered).not.toBe(sessionId);
   });
 
   test("the 11th message in a minute gets a real 429 from the real handler", async ({
