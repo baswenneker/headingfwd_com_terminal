@@ -14,13 +14,18 @@ import styles from "./editorial.module.css";
  * undo both for editorial routes only. The wrapper itself paints the near-black
  * surface and the 42px grid across the full viewport height, so no cyan shows
  * through on a page shorter than the screen.
+ *
+ * `<main id="content">` wraps the page itself. Every editorial route is one
+ * document, so the landmark belongs to the layout rather than to each page:
+ * one `main` per page is what `landmark-one-main` asks for, and it is what
+ * lets a screen-reader user jump past the chrome to the article.
  */
 export default function EditorialLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div data-editorial-root="" className={styles.root}>
-      {children}
+      <main id="content">{children}</main>
     </div>
   );
 }
