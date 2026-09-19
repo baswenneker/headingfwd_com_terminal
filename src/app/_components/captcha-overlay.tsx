@@ -106,15 +106,22 @@ export function CaptchaOverlay({ onSuccess, onError }: CaptchaOverlayProps) {
             "0 1px 0 rgba(255,255,255,0.07) inset, 0 40px 90px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,0,0,0.25)",
         }}
       >
-        {/* Header — accent ">" marker echoes the terminal prompt */}
+        {/* Header — accent ">" marker echoes the terminal prompt.
+            "Verification Required / Complete the check below to start
+            chatting" read as a security wall thrown up between the visitor
+            and the site, at the exact moment they had decided to say
+            something (#13 F4). It is a bot filter; it says so. */}
         <div className="mb-4 text-center" id="captcha-overlay-title">
           <span className="text-lg font-bold text-[#2ee6f6]">{">"}</span>
-          <span className="ml-2 text-[#eafbfe]">Verification Required</span>
+          <span className="ml-2 text-[#eafbfe]">one quick check</span>
         </div>
 
-        {/* Description */}
+        {/* Description. The second sentence is true today — the message the
+            visitor typed is held and sent once the check passes — and nothing
+            said it, so everyone feared retyping it. */}
         <p className="mb-6 text-center text-sm text-[rgba(160,178,182,0.7)]">
-          Complete the check below to start chatting
+          Cloudflare, so the chat doesn&apos;t fill up with bots. Takes a
+          second — your message is kept.
         </p>
 
         {/* Loading state — shown until the Turnstile widget renders.
