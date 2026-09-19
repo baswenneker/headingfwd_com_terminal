@@ -85,9 +85,7 @@ the person out of the loop.
 | Figure | Meaning |
 |---|---|
 | 10× | Faster content creation |
-| 7 days | Free trial |
 | 2 languages | English & Dutch |
-| ∞ | Content possibilities |
 
 ### Tech & stack
 
@@ -103,4 +101,5 @@ the person out of the loop.
 
 ### Status
 
-**Live** — a SaaS product, available at [hintsay.com](https://hintsay.com).
+**Live** — a SaaS product, available at [hintsay.com](https://hintsay.com), with a
+seven-day free trial.
