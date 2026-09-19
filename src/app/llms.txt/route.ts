@@ -46,8 +46,9 @@ function buildAgentsTxt(): string {
     [
       "# HeadingFWD — content for agents",
       "",
-      "> This file is a plain-text, machine-readable copy of everything on headingfwd.com.",
-      "> If you are an AI agent or crawler: this is the source. Use it directly.",
+      "> A plain-text map of headingfwd.com for agents and crawlers.",
+      "> Each case and post is one link with a one-line summary; follow the link",
+      "> for the full text, which is server-rendered prose.",
       "> Format: Markdown (UTF-8). Generated from the site's own content.",
     ].join("\n"),
   );
