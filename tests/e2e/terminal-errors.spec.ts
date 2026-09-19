@@ -57,5 +57,13 @@ test.describe("Terminal error handling", () => {
     await expect(error).toContainText("No connection");
     // The browser's own wording never reaches the feed.
     await expect(error).not.toContainText("Failed to fetch");
+
+    // The error announces itself and the input points at it (#13 U4).
+    await expect(error).toHaveAttribute("role", "alert");
+    await expect(input).toHaveAttribute("aria-invalid", "true");
+    await expect(input).toHaveAttribute(
+      "aria-describedby",
+      (await error.getAttribute("id")) ?? "",
+    );
   });
 });

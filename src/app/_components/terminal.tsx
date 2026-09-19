@@ -41,6 +41,13 @@ type CommandBlock = { type: "cmd"; lines: FeedLine[] };
 type AiTurnBlock  = { type: "ai";  userText: string };
 type FeedBlock    = CommandBlock | AiTurnBlock;
 
+/**
+ * Id of the error line belonging to the latest AI turn. The input points at
+ * it with aria-describedby while it is on screen, so the two are one thing to
+ * a screen reader instead of two unrelated ones.
+ */
+const TERMINAL_ERROR_ID = "terminal-error";
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -770,11 +777,19 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                     </div>
                   )}
 
-                  {/* Streamed or completed assistant response */}
+                  {/*
+                   * Streamed or completed assistant response.
+                   *
+                   * The latest turn is a polite live region, so a screen
+                   * reader hears the answer arrive instead of nothing at all
+                   * (#13 U4). Older turns are not: re-announcing a finished
+                   * answer because a later turn re-rendered would be noise.
+                   */}
                   {assistantMsg && (
                     <div
                       className={styles.aiResponse}
                       data-testid="assistant-message"
+                      aria-live={isLatestTurn ? "polite" : undefined}
                     >
                       {assistantMsg.parts.map((part, partIdx) => {
                         // Render the email-send tool outcome as a terminal-style
@@ -877,11 +892,15 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                     </div>
                   )}
 
-                  {/* Error display in terminal style */}
+                  {/* Error display in terminal style. role="alert" so it is
+                      announced the moment it appears, and an id so the input
+                      below can point at it while it is up (#13 U4). */}
                   {showError && (
                     <div
                       className={styles.aiError}
                       data-testid="error-message"
+                      role="alert"
+                      id={TERMINAL_ERROR_ID}
                     >
                       {"→ "}
                       {readableError(error)}
@@ -890,6 +909,20 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                 </div>
               );
             })}
+          </div>
+
+          {/*
+           * Progress, for assistive tech only. "Thinking…" is drawn in the
+           * feed but nothing announced it, so a screen-reader user had no way
+           * to tell a slow answer from a dead page (#13 U4). Kept out of the
+           * visual feed, which already shows all of this.
+           */}
+          <div role="status" aria-live="polite" className={styles.srOnly}>
+            {isAiInFlight
+              ? "Thinking…"
+              : aiTurnBlocks.length > 0 && status === "ready"
+                ? "Answer complete."
+                : ""}
           </div>
 
           {/* ── Input row ── */}
@@ -918,6 +951,13 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               spellCheck={false}
               autoComplete="off"
               data-testid="terminal-input"
+              // While an error is on screen the input says so and points at
+              // it, so the message is read with the field rather than only
+              // sitting above it (#13 U4).
+              aria-invalid={status === "error" || undefined}
+              aria-describedby={
+                status === "error" ? TERMINAL_ERROR_ID : undefined
+              }
             />
           </div>
         </div>
