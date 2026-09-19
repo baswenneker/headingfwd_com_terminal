@@ -27,31 +27,47 @@ export const maxDuration = 30;
  */
 const MAX_MESSAGE_LENGTH = 4000;
 
+/**
+ * The shape the route accepts. Anything else is a 400: the handler works from
+ * these fields only, so a body that does not fit them has nothing to offer it.
+ */
+const chatRequestSchema = z.object({
+  messages: z
+    .array(
+      z.looseObject({
+        id: z.string().optional(),
+        role: z.string(),
+        parts: z.array(z.looseObject({ type: z.string() })),
+      }),
+    )
+    .min(1),
+  sessionId: z.string().min(1),
+});
+
 export async function POST(req: Request) {
   try {
-    const { messages, sessionId } = (await req.json()) as {
-      messages: UIMessage[];
-      sessionId: string;
-    };
-
-    // Validate messages exist and are not empty
-    if (!messages || messages.length === 0) {
+    let rawBody: unknown;
+    try {
+      rawBody = await req.json();
+    } catch {
       return createErrorJsonResponse(
-        "No messages provided",
+        "Invalid request body",
         400,
         ErrorCode.INVALID_INPUT,
       );
     }
 
-    // Validate message exists
-    const lastMessage = messages[messages.length - 1];
-    if (!lastMessage) {
+    const parsed = chatRequestSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return createErrorJsonResponse(
-        "Invalid message format",
+        "Invalid request body",
         400,
         ErrorCode.INVALID_INPUT,
       );
     }
+
+    const { messages, sessionId } = parsed.data;
+    const lastMessage = messages[messages.length - 1]!;
 
     // Validate message length using JSON stringification as approximation
     // This prevents excessively large payloads while being type-safe
@@ -59,15 +75,6 @@ export async function POST(req: Request) {
     if (messageSize > MAX_MESSAGE_LENGTH) {
       return createErrorJsonResponse(
         `Message too long. Maximum length is ${MAX_MESSAGE_LENGTH} characters.`,
-        400,
-        ErrorCode.INVALID_INPUT,
-      );
-    }
-
-    // Validate sessionId exists
-    if (!sessionId || typeof sessionId !== "string") {
-      return createErrorJsonResponse(
-        "Invalid session ID",
         400,
         ErrorCode.INVALID_INPUT,
       );
@@ -144,30 +151,32 @@ export async function POST(req: Request) {
 
     // Filter out incomplete assistant messages (those that are still streaming or have empty content)
     // This prevents issues with convertToModelMessages when the frontend sends back incomplete streaming responses
-    const cleanedMessages = messages.filter((msg) => {
-      // Keep all user messages
-      if (msg.role === "user") return true;
+    const cleanedMessages = (messages as unknown as UIMessage[]).filter(
+      (msg) => {
+        // Keep all user messages
+        if (msg.role === "user") return true;
 
-      // For assistant messages, filter out incomplete ones
-      if (msg.role === "assistant") {
-        // Check if message has any complete text parts
-        const hasCompleteText = msg.parts.some((part) => {
-          if (part.type === "text") {
-            // Keep only if text is not empty and not still streaming
-            return (
-              part.text &&
-              part.text.trim().length > 0 &&
-              (!("state" in part) || part.state !== "streaming")
-            );
-          }
-          return false;
-        });
-        return hasCompleteText;
-      }
+        // For assistant messages, filter out incomplete ones
+        if (msg.role === "assistant") {
+          // Check if message has any complete text parts
+          const hasCompleteText = msg.parts.some((part) => {
+            if (part.type === "text") {
+              // Keep only if text is not empty and not still streaming
+              return (
+                part.text &&
+                part.text.trim().length > 0 &&
+                (!("state" in part) || part.state !== "streaming")
+              );
+            }
+            return false;
+          });
+          return hasCompleteText;
+        }
 
-      // Keep other roles (system, etc.)
-      return true;
-    });
+        // Keep other roles (system, etc.)
+        return true;
+      },
+    );
 
     // Stream AI response with tools - automatically traced by LangSmith
     const result = streamText({
@@ -342,11 +351,10 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
 
     return result.toUIMessageStreamResponse();
   } catch (error) {
+    // The detail stays in the log; the client gets one fixed sentence.
     logError("Chat API", error, { endpoint: "/api/chat" });
     return createErrorJsonResponse(
-      error instanceof Error
-        ? error.message
-        : "An error occurred processing your message",
+      "An error occurred processing your message",
       500,
       ErrorCode.INTERNAL_ERROR,
     );
