@@ -16,15 +16,22 @@ function generateSessionId(): string {
 }
 
 /**
- * A stable, non-reversible key for the client behind this request: the first
- * entry of `x-forwarded-for` (what Vercel sets), else `x-real-ip`, hashed so
- * the address itself is never stored.
+ * The client address behind this request: the first entry of
+ * `x-forwarded-for` (what Vercel sets), else `x-real-ip`, else empty.
  */
-function clientKey(headers: Headers): string {
+function clientIp(headers: Headers): string {
   const forwarded = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const ip = forwarded?.length
+  return forwarded?.length
     ? forwarded
     : (headers.get("x-real-ip")?.trim() ?? "");
+}
+
+/**
+ * A stable, non-reversible key for that client, so the address itself is
+ * never stored.
+ */
+function clientKey(headers: Headers): string {
+  const ip = clientIp(headers);
   return createHash("sha256")
     .update(ip.length > 0 ? ip : "unknown")
     .digest("hex");
@@ -60,7 +67,9 @@ export const chatRouter = createTRPCRouter({
       }
 
       // Verify Turnstile token
-      const verification = await verifyTurnstileToken(input.turnstileToken);
+      const verification = await verifyTurnstileToken(input.turnstileToken, {
+        remoteIp: clientIp(ctx.headers),
+      });
 
       if (!verification.success) {
         logError("tRPC initSession", "CAPTCHA verification failed", {
