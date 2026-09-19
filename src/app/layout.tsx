@@ -4,21 +4,12 @@ import { type Metadata, type Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import {
-  CONTACT,
-  SITE_DESCRIPTION,
-  SPECIALTIES,
-} from "~/content/site-content";
+import { CONTACT, SITE_DESCRIPTION, SPECIALTIES } from "~/content/site-content";
 // Canonical production origin + brand name. `metadataBase` lets Next resolve
 // every relative URL below (canonical, Open Graph, icons) to an absolute URL,
 // which crawlers and social scrapers require.
 import { socialMeta } from "~/config/metadata";
-import {
-  ORGANIZATION_ID,
-  PERSON_ID,
-  SITE_NAME,
-  SITE_URL,
-} from "~/config/site";
+import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
 
 const TITLE = "HeadingFWD — AI Engineering & Consultancy";
 // The third hand-kept variant of one sentence, until #13 F6. It is derived

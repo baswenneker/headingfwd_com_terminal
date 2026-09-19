@@ -15,7 +15,12 @@ import { SITE_URL } from "~/config/site";
  */
 
 function expectedStaticUrls(): string[] {
-  return [`${SITE_URL}/`, `${SITE_URL}/portfolio`, `${SITE_URL}/blog`, `${SITE_URL}/llms.txt`];
+  return [
+    `${SITE_URL}/`,
+    `${SITE_URL}/portfolio`,
+    `${SITE_URL}/blog`,
+    `${SITE_URL}/llms.txt`,
+  ];
 }
 
 function expectedCaseUrls(): string[] {
@@ -60,7 +65,9 @@ describe("/llms.txt", () => {
     // Count the markdown links that point at a case or a post page and
     // confirm there are no extras (e.g. a hidden case leaking through).
     const caseOrPostLinks = [
-      ...text.matchAll(/\]\((https:\/\/headingfwd\.com\/(?:portfolio|blog)\/[^)]+)\)/g),
+      ...text.matchAll(
+        /\]\((https:\/\/headingfwd\.com\/(?:portfolio|blog)\/[^)]+)\)/g,
+      ),
     ].map((m) => m[1]);
     expect(new Set(caseOrPostLinks)).toEqual(
       new Set([...expectedCaseUrls(), ...expectedPostUrls()]),

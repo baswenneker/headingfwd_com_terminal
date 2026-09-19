@@ -7,7 +7,13 @@
  * feed entirely or append a list of new lines.
  */
 
-import { ABOUT, CONTACT, CREDENTIALS, SPECIALTIES, STACK } from "~/content/site-content";
+import {
+  ABOUT,
+  CONTACT,
+  CREDENTIALS,
+  SPECIALTIES,
+  STACK,
+} from "~/content/site-content";
 
 // ── Discriminated-union line model ──────────────────────────────────────────
 
@@ -128,6 +134,8 @@ function row(label: string, desc: string): RowLine {
 }
 
 function helpLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "available commands" },
     row("/about",     "who I am & how I work"),
@@ -148,6 +156,8 @@ function helpLines(): FeedLine[] {
 }
 
 function aboutLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "$ whoami" },
     { kind: "out", text: ABOUT.name },
@@ -160,6 +170,8 @@ function aboutLines(): FeedLine[] {
 }
 
 function servicesLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "// what I help teams with" },
     ...SPECIALTIES.map(
@@ -169,6 +181,8 @@ function servicesLines(): FeedLine[] {
 }
 
 function stackLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "// stack" },
     ...STACK.map((text): FeedLine => ({ kind: "out", text })),
@@ -185,6 +199,8 @@ function stackLines(): FeedLine[] {
  * who asked "24–48 hours". Both surfaces now say two working days.
  */
 function contactLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "let's talk →" },
     { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
@@ -198,9 +214,11 @@ function contactLines(): FeedLine[] {
 
 /** Points visitors and AI agents at the plain-text, machine-readable source. */
 function agentsLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "// plaintext version for agents" },
-    { kind: "out",  text: "A plain-text, machine-readable copy of everything here —" },
+    { kind: "out",  text: "A plain-text map of this site — one link per case and post," },
     { kind: "out",  text: "so AI agents & crawlers can read the source directly." },
     { kind: "link", label: "file", text: "llms.txt", href: "/llms.txt" },
   ];
@@ -210,6 +228,8 @@ function agentsLines(): FeedLine[] {
  * Registry of known slash-commands. Keys are the lowercase command tokens
  * (without the leading slash).
  */
+// Keys aligned on purpose.
+// prettier-ignore
 const COMMANDS: Record<string, () => FeedLine[]> = {
   help:     helpLines,
   about:    aboutLines,
@@ -235,6 +255,8 @@ const COMMANDS: Record<string, () => FeedLine[]> = {
  * the browser blocks the popup.
  */
 function linkedinLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "out",  text: "→ opening Bas's LinkedIn profile in a new tab…" },
     { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
@@ -324,6 +346,8 @@ export const COMMAND_PAGES: CommandPage[] = [
  * line says what went wrong, what to do instead, and what it can do.
  */
 function freeformLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "out",  text: "→ Not a command. Type /help for the list, or just ask a" },
     { kind: "out",  text: "  question — I'm Bas's AI assistant and I can pass a message" },

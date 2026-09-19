@@ -299,8 +299,10 @@ test.describe("Sitemap", () => {
     const xml = await res.text();
 
     const dated = visibleCases().find((c) => c.updated);
-    expect(dated, "no visible case has an `updated` value to assert on")
-      .toBeDefined();
+    expect(
+      dated,
+      "no visible case has an `updated` value to assert on",
+    ).toBeDefined();
 
     // The <url> block for that case must carry a <lastmod>.
     const block = xml

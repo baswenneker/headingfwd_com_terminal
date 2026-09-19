@@ -156,7 +156,13 @@ function neighbours(current: Case): { prev?: Case; next?: Case } {
  * the file at build time, exactly as a post image is, so the box is reserved
  * before the bytes arrive and the page never jumps mid-read.
  */
-function Hero({ image, slug }: { image: NonNullable<Case["image"]>; slug: string }) {
+function Hero({
+  image,
+  slug,
+}: {
+  image: NonNullable<Case["image"]>;
+  slug: string;
+}) {
   const resolved = postAssets(`/portfolio/${slug}`).resolve(image.src);
   if (resolved?.kind !== "raster") {
     throw new Error(
@@ -188,11 +194,9 @@ export default async function CasePage({ params }: CasePageProps) {
 
   // Sector leads the kicker, so the metadata line carries what is left:
   // period, state and role, each only when the case has it.
-  const meta = [
-    c.period,
-    comingSoon ? "coming soon" : c.status,
-    c.role,
-  ].filter(Boolean);
+  const meta = [c.period, comingSoon ? "coming soon" : c.status, c.role].filter(
+    Boolean,
+  );
 
   // Neighbouring cases, wrapping — the same order the overview shows, minus
   // the coming-soon shells. A prev/next button promises something to read,

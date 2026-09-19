@@ -159,7 +159,9 @@ export default function NotFound() {
             </span>
             <span className={styles.statusAgentsShort}>llms.txt</span>
           </a>
-          <span className={styles.statusRight}>error 404 · route not found</span>
+          <span className={styles.statusRight}>
+            error 404 · route not found
+          </span>
         </div>
       </div>
     </main>

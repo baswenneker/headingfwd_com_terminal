@@ -45,8 +45,8 @@ const CaptchaOverlay = dynamic(
 // top-to-bottom in the order events happened.
 
 type CommandBlock = { type: "cmd"; lines: FeedLine[] };
-type AiTurnBlock  = { type: "ai";  userText: string };
-type FeedBlock    = CommandBlock | AiTurnBlock;
+type AiTurnBlock = { type: "ai"; userText: string };
+type FeedBlock = CommandBlock | AiTurnBlock;
 
 /**
  * Id of the error line belonging to the latest AI turn. The input points at
@@ -602,7 +602,6 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
 
       {/* macOS-style terminal window */}
       <div className={styles.window}>
-
         {/* ── Title bar ── */}
         <div className={styles.titleBar}>
           <div className={styles.trafficLights}>
@@ -631,7 +630,9 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
           }}
         >
           {/* Shell prompt that precedes the intro */}
-          <div className={styles.promptLine}>bas@headingfwd:~$ ./hello --who</div>
+          <div className={styles.promptLine}>
+            bas@headingfwd:~$ ./hello --who
+          </div>
 
           {/* Wordmark: "Heading" in white, "FWD" in accent. The site's single
               level-one heading — names the brand for assistive tech and search. */}
@@ -671,7 +672,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               different order and different wording (#13 F6). Titles only —
               the blurb after the em dash belongs to /services, where there is
               room to read it. */}
-          <div className={styles.specialtiesLabel}>{'// specialties'}</div>
+          <div className={styles.specialtiesLabel}>{"// specialties"}</div>
           <div className={styles.specialtiesGrid}>
             {SPECIALTIES.map((s) => (
               <div key={s.title}>
@@ -706,8 +707,8 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               }}
             >
               /help
-            </Link>
-            {" "}for commands ·{" "}
+            </Link>{" "}
+            for commands ·{" "}
             <Link
               href="/portfolio"
               prefetch={false}
@@ -719,8 +720,8 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               }}
             >
               /portfolio
-            </Link>
-            {" "}for the work ·{" "}
+            </Link>{" "}
+            for the work ·{" "}
             <Link
               href="/blog"
               prefetch={false}
@@ -732,8 +733,8 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               }}
             >
               /blog
-            </Link>
-            {" "}to read what I write ·{" "}
+            </Link>{" "}
+            to read what I write ·{" "}
             <Link
               href="/contact"
               prefetch={false}
@@ -745,8 +746,8 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               }}
             >
               /contact
-            </Link>
-            {" "}to reach me · or just ask
+            </Link>{" "}
+            to reach me · or just ask
           </div>
 
           {/* Divider separating the intro from the chronological feed */}
@@ -882,10 +883,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                           if (toolPart.state === "output-available") {
                             if (toolPart.output?.success) {
                               return (
-                                <div
-                                  key={partIdx}
-                                  className={styles.toolSent}
-                                >
+                                <div key={partIdx} className={styles.toolSent}>
                                   {/* "to Bas", not the address: the site
                                       does not publish it and the preview
                                       above no longer does either (#13 F5). */}
@@ -897,10 +895,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                             // Show the error text in the same red style used for
                             // network/stream errors so it is clearly a problem.
                             return (
-                              <div
-                                key={partIdx}
-                                className={styles.aiError}
-                              >
+                              <div key={partIdx} className={styles.aiError}>
                                 {"→ "}
                                 {toolPart.output?.error ??
                                   "Failed to send your message."}
@@ -912,10 +907,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                             // The tool threw an exception rather than returning
                             // a structured failure; show the raw error text.
                             return (
-                              <div
-                                key={partIdx}
-                                className={styles.aiError}
-                              >
+                              <div key={partIdx} className={styles.aiError}>
                                 {"→ "}
                                 {toolPart.errorText ??
                                   "Failed to send your message."}
@@ -926,10 +918,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                           // While the tool's input is still being built or the
                           // execution is pending, show a dim placeholder.
                           return (
-                            <div
-                              key={partIdx}
-                              className={styles.toolSending}
-                            >
+                            <div key={partIdx} className={styles.toolSending}>
                               {"✉ sending your message…"}
                             </div>
                           );
@@ -1073,7 +1062,11 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
            * in the initial HTML gives crawlers (and visitors who don't type
            * commands) the way in: home → list → case.
            */}
-          <Link className={styles.statusLink} href="/portfolio" prefetch={false}>
+          <Link
+            className={styles.statusLink}
+            href="/portfolio"
+            prefetch={false}
+          >
             portfolio
           </Link>
           {/*

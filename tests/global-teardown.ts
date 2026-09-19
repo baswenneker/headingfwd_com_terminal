@@ -31,7 +31,9 @@ async function globalTeardown(config: FullConfig) {
       console.warn("⚠️  Could not delete test database:", error);
     }
   } else {
-    console.warn(`⚠️  DATABASE_URL is not a file: URL (${dbUrl}); nothing to clean up`);
+    console.warn(
+      `⚠️  DATABASE_URL is not a file: URL (${dbUrl}); nothing to clean up`,
+    );
   }
 
   console.log("✅ Global teardown complete");

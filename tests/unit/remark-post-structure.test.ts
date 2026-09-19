@@ -69,15 +69,17 @@ describe("remarkPostStructure", () => {
       "Lead.\n\n## First\n\nBody.\n\n## Second\n\nBody.\n\n## Third\n\nBody.\n",
     );
 
-    const sections = findAll(tree.children, (el) => hasProp(el, "data-post-section"));
+    const sections = findAll(tree.children, (el) =>
+      hasProp(el, "data-post-section"),
+    );
     expect(sections).toHaveLength(3);
-    expect(sections.map((s) => s.properties["data-post-section-number"])).toEqual([
-      "I",
-      "II",
-      "III",
-    ]);
+    expect(
+      sections.map((s) => s.properties["data-post-section-number"]),
+    ).toEqual(["I", "II", "III"]);
 
-    const romanSpans = findAll(tree.children, (el) => hasProp(el, "data-post-roman"));
+    const romanSpans = findAll(tree.children, (el) =>
+      hasProp(el, "data-post-roman"),
+    );
     expect(romanSpans.map(text)).toEqual(["I", "II", "III"]);
   });
 
@@ -125,7 +127,9 @@ describe("remarkPostStructure", () => {
       "### Stray heading\n\nSome text before any section.\n\n## Section\n\nBody.\n",
     );
 
-    const lead = findAll(tree.children, (el) => hasProp(el, "data-post-lead"))[0];
+    const lead = findAll(tree.children, (el) =>
+      hasProp(el, "data-post-lead"),
+    )[0];
     expect(lead, "no lead wrapper was produced").toBeDefined();
 
     const strayHeading = findAll(lead!.children, (el) => el.tagName === "h3");
@@ -133,7 +137,9 @@ describe("remarkPostStructure", () => {
     expect(text(strayHeading[0]!)).toBe("Stray heading");
 
     // It must not have become a numbered item.
-    const items = findAll(tree.children, (el) => hasProp(el, "data-post-item-number"));
+    const items = findAll(tree.children, (el) =>
+      hasProp(el, "data-post-item-number"),
+    );
     expect(items).toHaveLength(0);
   });
 
@@ -143,7 +149,9 @@ describe("remarkPostStructure", () => {
     const lead = findAll(tree.children, (el) => hasProp(el, "data-post-lead"));
     expect(lead).toHaveLength(0);
 
-    const sections = findAll(tree.children, (el) => hasProp(el, "data-post-section"));
+    const sections = findAll(tree.children, (el) =>
+      hasProp(el, "data-post-section"),
+    );
     expect(sections).toHaveLength(1);
   });
 });

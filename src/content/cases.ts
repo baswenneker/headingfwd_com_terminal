@@ -156,7 +156,12 @@ export const CASES: Case[] = [
     role: "Initiator / AI engineer",
     tags: ["LLM", "Writing", "Marketing", "Python", "VectorDB"],
     stack: ["Azure OpenAI", "Python", "Agentic architecture", "VSCode"],
-    sources: ["headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/page.tsx", "headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/schrijfhulp-demo.tsx", "headingfwd-com/src/data/index/page.json (teaser \"AI Schrijfhulp\")", "dspy-writing-style (gerelateerd R&D-experiment)"],
+    sources: [
+      "headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/page.tsx",
+      "headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/schrijfhulp-demo.tsx",
+      'headingfwd-com/src/data/index/page.json (teaser "AI Schrijfhulp")',
+      "dspy-writing-style (gerelateerd R&D-experiment)",
+    ],
     updated: "2026-07-10",
     body: `
 A generative-AI writing assistant for a large public-sector organization. It rewrites
@@ -244,7 +249,11 @@ organization.
     tags: ["LLM", "Marketing", "SaaS"],
     stack: ["React", "Advanced language models", "Cloud infrastructure"],
     links: ["https://hintsay.com"],
-    sources: ["headingfwd-demo-playground/src/app/cases/hintsay/page.tsx", "headingfwd-com/src/data/index/page.json (teaser \"LinkedIn Schrijfhulp\")", "vibes-chrome-li-extension (gerelateerd, los experiment)"],
+    sources: [
+      "headingfwd-demo-playground/src/app/cases/hintsay/page.tsx",
+      'headingfwd-com/src/data/index/page.json (teaser "LinkedIn Schrijfhulp")',
+      "vibes-chrome-li-extension (gerelateerd, los experiment)",
+    ],
     updated: "2026-07-10",
     body: `
 Hintsay is an AI writing assistant that helps professionals build their personal brand
@@ -348,7 +357,11 @@ seven-day free trial.
     client: "bQurius",
     tags: ["Mobile App", "Product Management", "Design Thinking"],
     stack: [],
-    sources: ["headingfwd-demo-playground/src/app/showcase/myworq/page.tsx", "headingfwd-demo-playground/src/app/showcase/myworq/myworq-intro.tsx", "headingfwd-demo-playground/src/app/showcase/myworq/process-ticker.tsx"],
+    sources: [
+      "headingfwd-demo-playground/src/app/showcase/myworq/page.tsx",
+      "headingfwd-demo-playground/src/app/showcase/myworq/myworq-intro.tsx",
+      "headingfwd-demo-playground/src/app/showcase/myworq/process-ticker.tsx",
+    ],
     updated: "2026-07-15",
     videos: [
       {
@@ -431,7 +444,13 @@ the product role over to the client after roughly two years.
     role: "AI engineer",
     tags: ["RAG", "OCR", "LLM", "Marketing"],
     stack: ["Python", "Google Vision", "Claude Code", "VSCode"],
-    sources: ["headingfwd-demo-playground/src/app/showcase/briefwijzer/page.tsx", "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/briefwijzer-intro.tsx", "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/how-it-works.tsx", "headingfwd-com/src/data/index/page.json (teaser \"Briefwijzer\")", "headingfwd_toolkit (promptfoo-test verwijst naar briefwijzer)"],
+    sources: [
+      "headingfwd-demo-playground/src/app/showcase/briefwijzer/page.tsx",
+      "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/briefwijzer-intro.tsx",
+      "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/how-it-works.tsx",
+      'headingfwd-com/src/data/index/page.json (teaser "Briefwijzer")',
+      "headingfwd_toolkit (promptfoo-test verwijst naar briefwijzer)",
+    ],
     updated: "2025-07-03",
     body: `
 BriefWijzer makes unreadable (government) letters understandable. Your customer takes a
@@ -506,9 +525,20 @@ bodies that want to make their letters more accessible.
     status: "experiment",
     role: "Maker / AI engineer",
     tags: ["LLM", "Multimodal", "Motion recognition", "Python"],
-    stack: ["Google Gemini 2.5 Pro", "Python", "ChatGPT", "GitHub Copilot", "VSCode"],
-    links: ["https://www.linkedin.com/posts/baswenneker_kan-chatgpt-een-personal-trainer-vervangen-activity-7330482395533430785-CqxF/", "https://www.linkedin.com/feed/update/urn:li:activity:7338437372616826883/"],
-    sources: ["headingfwd-demo-playground/src/app/showcase/ai-personal-trainer/page.tsx"],
+    stack: [
+      "Google Gemini 2.5 Pro",
+      "Python",
+      "ChatGPT",
+      "GitHub Copilot",
+      "VSCode",
+    ],
+    links: [
+      "https://www.linkedin.com/posts/baswenneker_kan-chatgpt-een-personal-trainer-vervangen-activity-7330482395533430785-CqxF/",
+      "https://www.linkedin.com/feed/update/urn:li:activity:7338437372616826883/",
+    ],
+    sources: [
+      "headingfwd-demo-playground/src/app/showcase/ai-personal-trainer/page.tsx",
+    ],
     updated: "2025-06-19",
     videos: [
       {
@@ -604,7 +634,10 @@ multimodal models fall short for movement analysis, while a custom approach with
     status: "concept",
     tags: ["RAG", "LLM", "Chatbot", "Marketing"],
     stack: [],
-    sources: ["headingfwd-demo-playground/src/data/projects.json (entry \"Chatbot: Vraagbaak voor je team\")", "headingfwd-demo-playground/src/app/showcase/coming-soon/page.tsx"],
+    sources: [
+      'headingfwd-demo-playground/src/data/projects.json (entry "Chatbot: Vraagbaak voor je team")',
+      "headingfwd-demo-playground/src/app/showcase/coming-soon/page.tsx",
+    ],
     updated: "2025-06-19",
     body: `
 A chatbot that acts as a Q&A hub for a team and saves a lot of time: chat instead of
@@ -636,7 +669,10 @@ themselves.
     status: "concept",
     tags: ["Transcription", "LLM", "Audio"],
     stack: [],
-    sources: ["headingfwd-com/src/data/index/page.json (teaser \"Podcast transcriptie en segmentering\")", "whisperfwd (gerelateerde, echte transcriptie-tech)"],
+    sources: [
+      'headingfwd-com/src/data/index/page.json (teaser "Podcast transcriptie en segmentering")',
+      "whisperfwd (gerelateerde, echte transcriptie-tech)",
+    ],
     body: `
 Upload your podcast and get a full transcription back, together with a segment breakdown
 carrying timecodes — so a two-hour episode becomes something a listener can navigate and

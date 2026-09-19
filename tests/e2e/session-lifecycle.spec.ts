@@ -7,10 +7,7 @@ import {
   sendAIMessage,
   waitForTerminalReady,
 } from "../helpers/session";
-import {
-  addRateLimitLogs,
-  expireSession,
-} from "../helpers/database";
+import { addRateLimitLogs, expireSession } from "../helpers/database";
 import {
   clearChatMock,
   createTextStream,
@@ -38,7 +35,8 @@ async function latestSessionId(): Promise<string> {
     .from(chatSessions)
     .orderBy(desc(chatSessions.id))
     .limit(1);
-  if (!row) throw new Error("No chat session found — did the bootstrap message run?");
+  if (!row)
+    throw new Error("No chat session found — did the bootstrap message run?");
   return row.sessionId;
 }
 
@@ -90,9 +88,10 @@ test.describe("Session lifecycle against the real handler", () => {
     await expect(page.getByText("session expired, one more check")).toBeVisible(
       { timeout: 10000 },
     );
-    await expect(
-      page.getByTestId("assistant-message").last(),
-    ).toContainText("Still here.", { timeout: 15000 });
+    await expect(page.getByTestId("assistant-message").last()).toContainText(
+      "Still here.",
+      { timeout: 15000 },
+    );
 
     // A second, valid session row was created for the retry.
     const recovered = await latestSessionId();
