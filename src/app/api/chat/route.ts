@@ -402,9 +402,9 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
                 `From: ${senderEmail.trim()}`,
                 "",
                 // "To: Bas", not the address. /contact deliberately does not
-              // publish the address, and the preview used to hand it to
-              // anyone who typed two lines into the chat (#13 F5).
-              "To: Bas",
+                // publish the address, and the preview used to hand it to
+                // anyone who typed two lines into the chat (#13 F5).
+                "To: Bas",
                 "",
                 "Message:",
                 "",

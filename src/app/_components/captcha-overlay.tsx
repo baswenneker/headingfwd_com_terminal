@@ -120,8 +120,8 @@ export function CaptchaOverlay({ onSuccess, onError }: CaptchaOverlayProps) {
             visitor typed is held and sent once the check passes — and nothing
             said it, so everyone feared retyping it. */}
         <p className="mb-6 text-center text-sm text-[rgba(160,178,182,0.7)]">
-          Cloudflare, so the chat doesn&apos;t fill up with bots. Takes a
-          second — your message is kept.
+          Cloudflare, so the chat doesn&apos;t fill up with bots. Takes a second
+          — your message is kept.
         </p>
 
         {/* Loading state — shown until the Turnstile widget renders.
