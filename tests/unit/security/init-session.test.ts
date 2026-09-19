@@ -6,9 +6,10 @@ import { migratedDb, truncateAll, db } from "../helpers/db";
  * A/S4 — one client can only mint so many sessions per hour. Turnstile is
  * stubbed: the unit layer never calls Cloudflare.
  */
-vi.mock("~/server/services/turnstile", () => ({
+const { verifyTurnstileToken } = vi.hoisted(() => ({
   verifyTurnstileToken: vi.fn(async () => ({ success: true })),
 }));
+vi.mock("~/server/services/turnstile", () => ({ verifyTurnstileToken }));
 
 const { createCaller } = await import("~/server/api/root");
 
@@ -26,6 +27,26 @@ describe("chat.initSession", () => {
 
   beforeEach(async () => {
     await truncateAll();
+    verifyTurnstileToken.mockResolvedValue({ success: true });
+  });
+
+  it("does not spend the quota on a token that fails verification", async () => {
+    const caller = callerFor("203.0.113.9");
+    verifyTurnstileToken.mockResolvedValue({
+      success: false,
+      error: "Turnstile verification failed: invalid-input-response",
+    });
+    for (let i = 0; i < 6; i++) {
+      await expect(
+        caller.chat.initSession({ turnstileToken: "garbage" }),
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    }
+    expect(await db.query.rateLimitLogs.findMany()).toHaveLength(0);
+
+    verifyTurnstileToken.mockResolvedValue({ success: true });
+    await expect(
+      caller.chat.initSession({ turnstileToken: "tok" }),
+    ).resolves.toMatchObject({ sessionId: expect.stringMatching(/^session_/) });
   });
 
   it("refuses past the cap for one client and keeps serving another", async () => {

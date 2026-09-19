@@ -51,22 +51,6 @@ export const chatRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Cap how many sessions one client can mint, so a solved challenge buys
-      // a quota rather than an unlimited supply of them. Skipped wherever the
-      // CAPTCHA itself is switched off — the same gate, dev and the e2e suite.
-      if (env.NEXT_PUBLIC_DISABLE_CAPTCHA !== "true") {
-        const sessionLimit = await checkSessionRateLimit(
-          clientKey(ctx.headers),
-        );
-        if (!sessionLimit.allowed) {
-          throw new TRPCError({
-            code: "TOO_MANY_REQUESTS",
-            message:
-              "Too many sessions started from this network. Please try again later.",
-          });
-        }
-      }
-
       // Verify Turnstile token
       const verification = await verifyTurnstileToken(input.turnstileToken, {
         remoteIp: clientIp(ctx.headers),
@@ -80,6 +64,25 @@ export const chatRouter = createTRPCRouter({
           code: "FORBIDDEN",
           message: verification.error ?? "CAPTCHA verification failed",
         });
+      }
+
+      // Cap how many sessions one client can mint, so a solved challenge buys
+      // a quota rather than an unlimited supply of them. Counted only AFTER
+      // the challenge passed: a claim before verification would let five
+      // garbage tokens lock every visitor behind the same address out for an
+      // hour. Skipped wherever the CAPTCHA itself is switched off — the same
+      // gate, dev and the e2e suite.
+      if (env.NEXT_PUBLIC_DISABLE_CAPTCHA !== "true") {
+        const sessionLimit = await checkSessionRateLimit(
+          clientKey(ctx.headers),
+        );
+        if (!sessionLimit.allowed) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message:
+              "Too many sessions started from this network. Please try again later.",
+          });
+        }
       }
 
       const sessionId = generateSessionId();
