@@ -105,6 +105,20 @@ test.describe("Terminal crawl paths", () => {
   });
 });
 
+test.describe("Without JavaScript", () => {
+  test("the homepage says the terminal needs script, with links out", async ({
+    request,
+  }) => {
+    const html = await (await request.get("/")).text();
+    const noscript = /<noscript>([\s\S]*?)<\/noscript>/.exec(html)?.[1] ?? "";
+
+    expect(noscript).toContain("needs JavaScript");
+    expect(noscript).toContain('href="/portfolio"');
+    expect(noscript).toContain('href="/blog"');
+    expect(noscript).toContain("linkedin.com");
+  });
+});
+
 test.describe("Touch targets", () => {
   test("every status-bar link is at least 24px tall", async ({ page }) => {
     await page.goto("/");

@@ -7,6 +7,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { api } from "~/trpc/react";
 import { env } from "~/env";
+import { CONTACT } from "~/content/site-content";
 import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
@@ -960,6 +961,32 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               }
             />
           </div>
+
+          {/*
+           * Without JavaScript the input above renders and does nothing: no
+           * command runs, no message is sent, and the page said so nowhere
+           * (#13 U8). The editorial pages need no such notice — they are
+           * fully readable without script, by design.
+           */}
+          <noscript>
+            <p className={styles.noscript}>
+              This terminal needs JavaScript. Without it:{" "}
+              {/* Link, not a bare anchor, only to satisfy the Next lint rule:
+                  inside noscript it renders as the plain <a> it has to be. */}
+              <Link href="/portfolio" prefetch={false}>
+                portfolio
+              </Link>
+              ,{" "}
+              <Link href="/blog" prefetch={false}>
+                blog
+              </Link>
+              , or{" "}
+              <a href={CONTACT.linkedin} rel="noreferrer">
+                LinkedIn
+              </a>
+              .
+            </p>
+          </noscript>
         </div>
 
         {/* ── Status bar ── */}
