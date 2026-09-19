@@ -1,6 +1,7 @@
 import { type Metadata } from "next";
 import Link from "next/link";
 import styles from "../editorial.module.css";
+import { socialMeta } from "~/config/metadata";
 import { BLOG } from "~/content/site-content";
 import {
   draftPreviewEnabled,
@@ -20,20 +21,21 @@ import {
 
 const TITLE = "Blog — writing on AI engineering";
 
+const social = socialMeta({
+  title: TITLE,
+  description: BLOG.description,
+  path: "/blog",
+});
+
 export const metadata: Metadata = {
   title: TITLE,
   description: BLOG.description,
+  ...social,
   alternates: {
-    canonical: "/blog",
+    ...social.alternates,
     // Makes the feed discoverable from the page itself, not only by guessing
     // the URL: browsers and feed readers look for this link.
     types: { "application/rss+xml": "/blog/rss.xml" },
-  },
-  openGraph: {
-    type: "website",
-    url: "/blog",
-    title: `${TITLE} — HeadingFWD`,
-    description: BLOG.description,
   },
 };
 

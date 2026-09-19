@@ -8,6 +8,7 @@ import { CONTACT } from "~/content/site-content";
 // Canonical production origin + brand name. `metadataBase` lets Next resolve
 // every relative URL below (canonical, Open Graph, icons) to an absolute URL,
 // which crawlers and social scrapers require.
+import { socialMeta } from "~/config/metadata";
 import {
   ORGANIZATION_ID,
   PERSON_ID,
@@ -57,25 +58,14 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: SITE_NAME,
-    title: TITLE,
-    description: DESCRIPTION,
-    locale: "en_US",
-    // No `images` here on purpose: an explicit entry beats Next's
-    // `opengraph-image` file convention, so the generated card in
-    // src/app/opengraph-image.tsx would never be used. Same for twitter.
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-  },
+  // Open Graph, Twitter and the canonical from the same builder every page
+  // uses (~/config/metadata). No `images` is passed on purpose: an explicit
+  // entry beats Next's `opengraph-image` file convention, so the generated
+  // card in src/app/opengraph-image.tsx would never be used.
+  //
+  // These are the site-wide DEFAULTS. Next replaces `openGraph` and `twitter`
+  // wholesale for a page that sets them, which is why every page sets both.
+  ...socialMeta({ title: TITLE, description: DESCRIPTION, path: "/" }),
   icons: [
     { rel: "icon", url: "/favicon.ico" },
     { rel: "icon", type: "image/svg+xml", url: "/favicon.svg" },

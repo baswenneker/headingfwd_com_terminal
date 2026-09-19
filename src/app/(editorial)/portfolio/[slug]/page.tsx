@@ -9,6 +9,7 @@ import { VideoPreviews } from "~/app/_components/video-previews";
 import { postAssets } from "~/content/blog/assets";
 import { isComingSoonCase, visibleCases, type Case } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
+import { socialMeta } from "~/config/metadata";
 import {
   ORGANIZATION_ID,
   PERSON_ID,
@@ -125,19 +126,17 @@ export async function generateMetadata({
   return {
     title: c.title,
     description,
-    alternates: {
-      canonical: `/portfolio/${c.slug}`,
-    },
-    openGraph: {
-      // "article", matching the Article node in the JSON-LD below — the two
-      // must agree or a scraper gets contradictory signals. Title and
-      // description are unchanged, so link previews keep looking the same.
-      type: "article",
-      ...(c.updated ? { modifiedTime: c.updated } : {}),
-      url: `/portfolio/${c.slug}`,
-      title: `${c.title} — HeadingFWD`,
+    // "article", matching the Article node in the JSON-LD above — the two must
+    // agree or a scraper gets contradictory signals.
+    ...socialMeta({
+      title: c.title,
       description,
-    },
+      path: `/portfolio/${c.slug}`,
+      type: "article",
+      tags: c.tags,
+      authors: ["Bas Wenneker"],
+      ...(c.updated ? { modifiedTime: c.updated } : {}),
+    }),
   };
 }
 

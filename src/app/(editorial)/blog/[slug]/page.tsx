@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import styles from "../../editorial.module.css";
 import blog from "../../blog.module.css";
 import { PostBody } from "~/app/_components/post-body";
+import { socialMeta } from "~/config/metadata";
 import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
 import { POST_COPY } from "~/content/site-content";
 import {
@@ -119,27 +120,31 @@ export async function generateMetadata({
 
   const isDraft = Boolean(post.draft);
 
+  const social = socialMeta({
+    title: post.title,
+    description: post.excerpt,
+    path: postPath(post),
+    type: "article",
+    locale: POST_LOCALES[post.lang].og,
+    publishedTime: post.date,
+    modifiedTime: lastModified(post),
+    authors: ["Bas Wenneker"],
+    ...(post.tags ? { tags: post.tags } : {}),
+    // A post that sets `image` in its frontmatter still wins over the
+    // generated card: an explicit `images` entry beats the file convention.
+    ...(post.image ? { images: [{ url: post.image }] } : {}),
+  });
+
   return {
     title: post.title,
     description: post.excerpt,
-    alternates: {
-      canonical: postPath(post),
-      types: { "application/rss+xml": "/blog/rss.xml" },
-    },
     // A draft is only ever reachable outside production, but say noindex
     // explicitly so a preview deployment can never be indexed.
     ...(isDraft ? { robots: { index: false, follow: false } } : {}),
-    openGraph: {
-      type: "article",
-      url: postPath(post),
-      title: `${post.title} — HeadingFWD`,
-      description: post.excerpt,
-      locale: POST_LOCALES[post.lang].og,
-      publishedTime: post.date,
-      modifiedTime: lastModified(post),
-      authors: ["Bas Wenneker"],
-      ...(post.tags ? { tags: post.tags } : {}),
-      ...(post.image ? { images: [{ url: post.image }] } : {}),
+    ...social,
+    alternates: {
+      ...social.alternates,
+      types: { "application/rss+xml": "/blog/rss.xml" },
     },
   };
 }

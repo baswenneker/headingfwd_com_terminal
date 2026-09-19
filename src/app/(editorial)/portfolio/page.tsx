@@ -2,6 +2,7 @@ import { type Metadata } from "next";
 import Link from "next/link";
 import styles from "../editorial.module.css";
 import pf from "../portfolio.module.css";
+import { socialMeta } from "~/config/metadata";
 import { isComingSoonCase, visibleCases } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
 
@@ -13,21 +14,20 @@ import { CONTACT } from "~/content/site-content";
  * occupies on the blog overview.
  */
 
+const DESCRIPTION =
+  "Selected AI engineering & product design work by Bas Wenneker / HeadingFWD — " +
+  "agents, assistants and AI workflows built to reach production.";
+
 export const metadata: Metadata = {
   title: "Portfolio",
-  description:
-    "Selected AI engineering & product design work by Bas Wenneker / HeadingFWD — " +
-    "agents, assistants and AI workflows built to reach production.",
-  alternates: {
-    canonical: "/portfolio",
-  },
-  openGraph: {
-    type: "website",
-    url: "/portfolio",
-    title: "Portfolio — HeadingFWD",
-    description:
-      "Selected AI engineering & product design work by Bas Wenneker / HeadingFWD.",
-  },
+  description: DESCRIPTION,
+  // One description for the meta tag and both cards — the Open Graph block
+  // used to carry a shortened variant, which is one string too many.
+  ...socialMeta({
+    title: "Portfolio",
+    description: DESCRIPTION,
+    path: "/portfolio",
+  }),
 };
 
 export default function PortfolioPage() {
