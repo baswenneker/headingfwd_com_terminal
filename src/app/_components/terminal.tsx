@@ -7,7 +7,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { api } from "~/trpc/react";
 import { env } from "~/env";
-import { CONTACT } from "~/content/site-content";
+import { CONTACT, CREDENTIALS } from "~/content/site-content";
 import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
@@ -607,6 +607,14 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             consulting on{" "}
             <span className={styles.valuePropBright}>AI strategy</span>.
           </div>
+
+          {/*
+           * The one proof line above the fold. Nothing else here says what has
+           * actually shipped, and a reader who decides in ten seconds decides
+           * on this (#13 F1). It is a single source in site-content.ts, said
+           * the same way by /about and by /llms.txt.
+           */}
+          <div className={styles.credentials}>{CREDENTIALS}</div>
 
           {/* "// specialities" is terminal-style comment decoration */}
           <div className={styles.specialitiesLabel}>{'// specialities'}</div>

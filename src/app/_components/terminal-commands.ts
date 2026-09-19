@@ -7,7 +7,7 @@
  * feed entirely or append a list of new lines.
  */
 
-import { ABOUT, CONTACT, SPECIALTIES, STACK } from "~/content/site-content";
+import { ABOUT, CONTACT, CREDENTIALS, SPECIALTIES, STACK } from "~/content/site-content";
 
 // ── Discriminated-union line model ──────────────────────────────────────────
 
@@ -152,6 +152,10 @@ function aboutLines(): FeedLine[] {
     { kind: "head", text: "$ whoami" },
     { kind: "out", text: ABOUT.name },
     ...ABOUT.lines.map((text): FeedLine => ({ kind: "out", text })),
+    sp,
+    // The same proof line the homepage shows above the fold (#13 F1): /about
+    // is where a reader goes for the track record, so it says it here too.
+    { kind: "dim", text: CREDENTIALS },
   ];
 }
 

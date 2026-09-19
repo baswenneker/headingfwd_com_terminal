@@ -31,6 +31,21 @@ export const INTRO =
   "agents, assistants and AI workflows that actually make it to production, " +
   "training dev teams, and consulting on AI strategy.";
 
+/**
+ * The one proof line above the fold — the homepage's only factual claim about
+ * track record, shown under the value proposition, in `/about` and in the
+ * About block of `/llms.txt`.
+ *
+ * Every clause is backed by something else on this site: the years by
+ * `ABOUT.lines`, the production claim by case 01 in `cases.ts`, which runs
+ * live inside a large public-sector organization. No client is named here —
+ * publishing client names is Bas's call and the site does not make it (#13
+ * F1/F7).
+ */
+export const CREDENTIALS =
+  "15+ yrs shipping software · GenAI in production at a large Dutch " +
+  "public-sector organization";
+
 /** Short "who I am" block, shown by `/about` and the agent file's About section. */
 export const ABOUT = {
   /** Headline identity line. */

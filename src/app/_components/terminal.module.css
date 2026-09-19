@@ -204,6 +204,13 @@
   font-weight: 500;
 }
 
+/* Proof line under the value proposition — one factual claim, set apart from
+ * the paragraph above it without competing with it (#13 F1). */
+.credentials {
+  margin-top: 14px;
+  color: rgba(214, 230, 234, 0.72);
+}
+
 /* "// specialities" comment */
 .specialitiesLabel {
   margin-top: 22px;

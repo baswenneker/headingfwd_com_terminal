@@ -27,6 +27,7 @@
 import {
   ABOUT,
   CONTACT,
+  CREDENTIALS,
   INTRO,
   SPECIALTIES,
   STACK,
@@ -64,6 +65,8 @@ function buildAgentsTxt(): string {
       INTRO,
       "",
       ABOUT.lines.join(" "),
+      "",
+      CREDENTIALS,
     ].join("\n"),
   );
 
