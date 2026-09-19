@@ -312,12 +312,17 @@ export const COMMAND_PAGES: CommandPage[] = [
 
 /**
  * Fallback response for input that is not a recognised slash-command.
- * Points the visitor toward /help and the contact email.
+ *
+ * "I'm a lightweight demo assistant on this page" talked the assistant down
+ * in the one moment a visitor had just tried something (#13 F13). It is not a
+ * demo: it answers questions about the work and it gets a message to Bas. The
+ * line says what went wrong, what to do instead, and what it can do.
  */
 function freeformLines(): FeedLine[] {
   return [
-    { kind: "out",  text: "→ I'm a lightweight demo assistant on this page." },
-    { kind: "out",  text: "  Type /help for commands, or reach Bas directly:" },
+    { kind: "out",  text: "→ Not a command. Type /help for the list, or just ask a" },
+    { kind: "out",  text: "  question — I'm Bas's AI assistant and I can pass a message" },
+    { kind: "out",  text: "  to him." },
     { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
   ];
 }
