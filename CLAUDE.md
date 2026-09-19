@@ -40,6 +40,8 @@ pnpm db:studio        # Open Drizzle Studio (visual database browser)
 
 **Important:** In development, automatic migrations are disabled. Use `pnpm db:push` for fast iteration. In production, migrations run automatically on server startup via `src/instrumentation.ts`.
 
+**Env loading for `db:push`/`db:generate`/`db:migrate`/`db:studio`:** these run `drizzle-kit`, a separate CLI process that never goes through Next.js's own env loading — it only sees the real process env. `drizzle.config.ts` loads `.env.local` then `.env` with `dotenv` itself (`override: false`, so a variable already set in the real process env always wins over either file), so a fresh checkout with only `.env.local` in place works with no extra step. If you export `DATABASE_URL` directly in the shell instead, that value is used as-is.
+
 ### Testing
 
 ```bash
