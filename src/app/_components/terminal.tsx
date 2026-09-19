@@ -83,10 +83,24 @@ function initialCommandBlocks(command?: string): FeedBlock[] {
  * of raw JSON. If the input is not JSON, or the JSON does not contain an
  * "error" string, the raw text is returned as-is. An empty result falls back
  * to a generic prompt.
+ *
+ * A dropped connection never produces a body at all: fetch rejects with a
+ * TypeError whose message is the browser's own wording — "Failed to fetch" in
+ * Chrome, "NetworkError when attempting to fetch resource" in Firefox — which
+ * the terminal used to print verbatim (#13 U7). Those are recognised and
+ * answered in the site's own voice instead.
  */
 function readableError(err: unknown): string {
   const raw =
     err instanceof Error ? err.message : typeof err === "string" ? err : "";
+
+  if (
+    err instanceof TypeError ||
+    /failed to fetch|networkerror|network request failed|load failed/i.test(raw)
+  ) {
+    return "No connection. Check your network and try again.";
+  }
+
   try {
     const parsed: unknown = JSON.parse(raw);
     if (parsed && typeof parsed === "object" && "error" in parsed) {
