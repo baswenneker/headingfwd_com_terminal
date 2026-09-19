@@ -1,17 +1,19 @@
+import { createHash, randomUUID } from "node:crypto";
 import { openai } from "@ai-sdk/openai";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import * as ai from "ai";
-import { convertToModelMessages, tool, type UIMessage, stepCountIs } from "ai";
+import { tool, type ModelMessage, stepCountIs } from "ai";
 import { z } from "zod";
 import { wrapAISDK } from "langsmith/experimental/vercel";
 import { db } from "~/server/db";
-import { chatSessions } from "~/server/db/schema";
+import { chatMessages, chatSessions, pendingEmails } from "~/server/db/schema";
 import {
   checkMessageRateLimit,
   checkEmailRateLimit,
 } from "~/server/services/rate-limiter";
 import { sendContactEmail } from "~/server/services/email";
 import { env } from "~/env";
+import { CONTACT } from "~/content/site-content";
 import { createErrorJsonResponse, logError, ErrorCode } from "~/lib/errors";
 
 // Wrap AI SDK with LangSmith for tracing
@@ -27,6 +29,13 @@ export const maxDuration = 30;
  */
 const MAX_MESSAGE_LENGTH = 4000;
 
+/** How many stored turns at most go back to the model. */
+const MAX_HISTORY_TURNS = 30;
+/** And how many characters of them at most. */
+const MAX_HISTORY_CHARS = 60_000;
+/** How long a shown preview stays confirmable. */
+const PREVIEW_TTL_MS = 10 * 60 * 1000;
+
 /**
  * The shape the route accepts. Anything else is a 400: the handler works from
  * these fields only, so a body that does not fit them has nothing to offer it.
@@ -37,12 +46,58 @@ const chatRequestSchema = z.object({
       z.looseObject({
         id: z.string().optional(),
         role: z.string(),
-        parts: z.array(z.looseObject({ type: z.string() })),
+        parts: z.array(
+          z.looseObject({ type: z.string(), text: z.string().optional() }),
+        ),
       }),
     )
     .min(1),
   sessionId: z.string().min(1),
 });
+
+/** The text of a message, taken from its text parts only. */
+function textOf(parts: { type: string; text?: string }[]): string {
+  return parts
+    .filter((part) => part.type === "text" && typeof part.text === "string")
+    .map((part) => part.text!)
+    .join("\n")
+    .trim();
+}
+
+/** A stable fingerprint of a message body, so a preview can be matched. */
+function hashMessage(message: string): string {
+  return createHash("sha256").update(message.trim()).digest("hex");
+}
+
+/**
+ * The conversation as the server recorded it. The request contributes the new
+ * user text and nothing else, so an assistant turn in the model input is one
+ * this server produced and stored.
+ */
+async function loadHistory(sessionId: string): Promise<ModelMessage[]> {
+  const rows = await db
+    .select({ role: chatMessages.role, content: chatMessages.content })
+    .from(chatMessages)
+    .where(eq(chatMessages.sessionId, sessionId))
+    .orderBy(desc(chatMessages.id))
+    .limit(MAX_HISTORY_TURNS);
+
+  const kept: typeof rows = [];
+  let chars = 0;
+  for (const row of rows) {
+    chars += row.content.length;
+    if (chars > MAX_HISTORY_CHARS) break;
+    kept.push(row);
+  }
+
+  return kept
+    .reverse()
+    .map((row) =>
+      row.role === "assistant"
+        ? ({ role: "assistant", content: row.content } satisfies ModelMessage)
+        : ({ role: "user", content: row.content } satisfies ModelMessage),
+    );
+}
 
 export async function POST(req: Request) {
   try {
@@ -75,6 +130,18 @@ export async function POST(req: Request) {
     if (messageSize > MAX_MESSAGE_LENGTH) {
       return createErrorJsonResponse(
         `Message too long. Maximum length is ${MAX_MESSAGE_LENGTH} characters.`,
+        400,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    // Only the new user text is taken from the request. Assistant, tool and
+    // system parts a client sends along are dropped here and never rebuilt.
+    const userText =
+      lastMessage.role === "user" ? textOf(lastMessage.parts) : "";
+    if (userText.length === 0) {
+      return createErrorJsonResponse(
+        "Invalid request body",
         400,
         ErrorCode.INVALID_INPUT,
       );
@@ -149,34 +216,20 @@ export async function POST(req: Request) {
       })
       .where(eq(chatSessions.sessionId, sessionId));
 
-    // Filter out incomplete assistant messages (those that are still streaming or have empty content)
-    // This prevents issues with convertToModelMessages when the frontend sends back incomplete streaming responses
-    const cleanedMessages = (messages as unknown as UIMessage[]).filter(
-      (msg) => {
-        // Keep all user messages
-        if (msg.role === "user") return true;
+    // Build the model input from the stored conversation plus the new user
+    // text, and record that text before the model sees it.
+    const history = await loadHistory(sessionId);
+    const modelMessages: ModelMessage[] = [
+      ...history,
+      { role: "user", content: userText },
+    ];
 
-        // For assistant messages, filter out incomplete ones
-        if (msg.role === "assistant") {
-          // Check if message has any complete text parts
-          const hasCompleteText = msg.parts.some((part) => {
-            if (part.type === "text") {
-              // Keep only if text is not empty and not still streaming
-              return (
-                part.text &&
-                part.text.trim().length > 0 &&
-                (!("state" in part) || part.state !== "streaming")
-              );
-            }
-            return false;
-          });
-          return hasCompleteText;
-        }
-
-        // Keep other roles (system, etc.)
-        return true;
-      },
-    );
+    await db.insert(chatMessages).values({
+      sessionId,
+      role: "user",
+      content: userText,
+      createdAt: now,
+    });
 
     // Stream AI response with tools - automatically traced by LangSmith
     const result = streamText({
@@ -234,7 +287,7 @@ STEP 1 - GATHER INFO:
 - Accept ALL other messages including: "Quick question", "I need help", "Test message", etc.
 
 STEP 2 - SHOW PREVIEW:
-Once you have both email and message, show this preview EXACTLY as formatted below (each line on its own line):
+Once you have both email and message, call the previewMessage tool with them, then show the preview text it returns to the user exactly as returned. It has this shape (each line on its own line):
 
 📧 Email Preview:
 
@@ -255,7 +308,7 @@ Should I send this email to Bas? (yes/no)
 STEP 3 - WAIT FOR CONFIRMATION:
 After showing the preview, if user says ANY of these words: "yes", "send", "send it", "confirm", "ok", "okay", "go ahead", "please", "do it" → IMMEDIATELY call the sendMessage tool with userConfirmed: true.
 
-DO NOT call any other tools. DO NOT call getContact. Only call sendMessage.
+DO NOT call any other tools at this step. Do not call previewMessage again. Only call sendMessage.
 
 If user says "no", "wait", "stop", "cancel" → DO NOT send. Respond with exactly: "No problem, the message was not sent. If you need anything else, just let me know!"
 
@@ -265,8 +318,86 @@ After you call sendMessage, you MUST immediately generate a text response to con
 
 IMPORTANT: Always include text in your response after calling the tool. The tool call alone is not enough - the user needs to see your confirmation message.
 `,
-      messages: await convertToModelMessages(cleanedMessages),
+      messages: modelMessages,
+      onFinish: async ({ text }) => {
+        const assistantText = text.trim();
+        if (assistantText.length === 0) return;
+        await db.insert(chatMessages).values({
+          sessionId,
+          role: "assistant",
+          content: assistantText.slice(0, MAX_HISTORY_CHARS),
+          createdAt: new Date(),
+        });
+      },
       tools: {
+        previewMessage: tool({
+          description:
+            "Register the email preview the user is about to see. Call this once you have both the sender's email address and the message, before showing the preview. Returns the preview text to show the user verbatim.",
+          inputSchema: z.object({
+            // NOTE: no .email() here, for the same reason as in sendMessage.
+            senderEmail: z
+              .string()
+              .describe(
+                "The sender's email address for Bas to reply to. Must be a valid email address.",
+              ),
+            message: z
+              .string()
+              .min(10, "Message must be at least 10 characters")
+              .max(2000, "Message must be less than 2000 characters")
+              .describe("The message content to send to Bas"),
+          }),
+          execute: async ({ senderEmail, message }) => {
+            if (!z.string().email().safeParse(senderEmail).success) {
+              return {
+                success: false,
+                error:
+                  "That does not look like a valid email address. Please ask the user for a valid one.",
+              };
+            }
+
+            const shownAt = new Date();
+            // One live preview per session, and no stale ones anywhere.
+            await db
+              .delete(pendingEmails)
+              .where(
+                or(
+                  eq(pendingEmails.sessionId, sessionId),
+                  lt(
+                    pendingEmails.createdAt,
+                    new Date(shownAt.getTime() - PREVIEW_TTL_MS),
+                  ),
+                ),
+              );
+            await db.insert(pendingEmails).values({
+              sessionId,
+              senderEmail: senderEmail.trim().toLowerCase(),
+              messageHash: hashMessage(message),
+              nonce: randomUUID(),
+              createdAt: shownAt,
+            });
+
+            return {
+              success: true,
+              preview: [
+                "📧 Email Preview:",
+                "",
+                "━━━━━━━━━━━━━━━━━━━━━━",
+                "",
+                `From: ${senderEmail.trim()}`,
+                "",
+                `To: ${CONTACT.email}`,
+                "",
+                "Message:",
+                "",
+                message,
+                "",
+                "━━━━━━━━━━━━━━━━━━━━━━",
+                "",
+                "Should I send this email to Bas? (yes/no)",
+              ].join("\n"),
+            };
+          },
+        }),
         sendMessage: tool({
           description:
             "Send a message to Bas via email. ONLY call this after showing the user a preview and getting explicit confirmation. The full conversation history will be included automatically.",
@@ -313,6 +444,34 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
               };
             }
 
+            // The preview has to be one this server showed: a matching,
+            // unexpired record for this session, sender and message.
+            const confirmedAt = new Date();
+            const pending = await db.query.pendingEmails.findFirst({
+              where: and(
+                eq(pendingEmails.sessionId, sessionId),
+                eq(pendingEmails.senderEmail, senderEmail.trim().toLowerCase()),
+                eq(pendingEmails.messageHash, hashMessage(message)),
+                gte(
+                  pendingEmails.createdAt,
+                  new Date(confirmedAt.getTime() - PREVIEW_TTL_MS),
+                ),
+              ),
+            });
+
+            if (!pending) {
+              return {
+                success: false,
+                error:
+                  "No preview is waiting for confirmation. Call previewMessage with the email address and the message, show the preview to the user and ask them to confirm first.",
+              };
+            }
+
+            // One preview, one send.
+            await db
+              .delete(pendingEmails)
+              .where(eq(pendingEmails.id, pending.id));
+
             // Check email rate limit
             const rateLimit = await checkEmailRateLimit(sessionId);
             if (!rateLimit.allowed) {
@@ -327,8 +486,7 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
               sessionId,
               senderEmail,
               message,
-              conversationHistory:
-                await convertToModelMessages(cleanedMessages),
+              conversationHistory: modelMessages,
             });
 
             if (!result.success) {

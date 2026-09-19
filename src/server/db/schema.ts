@@ -54,6 +54,29 @@ export const chatMessages = createTable(
   (t) => [index("session_message_idx").on(t.sessionId)],
 );
 
+// Pending email previews: one row per preview the model has actually shown.
+// `sendMessage` only sends when a row here matches the session, the sender and
+// the message, so the confirmation step is a server fact rather than a claim
+// carried in the request.
+export const pendingEmails = createTable(
+  "pending_email",
+  (d) => ({
+    id: d.integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+    sessionId: d.text({ length: 256 }).notNull(),
+    senderEmail: d.text({ length: 256 }).notNull(),
+    messageHash: d.text({ length: 64 }).notNull(),
+    nonce: d.text({ length: 64 }).notNull(),
+    createdAt: d
+      .integer({ mode: "timestamp" })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+  }),
+  (t) => [
+    index("pending_email_session_idx").on(t.sessionId),
+    index("pending_email_created_at_idx").on(t.createdAt),
+  ],
+);
+
 // Rate limit logs table (temporary storage for rate limiting)
 export const rateLimitLogs = createTable(
   "rate_limit_log",
