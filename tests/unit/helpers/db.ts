@@ -17,6 +17,7 @@ export async function migratedDb() {
 /** Empty every table between tests without dropping the schema. */
 export async function truncateAll() {
   await db.delete(schema.emailLogs);
+  await db.delete(schema.pendingEmails);
   await db.delete(schema.rateLimitLogs);
   await db.delete(schema.chatMessages);
   await db.delete(schema.chatSessions);
