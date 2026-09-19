@@ -13,6 +13,18 @@
  * files are generated from that module (`pnpm gen:cases`).
  */
 
+/**
+ * The day the copy in this file last changed — BUMP IT when you edit any
+ * string below.
+ *
+ * It is the `lastModified` the sitemap reports for every surface built from
+ * this copy: the terminal home, the six command pages and `/llms.txt`. Those
+ * pages have no date of their own, and a build-time `Date.now()` would tell
+ * crawlers the whole site changed on every deploy. A hand-maintained date is
+ * the honest answer: slightly stale beats confidently wrong.
+ */
+export const SITE_CONTENT_UPDATED = "2026-09-18";
+
 /** One-sentence value proposition, mirrored by the hero paragraph. */
 export const INTRO =
   "Bas helps teams get real value from Generative AI — designing and building " +
