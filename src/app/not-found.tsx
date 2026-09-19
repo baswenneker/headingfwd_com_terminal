@@ -23,17 +23,18 @@ export const metadata: Metadata = {
   description:
     "That route doesn’t exist on headingfwd.com. Head back to the terminal, " +
     "or jump to the portfolio, blog, services, about or contact pages.",
-  // Both lines below override something the root layout would otherwise hand
-  // down to this page.
+  // `robots: null` CLEARS what the root layout hands down, the way
+  // `alternates.canonical: null` below does. Next injects `<meta
+  // name="robots" content="noindex">` into every not-found render by itself;
+  // the layout's `index: true, follow: true` came along on top of it, and an
+  // explicit `noindex, follow` here only replaced one contradiction with a
+  // duplicate. Cleared, the served 404 carries Next's single `noindex`.
   //
-  // `robots`: the layout sets `index: true, follow: true` for the real pages.
-  // Inheriting that here would contradict the `noindex` Next injects on every
-  // 404. The two tags then disagree, so say noindex explicitly instead.
-  robots: { index: false, follow: true },
   // `alternates`: the layout sets `canonical: "/"`. A 404 carrying it tells
   // crawlers the homepage is this URL's real version, and Search Console files
   // the URL under "Alternative page with proper canonical tag". A page that
   // does not exist has no canonical, so drop it.
+  robots: null,
   alternates: { canonical: null },
 };
 
