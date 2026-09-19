@@ -32,6 +32,29 @@ export const INTRO =
   "training dev teams, and consulting on AI strategy.";
 
 /**
+ * The same sentence in the first person, for the terminal hero — the one
+ * place on the site where Bas speaks rather than being described.
+ *
+ * Derived rather than written out again: the hero, `/llms.txt` and the meta
+ * description used to carry three hand-kept variants of this sentence, and
+ * they had already drifted apart (#13 F6). The swap is the whole difference
+ * between the two voices, so it is the whole transformation.
+ */
+export const INTRO_FIRST_PERSON = INTRO.replace("Bas helps", "I help");
+
+/**
+ * The site-wide meta description, in the brand's third-person voice — what a
+ * search result and a social card show for `/`.
+ *
+ * Derived from `INTRO` the same way `INTRO_FIRST_PERSON` is, with the byline
+ * a search result needs and the hero does not. It was a third literal in
+ * `layout.tsx` until #13 F6.
+ */
+export const SITE_DESCRIPTION =
+  INTRO.replace("Bas helps", "HeadingFWD helps") +
+  " By Bas Wenneker, AI Lead / Engineer.";
+
+/**
  * The one proof line above the fold — the homepage's only factual claim about
  * track record, shown under the value proposition, in `/about` and in the
  * About block of `/llms.txt`.

@@ -4,7 +4,11 @@ import { type Metadata, type Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { CONTACT, SPECIALTIES } from "~/content/site-content";
+import {
+  CONTACT,
+  SITE_DESCRIPTION,
+  SPECIALTIES,
+} from "~/content/site-content";
 // Canonical production origin + brand name. `metadataBase` lets Next resolve
 // every relative URL below (canonical, Open Graph, icons) to an absolute URL,
 // which crawlers and social scrapers require.
@@ -17,10 +21,9 @@ import {
 } from "~/config/site";
 
 const TITLE = "HeadingFWD — AI Engineering & Consultancy";
-const DESCRIPTION =
-  "HeadingFWD helps teams get real value from Generative AI — designing and " +
-  "building agents, assistants and AI workflows that reach production, training " +
-  "dev teams, and consulting on AI strategy. By Bas Wenneker, AI Lead / Engineer.";
+// The third hand-kept variant of one sentence, until #13 F6. It is derived
+// from INTRO now, in site-content.ts, like the hero paragraph is.
+const DESCRIPTION = SITE_DESCRIPTION;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

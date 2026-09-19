@@ -7,7 +7,12 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { api } from "~/trpc/react";
 import { env } from "~/env";
-import { CONTACT, CREDENTIALS } from "~/content/site-content";
+import {
+  CONTACT,
+  CREDENTIALS,
+  INTRO_FIRST_PERSON,
+  SPECIALTIES,
+} from "~/content/site-content";
 import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
@@ -147,6 +152,51 @@ function sessionErrorCode(err: unknown): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * The phrases the hero paragraph lifts out of the sentence, longest first so
+ * a longer phrase always wins over a shorter one it contains.
+ *
+ * The sentence itself comes from `INTRO` in site-content.ts; this list is the
+ * styling laid over it. A phrase that is no longer in the sentence simply
+ * highlights nothing — the text renders whole either way, which is what makes
+ * it safe to keep the colour after the copy became derived (#13 F6).
+ */
+const HERO_HIGHLIGHTS: { phrase: string; accent?: true }[] = [
+  { phrase: "Generative AI", accent: true },
+  { phrase: "AI workflows" },
+  { phrase: "AI strategy" },
+  { phrase: "assistants" },
+  { phrase: "dev teams" },
+  { phrase: "agents" },
+];
+
+/** One sentence with the HERO_HIGHLIGHTS phrases wrapped in their own span. */
+function Highlighted({ text }: { text: string }) {
+  const pattern = new RegExp(
+    `(${HERO_HIGHLIGHTS.map((h) => h.phrase).join("|")})`,
+    "g",
+  );
+
+  return (
+    <>
+      {text.split(pattern).map((part, i) => {
+        const hit = HERO_HIGHLIGHTS.find((h) => h.phrase === part);
+        if (!hit) return <Fragment key={i}>{part}</Fragment>;
+        return (
+          <span
+            key={i}
+            className={
+              hit.accent ? styles.valuePropAccent : styles.valuePropBright
+            }
+          >
+            {part}
+          </span>
+        );
+      })}
+    </>
+  );
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -594,18 +644,11 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             AI engineering &amp; consultancy · Bas Wenneker — AI Lead / Engineer
           </div>
 
-          {/* Value proposition */}
+          {/* Value proposition — one sentence, derived from INTRO rather than
+              written out a second time (#13 F6). The highlighting is applied
+              on top of it, not baked into it. */}
           <div className={styles.valueProp}>
-            I help teams get real value from{" "}
-            <span className={styles.valuePropAccent}>Generative AI</span> —
-            designing and building{" "}
-            <span className={styles.valuePropBright}>agents</span>,{" "}
-            <span className={styles.valuePropBright}>assistants</span> and{" "}
-            <span className={styles.valuePropBright}>AI workflows</span> that
-            actually make it to production, training{" "}
-            <span className={styles.valuePropBright}>dev teams</span>, and
-            consulting on{" "}
-            <span className={styles.valuePropBright}>AI strategy</span>.
+            <Highlighted text={INTRO_FIRST_PERSON} />
           </div>
 
           {/*
@@ -616,25 +659,20 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
            */}
           <div className={styles.credentials}>{CREDENTIALS}</div>
 
-          {/* "// specialities" is terminal-style comment decoration */}
+          {/* "// specialities" is terminal-style comment decoration.
+              The grid comes from SPECIALTIES, the same list /services and
+              /llms.txt read: the hand-written copy here had drifted into a
+              different order and different wording (#13 F6). Titles only —
+              the blurb after the em dash belongs to /services, where there is
+              room to read it. */}
           <div className={styles.specialitiesLabel}>{'// specialities'}</div>
           <div className={styles.specialitiesGrid}>
-            <div>
-              <span className={styles.specialityBullet}>*</span>
-              Agentic workflow development
-            </div>
-            <div>
-              <span className={styles.specialityBullet}>*</span>
-              AI strategy &amp; consulting
-            </div>
-            <div>
-              <span className={styles.specialityBullet}>*</span>
-              Agentic coding training for dev teams
-            </div>
-            <div>
-              <span className={styles.specialityBullet}>*</span>
-              AI techniques: RAG, graphs, memory and more
-            </div>
+            {SPECIALTIES.map((s) => (
+              <div key={s.title}>
+                <span className={styles.specialityBullet}>*</span>
+                {s.title}
+              </div>
+            ))}
           </div>
 
           {/*
