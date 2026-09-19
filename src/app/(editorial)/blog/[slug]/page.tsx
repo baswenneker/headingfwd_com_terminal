@@ -175,6 +175,24 @@ export default async function PostPage({ params }: PostPageProps) {
       </article>
 
       {/*
+        Who wrote this and where to go next. A post used to end on "all posts ·
+        back to the terminal" and nothing else, so the piece that brings in the
+        most readers said least about the person who wrote it (#13 D3). In the
+        post's own language, like everything else a reader reads here.
+      */}
+      <aside className={blog.author} lang={POST_LOCALES[post.lang].html}>
+        <p>{copy.author}</p>
+        <p className={blog.authorLinks}>
+          <Link href="/portfolio" prefetch={false}>
+            → {copy.seeTheWork}
+          </Link>
+          <Link href="/contact" prefetch={false}>
+            → {copy.getInTouch}
+          </Link>
+        </p>
+      </aside>
+
+      {/*
         In the post's own language: this notice is written for a visitor who
         arrived from a copy on LinkedIn, and it has to be read to land.
       */}

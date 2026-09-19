@@ -32,6 +32,22 @@ test.describe("Editorial landmarks", () => {
   }
 });
 
+test.describe("Post author block", () => {
+  test.skip(!FIRST_POST, "no published post to render");
+
+  test("a post names its author and offers the work and contact", async ({
+    page,
+  }) => {
+    await page.goto(postPath(FIRST_POST!));
+
+    // The aside sits inside the document, above the origin footer.
+    const aside = page.getByRole("complementary");
+    await expect(aside).toContainText("Bas Wenneker");
+    await expect(aside.locator('a[href="/portfolio"]')).toHaveCount(1);
+    await expect(aside.locator('a[href="/contact"]')).toHaveCount(1);
+  });
+});
+
 test.describe("Editorial footer", () => {
   /** Every destination the shared footer must offer, in reading order. */
   const FOOTER_HREFS = ["/portfolio", "/blog", "/services", "/contact", "/"];

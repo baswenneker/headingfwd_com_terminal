@@ -121,6 +121,11 @@ export const POST_COPY = {
       "dan is deze pagina het origineel.",
     allPosts: "alle posts",
     backToTerminal: "terug naar de terminal",
+    author:
+      "Geschreven door Bas Wenneker — AI engineering & consultancy, Delft. " +
+      "Hij bouwt agents, assistants en AI-workflows die de productie halen.",
+    seeTheWork: "bekijk het werk",
+    getInTouch: "neem contact op",
   },
   en: {
     footnoteLabel: "Sources",
@@ -130,5 +135,10 @@ export const POST_COPY = {
       "elsewhere, this page is the original.",
     allPosts: "all posts",
     backToTerminal: "back to the terminal",
+    author:
+      "Written by Bas Wenneker — AI engineering & consultancy, Delft. He " +
+      "builds agents, assistants and AI workflows that reach production.",
+    seeTheWork: "see the work",
+    getInTouch: "get in touch",
   },
 } as const;
