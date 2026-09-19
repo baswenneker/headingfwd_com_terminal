@@ -105,6 +105,43 @@ test.describe("Terminal crawl paths", () => {
   });
 });
 
+test.describe("Editorial pages never pull the terminal bundle", () => {
+  /**
+   * `/blog` and `/portfolio` both render a link back to the terminal in the
+   * viewport. Without `prefetch={false}` Next prefetches `/`, which drags in
+   * the Turnstile widget and the tRPC client — several hundred kilobytes that
+   * an editorial page never runs (#13 P1).
+   *
+   * The assertion is on the bytes rather than on the markup, since the
+   * attribute leaves no trace in the HTML: load the page, let the router
+   * settle, then read back every script it fetched and refuse any that
+   * carries the Turnstile widget.
+   */
+  for (const path of ["/blog", "/portfolio"]) {
+    test(`${path} fetches no script containing the CAPTCHA widget`, async ({
+      page,
+      request,
+    }) => {
+      const scripts = new Set<string>();
+      page.on("request", (req) => {
+        if (req.resourceType() === "script") scripts.add(req.url());
+      });
+
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      // Prefetching is idle-scheduled, so give the router a moment past load.
+      await page.waitForTimeout(1500);
+
+      for (const url of scripts) {
+        const body = await (await request.get(url)).text();
+        expect(body.toLowerCase(), `${url} loaded on ${path}`).not.toContain(
+          "turnstile",
+        );
+      }
+    });
+  }
+});
+
 test.describe("Portfolio calls to action", () => {
   test("the overview leads with contact and keeps LinkedIn second", async ({
     page,

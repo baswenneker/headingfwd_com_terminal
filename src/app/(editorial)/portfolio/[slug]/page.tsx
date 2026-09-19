@@ -321,7 +321,9 @@ export default async function CasePage({ params }: CasePageProps) {
         <p className={pf.footerLinks}>
           <Link href="/portfolio">← all work</Link>
           {" · "}
-          <Link href="/">back to the terminal</Link>
+          <Link href="/" prefetch={false}>
+            back to the terminal
+          </Link>
         </p>
       </footer>
     </div>

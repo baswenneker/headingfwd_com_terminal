@@ -201,7 +201,9 @@ export default async function PostPage({ params }: PostPageProps) {
         <p>
           <Link href="/blog">← {copy.allPosts}</Link>
           {" · "}
-          <Link href="/">{copy.backToTerminal}</Link>
+          <Link href="/" prefetch={false}>
+            {copy.backToTerminal}
+          </Link>
         </p>
       </footer>
     </div>

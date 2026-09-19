@@ -76,7 +76,7 @@ export default function BlogIndexPage() {
       />
       <div className={styles.metaBar}>
         <span className={styles.kicker}>Bas Wenneker · Journal</span>
-        <Link href="/" className={styles.backLink}>
+        <Link href="/" prefetch={false} className={styles.backLink}>
           ← back to the terminal
         </Link>
       </div>
