@@ -15,6 +15,24 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])';
 
 /**
+ * The focus stops inside `root`, looking into open shadow roots too: the
+ * Turnstile widget may put its iframe in one.
+ */
+function focusStops(root: Element): HTMLElement[] {
+  const stops: HTMLElement[] = [];
+  for (const el of Array.from(root.querySelectorAll<HTMLElement>("*"))) {
+    if (el.matches(FOCUSABLE)) stops.push(el);
+    if (el.shadowRoot) {
+      for (const child of Array.from(el.shadowRoot.children)) {
+        if (child.matches(FOCUSABLE)) stops.push(child as HTMLElement);
+        stops.push(...focusStops(child));
+      }
+    }
+  }
+  return stops;
+}
+
+/**
  * Full-window overlay that gates the first free-text AI message behind a
  * Cloudflare Turnstile challenge. Styled to match the terminal dark-panel
  * aesthetic using the same color tokens as the terminal window.
@@ -63,34 +81,27 @@ export function CaptchaOverlay({
 
   /**
    * Escape closes the dialog as a choice, not a failure: the visitor gets
-   * their text back without an error line. Tab / Shift+Tab wrap inside the panel instead of reaching the page
-   * behind it. The widget's own iframe counts as one stop in the cycle.
+   * their text back without an error line.
    */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Escape") {
       e.preventDefault();
       onCancel?.();
-      return;
     }
-    if (e.key !== "Tab") return;
+  };
 
+  /**
+   * Tab and Shift+Tab wrap inside the panel through two focus sentinels, one
+   * on either side of it. A keydown handler cannot do this alone: while the
+   * widget's cross-origin iframe has focus, its key events never reach this
+   * document, and Tab would walk out of the dialog. Focus landing on a
+   * sentinel always reaches us, wherever it came from.
+   */
+  const wrapTo = (edge: "first" | "last") => {
     const panel = panelRef.current;
     if (!panel) return;
-    const stops = [
-      panel,
-      ...Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE)),
-    ];
-    const first = stops[0]!;
-    const last = stops[stops.length - 1]!;
-    const active = document.activeElement;
-
-    if (e.shiftKey && (active === first || !panel.contains(active))) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && active === last) {
-      e.preventDefault();
-      first.focus();
-    }
+    const stops = [panel, ...focusStops(panel)];
+    (edge === "first" ? stops[0] : stops[stops.length - 1])?.focus();
   };
 
   return (
@@ -102,6 +113,13 @@ export function CaptchaOverlay({
       aria-labelledby="captcha-overlay-title"
       onKeyDown={handleKeyDown}
     >
+      {/* Shift+Tab from the first stop lands here and wraps to the last. */}
+      <span
+        tabIndex={0}
+        aria-hidden="true"
+        data-testid="captcha-focus-start"
+        onFocus={() => wrapTo("last")}
+      />
       {/* Dark panel with the same surface and border language as the terminal window */}
       <div
         ref={panelRef}
@@ -169,6 +187,14 @@ export function CaptchaOverlay({
           </div>
         )}
       </div>
+      {/* Tab from the last stop — the widget's iframe — lands here and wraps
+          to the first. */}
+      <span
+        tabIndex={0}
+        aria-hidden="true"
+        data-testid="captcha-focus-end"
+        onFocus={() => wrapTo("first")}
+      />
     </div>
   );
 }
