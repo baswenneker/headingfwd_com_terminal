@@ -160,6 +160,8 @@ describe("/api/chat email confirmation", () => {
     });
     expect(first.success).toBe(true);
     expect(sendContactEmailMock).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(first)).not.toContain("@headingfwd.com");
+    expect(JSON.stringify(first)).toContain(SENDER);
 
     const second = await runTool("sendMessage", {
       senderEmail: SENDER,

@@ -528,7 +528,9 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
 
             return {
               success: true,
-              message: `Your message has been sent to Bas! He'll receive it at bas@headingfwd.com and can reply directly to ${senderEmail}. He typically responds within 24-48 hours.`,
+              // No address of Bas's own in here: the model repeats this text,
+              // and the site keeps that address off every public surface.
+              message: `Your message has been sent to Bas. He can reply directly to ${senderEmail}, usually within two working days.`,
             };
           },
         }),
