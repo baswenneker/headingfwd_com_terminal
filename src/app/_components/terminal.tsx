@@ -18,6 +18,7 @@ import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
 import { MemoizedMarkdown } from "./memoized-markdown";
+import { groupTurns, withoutLastTurn } from "./chat-turns";
 
 /**
  * The CAPTCHA overlay, loaded the first time it is shown rather than with the
@@ -363,10 +364,10 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
    * Push an AI turn block into the feed and trigger the useChat hook.
    * Only called when sessionIdRef.current is already set.
    *
-   * The N-th AI turn block maps to messages[N*2] (user) and
-   * messages[N*2+1] (assistant) in the useChat messages array. This
-   * correspondence is maintained as long as /clear resets both blocks and
-   * messages simultaneously (which it does in dispatchCommand below).
+   * The N-th AI turn block shows the N-th turn of `groupTurns(messages)`:
+   * every block adds exactly one user message. That holds as long as /clear
+   * resets both blocks and messages together (dispatchCommand below) and a
+   * dropped block also drops its messages (handleChatError).
    */
   function dispatchAiMessage(text: string) {
     if (!sessionIdRef.current) return;
@@ -451,14 +452,9 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
 
     sessionIdRef.current = null;
 
-    // Drop the turn that failed. Block and message indices stay in step
-    // because the count of remaining AI blocks decides where messages is cut:
-    // the N-th AI block owns messages[N*2] and messages[N*2+1].
-    const remainingTurns = Math.max(
-      0,
-      blocks.filter((b) => b.type === "ai").length - 1,
-    );
-    setMessages(messages.slice(0, remainingTurns * 2));
+    // Drop the turn that failed, from the messages and from the feed, so
+    // the N-th AI block still shows the N-th turn.
+    setMessages(withoutLastTurn(messages));
     setBlocks((prev) => {
       const last = prev.map((b) => b.type).lastIndexOf("ai");
       const kept = last >= 0 ? prev.filter((_, i) => i !== last) : prev;
@@ -570,8 +566,9 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   // ── Derived values for rendering ────────────────────────────────────────
 
   // Collect all AI turn blocks in order so we can derive the turn index of
-  // each block (the N-th AI block maps to messages[N*2] and messages[N*2+1]).
+  // each block: the N-th AI block shows the N-th turn.
   const aiTurnBlocks = blocks.filter((b): b is AiTurnBlock => b.type === "ai");
+  const turns = groupTurns(messages);
 
   // True while the AI has a request in flight (waiting or streaming).
   const isAiInFlight = status === "submitted" || status === "streaming";
@@ -769,14 +766,14 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
 
               // ── AI turn block ──────────────────────────────────
               //
-              // The N-th AI turn (0-indexed within aiTurnBlocks) maps to
-              // messages[N*2] (user message) and messages[N*2+1] (assistant).
-              // This is valid as long as /clear resets both arrays together.
+              // The N-th AI turn (0-indexed within aiTurnBlocks) shows the
+              // N-th turn from groupTurns, which a failed turn without an
+              // answer cannot shift.
               const turnIdx = aiTurnBlocks.indexOf(block);
               const isLatestTurn = turnIdx === aiTurnBlocks.length - 1;
 
-              const userMsg = messages[turnIdx * 2];
-              const assistantMsg = messages[turnIdx * 2 + 1];
+              const userMsg = turns[turnIdx]?.user;
+              const assistantMsg = turns[turnIdx]?.assistant;
 
               // Determine what to show for this turn.
               // isInFlight: this specific turn is still being processed.
