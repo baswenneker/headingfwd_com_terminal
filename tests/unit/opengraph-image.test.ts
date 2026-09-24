@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import RootImage from "~/app/opengraph-image";
 import PostImage from "~/app/(editorial)/blog/[slug]/opengraph-image";
+import * as CommandImage from "~/app/(terminal)/[command]/opengraph-image";
 
 /**
  * The two `opengraph-image.tsx` route handlers. Both export a default async
@@ -46,5 +47,12 @@ describe("post opengraph-image", () => {
     const bytes = await pngBytes(response);
     expect(Array.from(bytes.slice(0, 8))).toEqual(PNG_SIGNATURE);
     expect(ihdrDimensions(bytes)).toEqual({ width: 1200, height: 630 });
+  });
+});
+
+describe("command opengraph-image", () => {
+  it("renders cards only for registered commands", () => {
+    expect(CommandImage.dynamicParams).toBe(false);
+    expect(CommandImage.generateStaticParams().length).toBeGreaterThan(0);
   });
 });

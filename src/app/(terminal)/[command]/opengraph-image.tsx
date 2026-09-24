@@ -14,6 +14,12 @@ export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 export const alt = "HeadingFWD — AI Engineering & Consultancy";
 
+/**
+ * Only the registered commands get a card, like the page itself: any other
+ * segment is a 404 rather than a card rendered on demand for `/anything`.
+ */
+export const dynamicParams = false;
+
 /** One card per registered command, pre-rendered alongside its page. */
 export function generateStaticParams() {
   return COMMAND_PAGES.map((c) => ({ command: c.token }));
