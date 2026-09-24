@@ -78,4 +78,27 @@ describe("verifyTurnstileToken", () => {
     stubSiteverify({ success: true, hostname: "localhost" });
     expect((await production.verifyTurnstileToken("tok")).success).toBe(false);
   });
+
+  it("skips the host check for a Cloudflare test secret", async () => {
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "1x0000000000000000000000000000000AA");
+    vi.stubEnv("ENVIRONMENT", "production");
+    vi.resetModules();
+    const withTestKey = await import("~/server/services/turnstile");
+    stubSiteverify({ success: true, hostname: "example.com" });
+    expect((await withTestKey.verifyTurnstileToken("tok")).success).toBe(true);
+  });
+
+  it("refuses example.com for a real secret", async () => {
+    stubSiteverify({ success: true, hostname: "example.com" });
+    expect((await verifyTurnstileToken("tok")).success).toBe(false);
+  });
+
+  it("allows localhost under next dev when ENVIRONMENT is left at production", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("ENVIRONMENT", "production");
+    vi.resetModules();
+    const dev = await import("~/server/services/turnstile");
+    stubSiteverify({ success: true, hostname: "localhost" });
+    expect((await dev.verifyTurnstileToken("tok")).success).toBe(true);
+  });
 });
