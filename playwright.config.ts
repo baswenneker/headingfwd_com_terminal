@@ -100,7 +100,10 @@ export default defineConfig({
       ...process.env,
       NEXT_PUBLIC_DISABLE_CAPTCHA: "true",
       ENVIRONMENT: "test",
-      NODE_ENV: "test",
+      // Only for `next dev`. A production build and server have to run as
+      // production; NODE_ENV=test would change how they behave, and the
+      // prod run is there to test exactly what ships.
+      ...(!isProdServer && { NODE_ENV: "test" }),
       SKIP_ENV_VALIDATION: "1",
       // Ensure API key is available for live tests
       ...(process.env.OPENAI_API_KEY && {
