@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 interface CaptchaOverlayProps {
   onSuccess: (token: string) => void;
   onError?: () => void;
+  /** The visitor closed the dialog (Escape). Not a failure. */
+  onCancel?: () => void;
 }
 
 /** Elements that can hold focus inside the panel, in DOM order. */
@@ -26,7 +28,11 @@ const FOCUSABLE =
  * screen reader announced nothing when it appeared and Tab walked straight
  * out into the blurred terminal behind it.
  */
-export function CaptchaOverlay({ onSuccess, onError }: CaptchaOverlayProps) {
+export function CaptchaOverlay({
+  onSuccess,
+  onError,
+  onCancel,
+}: CaptchaOverlayProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -56,14 +62,14 @@ export function CaptchaOverlay({ onSuccess, onError }: CaptchaOverlayProps) {
   };
 
   /**
-   * Escape closes the dialog through the same path a failed challenge takes,
-   * and Tab / Shift+Tab wrap inside the panel instead of reaching the page
+   * Escape closes the dialog as a choice, not a failure: the visitor gets
+   * their text back without an error line. Tab / Shift+Tab wrap inside the panel instead of reaching the page
    * behind it. The widget's own iframe counts as one stop in the cycle.
    */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Escape") {
       e.preventDefault();
-      onError?.();
+      onCancel?.();
       return;
     }
     if (e.key !== "Tab") return;

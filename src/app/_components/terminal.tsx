@@ -1152,6 +1152,17 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               pendingMessageRef.current = null;
               reportSessionFailure(pending);
             }}
+            onCancel={() => {
+              // Escape: the visitor changed their mind. Nothing failed, so
+              // no error line — the text goes back into the input for them
+              // to edit or send again.
+              setCaptchaVisible(false);
+              const pending = pendingMessageRef.current;
+              pendingMessageRef.current = null;
+              if (pending) setInputValue(pending);
+              // After the commit that re-enables the input.
+              setTimeout(() => inputRef.current?.focus(), 0);
+            }}
           />
         )}
       </div>
