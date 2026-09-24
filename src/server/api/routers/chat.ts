@@ -91,26 +91,35 @@ export const chatRouter = createTRPCRouter({
 
       // Housekeeping, on the one call a visitor makes at most a few times an
       // hour: sessions a day past their expiry, the turns stored under them,
-      // and any preview left unconfirmed.
+      // and any preview left unconfirmed. Children go first and the sweep is
+      // one batch, which libsql runs as a single transaction, so a failure
+      // part-way leaves no turn or preview behind whose session is gone.
+      // (A batch rather than `transaction()`: libsql hands the connection to
+      // an interactive transaction and opens a fresh one afterwards.)
       const staleBefore = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      const expired = await ctx.db
-        .delete(chatSessions)
-        .where(lt(chatSessions.expiresAt, staleBefore))
-        .returning({ sessionId: chatSessions.sessionId });
-      if (expired.length > 0) {
-        const ids = expired.map((row) => row.sessionId);
-        await ctx.db
+      const staleIds = ctx.db
+        .select({ sessionId: chatSessions.sessionId })
+        .from(chatSessions)
+        .where(lt(chatSessions.expiresAt, staleBefore));
+      await ctx.db.batch([
+        ctx.db
           .delete(chatMessages)
-          .where(inArray(chatMessages.sessionId, ids));
-        await ctx.db
+          .where(inArray(chatMessages.sessionId, staleIds)),
+        ctx.db
           .delete(pendingEmails)
-          .where(inArray(pendingEmails.sessionId, ids));
-      }
-      await ctx.db
-        .delete(pendingEmails)
-        .where(
-          lt(pendingEmails.createdAt, new Date(now.getTime() - 60 * 60 * 1000)),
-        );
+          .where(inArray(pendingEmails.sessionId, staleIds)),
+        ctx.db
+          .delete(pendingEmails)
+          .where(
+            lt(
+              pendingEmails.createdAt,
+              new Date(now.getTime() - 60 * 60 * 1000),
+            ),
+          ),
+        ctx.db
+          .delete(chatSessions)
+          .where(lt(chatSessions.expiresAt, staleBefore)),
+      ]);
 
       // Create session in database
       await ctx.db.insert(chatSessions).values({
