@@ -128,4 +128,43 @@ test.describe("Session lifecycle against the real handler", () => {
     await expect(errorEl).toBeVisible({ timeout: 10000 });
     await expect(errorEl).toContainText("Rate limit exceeded");
   });
+
+  test("a session the server keeps refusing is recovered once, then reported", async ({
+    page,
+  }) => {
+    await mockChatSuccess(page, "Hello!");
+    await sendAIMessage(page, "Hi there");
+    await clearChatMock(page);
+
+    // Every attempt is refused as if the session does not exist, also the
+    // one made with the fresh session the recovery creates.
+    let attempts = 0;
+    await page.route("**/api/chat", async (route) => {
+      attempts += 1;
+      await route.fulfill({
+        status: 403,
+        contentType: "application/json",
+        body: JSON.stringify({
+          error: "Session not found. Please refresh and start a new session.",
+          code: "SESSION_NOT_FOUND",
+        }),
+      });
+    });
+
+    const input = page.getByTestId("terminal-input");
+    await input.fill("Anyone home?");
+    await input.press("Enter");
+
+    await expect(page.getByText("Couldn't start a session")).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(input).toHaveValue("Anyone home?");
+    // One refused attempt, one recovery attempt, and then it stops.
+    await page.waitForTimeout(1500);
+    expect(attempts).toBe(2);
+    // The answered turn before it does not pick up the refusal.
+    await expect(
+      page.locator("main").getByText("Session not found"),
+    ).toHaveCount(0);
+  });
 });

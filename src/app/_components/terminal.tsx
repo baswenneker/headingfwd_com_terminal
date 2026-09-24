@@ -252,6 +252,10 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   // The last free-text message dispatched to the AI, kept so an expired
   // session can be recovered by sending exactly that message again.
   const lastFreeTextRef = useRef<string | null>(null);
+  // Automatic session recoveries since the visitor last pressed Enter. One is
+  // allowed per typed message; a second session error in a row means a new
+  // session does not help, so the terminal stops instead of looping.
+  const sessionRecoveryRef = useRef(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -442,6 +446,10 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
    * useChat history, the session is cleared, and the same message is sent
    * again through the normal route — which puts the CAPTCHA back up in place
    * and, once it is solved, delivers the message. Nothing is reloaded.
+   *
+   * Only once per typed message: if the fresh session is refused as well,
+   * another one will not help, so the turn is dropped, the text goes back
+   * into the input and the feed says the session could not be started.
    */
   function handleChatError(err: Error) {
     const code = sessionErrorCode(err);
@@ -451,6 +459,8 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
     if (!text) return;
 
     sessionIdRef.current = null;
+    const giveUp = sessionRecoveryRef.current >= 1;
+    sessionRecoveryRef.current += 1;
 
     // Drop the turn that failed, from the messages and from the feed, so
     // the N-th AI block still shows the N-th turn.
@@ -458,6 +468,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
     setBlocks((prev) => {
       const last = prev.map((b) => b.type).lastIndexOf("ai");
       const kept = last >= 0 ? prev.filter((_, i) => i !== last) : prev;
+      if (giveUp) return kept;
       return [
         ...kept,
         {
@@ -467,6 +478,10 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
       ];
     });
 
+    if (giveUp) {
+      reportSessionFailure(text);
+      return;
+    }
     void handleFreeText(text);
   }
 
@@ -542,6 +557,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
         // Free text: record to history here (dispatchCommand handles its own)
         // then route to the AI.
         setHistory((prev) => [raw, ...prev].slice(0, 40));
+        sessionRecoveryRef.current = 0;
         void handleFreeText(raw);
       }
     } else if (e.key === "ArrowUp") {
@@ -796,8 +812,14 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               const showCursor = isLatestTurn && status === "streaming";
 
               // Show an error line when this is the latest turn and the
-              // request ended in an error state.
-              const showError = isLatestTurn && status === "error";
+              // request ended in an error state. Not for a session error:
+              // handleChatError has already taken that turn out and reports
+              // on its own, so here it would land on the previous, answered
+              // turn.
+              const showError =
+                isLatestTurn &&
+                status === "error" &&
+                sessionErrorCode(error) === null;
 
               return (
                 <div key={blockIdx} className={styles.aiTurn}>
