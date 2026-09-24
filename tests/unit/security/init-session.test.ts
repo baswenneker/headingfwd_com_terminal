@@ -15,6 +15,12 @@ const { verifyTurnstileToken } = vi.hoisted(() => ({
 }));
 vi.mock("~/server/services/turnstile", () => ({ verifyTurnstileToken }));
 
+// A small cap keeps these tests fast: every tRPC call waits 100-500 ms in
+// dev (see timingMiddleware). The default of 20 is covered in
+// rate-limiter.test.ts, without tRPC in between.
+const SESSION_CAP = 5;
+vi.stubEnv("SESSION_RATE_LIMIT", String(SESSION_CAP));
+
 const { createCaller } = await import("~/server/api/root");
 
 function callerFor(ip: string) {
@@ -55,7 +61,7 @@ describe("chat.initSession", () => {
 
   it("refuses past the cap for one client and keeps serving another", async () => {
     const caller = callerFor("203.0.113.9");
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < SESSION_CAP; i++) {
       const result = await caller.chat.initSession({ turnstileToken: "tok" });
       expect(result.sessionId).toMatch(/^session_/);
     }
@@ -70,7 +76,7 @@ describe("chat.initSession", () => {
     ).resolves.toMatchObject({ sessionId: expect.stringMatching(/^session_/) });
 
     const sessions = await db.query.chatSessions.findMany();
-    expect(sessions).toHaveLength(6);
+    expect(sessions).toHaveLength(SESSION_CAP + 1);
   });
 
   it("keys on the client address, not on the address itself being stored", async () => {
@@ -86,13 +92,26 @@ describe("chat.initSession", () => {
 
   it("throws a tRPC error rather than creating a session past the cap", async () => {
     const caller = callerFor("192.0.2.77");
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < SESSION_CAP; i++) {
       await caller.chat.initSession({ turnstileToken: "tok" });
     }
     const error = await caller.chat
       .initSession({ turnstileToken: "tok" })
       .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(TRPCError);
-    expect(await db.query.chatSessions.findMany()).toHaveLength(5);
+    expect(await db.query.chatSessions.findMany()).toHaveLength(SESSION_CAP);
+  });
+
+  it("does not count a refused attempt against the quota", async () => {
+    const caller = callerFor("198.51.100.30");
+    for (let i = 0; i < SESSION_CAP; i++) {
+      await caller.chat.initSession({ turnstileToken: "tok" });
+    }
+    for (let i = 0; i < 3; i++) {
+      await expect(
+        caller.chat.initSession({ turnstileToken: "tok" }),
+      ).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+    }
+    expect(await db.query.rateLimitLogs.findMany()).toHaveLength(SESSION_CAP);
   });
 });

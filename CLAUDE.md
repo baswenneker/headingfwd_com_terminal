@@ -100,6 +100,7 @@ pnpm run deploy       # Merge main→production and push (triggers Vercel deploy
 **Rate Limiting:**
 
 - Message rate limit per session (configured via `MESSAGE_RATE_LIMIT` env var)
+- Session creation: 20 per hour per client address (`SESSION_RATE_LIMIT`); a refused attempt does not count
 - Email sending: 3 emails per hour per session
 - Tracked in `rateLimitLogs` table with periodic cleanup
 
@@ -231,6 +232,7 @@ See `.env.example` for all required variables. Key ones:
 - `RESEND_API_KEY` - Required for email sending
 - `TURNSTILE_SECRET_KEY` / `NEXT_PUBLIC_TURNSTILE_SITE_KEY` - Cloudflare CAPTCHA
 - `MESSAGE_RATE_LIMIT` - Messages per minute (default: 10)
+- `SESSION_RATE_LIMIT` - Sessions one client address may start per hour (default: 20)
 - `ENVIRONMENT` - `development` | `test` | `production`. Distinct from `NODE_ENV`. Outside production, blog drafts are previewable. Unset means production, so it fails closed and Vercel needs no new variable
 
 ### Testing Notes

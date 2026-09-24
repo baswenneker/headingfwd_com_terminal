@@ -1,5 +1,8 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { checkRateLimit } from "~/server/services/rate-limiter";
+import {
+  checkRateLimit,
+  checkSessionRateLimit,
+} from "~/server/services/rate-limiter";
 import { migratedDb, truncateAll, schema } from "../helpers/db";
 
 /**
@@ -49,5 +52,49 @@ describe("checkRateLimit", () => {
 
     const rows = await db.query.rateLimitLogs.findMany();
     expect(rows.map((r) => r.identifier)).toEqual(["id-b"]);
+  });
+
+  it("removes a refused request's row when denied attempts do not count", async () => {
+    const db = await migratedDb();
+    const results = [];
+    for (let i = 0; i < 5; i++) {
+      results.push(
+        await checkRateLimit("id-c", "session_create", 3, 60_000, {
+          countDenied: false,
+        }),
+      );
+    }
+    expect(results.map((r) => r.allowed)).toEqual([
+      true,
+      true,
+      true,
+      false,
+      false,
+    ]);
+    expect(await db.query.rateLimitLogs.findMany()).toHaveLength(3);
+  });
+
+  it("holds the cap under overlap when denied attempts do not count", async () => {
+    const db = await migratedDb();
+    const results = await Promise.all(
+      Array.from({ length: 20 }, () =>
+        checkRateLimit("id-d", "session_create", 5, 60_000, {
+          countDenied: false,
+        }),
+      ),
+    );
+    expect(results.filter((r) => r.allowed)).toHaveLength(5);
+    expect(await db.query.rateLimitLogs.findMany()).toHaveLength(5);
+  });
+
+  it("lets one client start 20 sessions an hour and keeps 20 rows after a refusal", async () => {
+    const db = await migratedDb();
+    const results = [];
+    for (let i = 0; i < 21; i++) {
+      results.push(await checkSessionRateLimit("client-a"));
+    }
+    expect(results.slice(0, 20).every((r) => r.allowed)).toBe(true);
+    expect(results[20]?.allowed).toBe(false);
+    expect(await db.query.rateLimitLogs.findMany()).toHaveLength(20);
   });
 });
