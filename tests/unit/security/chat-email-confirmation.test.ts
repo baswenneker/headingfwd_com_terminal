@@ -190,6 +190,51 @@ describe("/api/chat email confirmation", () => {
     expect(sendContactEmailMock).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps the preview confirmable when sending fails", async () => {
+    const db = await migratedDb();
+    await POST(chatRequest([userMessage("I would like to write to Bas")]));
+    await runTool("previewMessage", { senderEmail: SENDER, message: MESSAGE });
+    const [before] = await db.query.pendingEmails.findMany();
+
+    sendContactEmailMock.mockResolvedValueOnce({
+      success: false,
+      error: "Resend is down",
+    });
+    const input = {
+      senderEmail: SENDER,
+      message: MESSAGE,
+      userConfirmed: true,
+    };
+    expect((await runTool("sendMessage", input)).success).toBe(false);
+    expect(await db.query.pendingEmails.findMany()).toEqual([before]);
+
+    expect((await runTool("sendMessage", input)).success).toBe(true);
+    expect(sendContactEmailMock).toHaveBeenCalledTimes(2);
+    expect(await db.query.pendingEmails.findMany()).toHaveLength(0);
+  });
+
+  it("keeps the preview confirmable when the email limit is reached", async () => {
+    const db = await migratedDb();
+    await POST(chatRequest([userMessage("I would like to write to Bas")]));
+    await runTool("previewMessage", { senderEmail: SENDER, message: MESSAGE });
+    await db.insert(schema.rateLimitLogs).values(
+      Array.from({ length: 3 }, () => ({
+        identifier: SESSION,
+        action: "email_send",
+        createdAt: new Date(),
+      })),
+    );
+
+    const result = await runTool("sendMessage", {
+      senderEmail: SENDER,
+      message: MESSAGE,
+      userConfirmed: true,
+    });
+    expect(result.success).toBe(false);
+    expect(sendContactEmailMock).not.toHaveBeenCalled();
+    expect(await db.query.pendingEmails.findMany()).toHaveLength(1);
+  });
+
   it("refuses a message that differs from the previewed one", async () => {
     await POST(chatRequest([userMessage("I would like to write to Bas")]));
     await runTool("previewMessage", {

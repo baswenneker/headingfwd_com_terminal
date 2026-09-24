@@ -500,9 +500,16 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
               };
             }
 
+            // The claim above stops a double send. If nothing is sent after
+            // all, put the preview back, so the visitor's "yes" still stands
+            // and the model does not have to show the preview again.
+            const restorePreview = () =>
+              db.insert(pendingEmails).values(pending);
+
             // Check email rate limit
             const rateLimit = await checkEmailRateLimit(sessionId);
             if (!rateLimit.allowed) {
+              await restorePreview();
               return {
                 success: false,
                 error: `You've reached the email limit (3 per hour). Please try again later. Resets at ${rateLimit.resetAt.toLocaleTimeString()}.`,
@@ -518,6 +525,7 @@ IMPORTANT: Always include text in your response after calling the tool. The tool
             });
 
             if (!result.success) {
+              await restorePreview();
               return {
                 success: false,
                 error:
