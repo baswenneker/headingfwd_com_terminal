@@ -27,6 +27,7 @@ export const COMMAND_TEXT = {
       "/portfolio",
       "/stack",
       "/contact",
+      "/linkedin",
       "/clear",
     ],
     /** Dim tip line at the bottom of the help output. */
@@ -62,8 +63,8 @@ export const COMMAND_TEXT = {
   STACK: {
     /** Section header. */
     header: "// stack",
-    /** First out-line; starts with "LLMs". */
-    content: "LLMs · agents · RAG",
+    /** First out-line; starts with "LLMs" (#13 F9 added LangGraph to it). */
+    content: "LLMs · agents · LangGraph · RAG",
   },
 
   /** /contact — LinkedIn link + "type here" hint (no email/mailto link) */

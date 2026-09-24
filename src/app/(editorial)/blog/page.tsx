@@ -1,12 +1,16 @@
 import { type Metadata } from "next";
 import Link from "next/link";
 import styles from "../editorial.module.css";
+import { socialMeta } from "~/config/metadata";
+import { SITE_URL } from "~/config/site";
+import { collectionGraph } from "~/config/structured-data";
 import { BLOG } from "~/content/site-content";
 import {
   draftPreviewEnabled,
   formatPostDate,
   POST_LOCALES,
   postPath,
+  publishedPosts,
   routablePosts,
 } from "~/content/posts";
 
@@ -20,22 +24,44 @@ import {
 
 const TITLE = "Blog — writing on AI engineering";
 
+const social = socialMeta({
+  title: TITLE,
+  description: BLOG.description,
+  path: "/blog",
+});
+
 export const metadata: Metadata = {
   title: TITLE,
   description: BLOG.description,
+  ...social,
   alternates: {
-    canonical: "/blog",
+    ...social.alternates,
     // Makes the feed discoverable from the page itself, not only by guessing
     // the URL: browsers and feed readers look for this link.
     types: { "application/rss+xml": "/blog/rss.xml" },
   },
-  openGraph: {
-    type: "website",
-    url: "/blog",
-    title: `${TITLE} — HeadingFWD`,
-    description: BLOG.description,
-  },
 };
+
+/**
+ * Structured data for the overview: a `Blog` node, the `ItemList` of what is
+ * on it and the two-step breadcrumb. Only PUBLISHED posts are listed — a draft
+ * is previewable here outside production, but it is not part of the blog a
+ * crawler should know about.
+ */
+function blogJsonLd() {
+  return collectionGraph({
+    url: `${SITE_URL}/blog`,
+    type: "Blog",
+    name: TITLE,
+    description: BLOG.description,
+    items: publishedPosts().map((post) => ({
+      path: postPath(post),
+      name: post.title,
+      description: post.excerpt,
+    })),
+    trail: [{ name: "Blog", path: "/blog" }],
+  });
+}
 
 export default function BlogIndexPage() {
   const posts = routablePosts();
@@ -43,9 +69,18 @@ export default function BlogIndexPage() {
 
   return (
     <div className={styles.shell}>
+      <script
+        type="application/ld+json"
+        // Built from the posts' own validated frontmatter — safe to inline.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd()) }}
+      />
       <div className={styles.metaBar}>
-        <span className={styles.kicker}>Bas Wenneker · Journal</span>
-        <Link href="/" className={styles.backLink}>
+        {/* "Journal" was the blog's third name, after the h1 ("Blog") and
+            /help ("long-form writing on AI engineering") — and the only one a
+            reader met before the page had said anything (#13 F11). It matches
+            "Bas Wenneker · Portfolio" now, as the two overviews should. */}
+        <span className={styles.kicker}>Bas Wenneker · Blog</span>
+        <Link href="/" prefetch={false} className={styles.backLink}>
           ← back to the terminal
         </Link>
       </div>

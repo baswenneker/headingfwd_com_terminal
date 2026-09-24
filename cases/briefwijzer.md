@@ -3,6 +3,7 @@ title: BriefWijzer
 slug: briefwijzer
 sector: Communication
 status: demo
+period: 2025
 role: AI engineer
 tags: [RAG, OCR, LLM, Marketing]
 stack: [Python, Google Vision, Claude Code, VSCode]

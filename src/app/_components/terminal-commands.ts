@@ -7,7 +7,13 @@
  * feed entirely or append a list of new lines.
  */
 
-import { ABOUT, CONTACT, SPECIALTIES, STACK } from "~/content/site-content";
+import {
+  ABOUT,
+  CONTACT,
+  CREDENTIALS,
+  SPECIALTIES,
+  STACK,
+} from "~/content/site-content";
 
 // ── Discriminated-union line model ──────────────────────────────────────────
 
@@ -30,10 +36,30 @@ export type DimLine = { kind: "dim"; text: string };
 export type BulletLine = { kind: "bullet"; text: string };
 
 /**
+ * Failure notice, in the same red as an AI error. `dim` was the only line the
+ * terminal had for "something did not work", and a dim grey line is exactly
+ * what a visitor skips (#13 U5). Carries the `error-message` test id, like the
+ * AI error line, since both are the same thing to a reader.
+ */
+export type ErrorLine = { kind: "error"; text: string };
+
+/**
  * Two-column label / description row.
  * Label is in accent, min-width 96px; description is slightly muted.
+ *
+ * `href` is set when the label's command also exists as a real page. The
+ * renderer then draws the label as an anchor to that page whose click is
+ * intercepted and run in the terminal instead — so a crawler following the
+ * document reaches every command page, while a visitor stays where they are
+ * (#13 D1). Rows without a page of their own (`/clear`, `/linkedin`) leave it
+ * unset and keep the plain button.
  */
-export type RowLine = { kind: "row"; label: string; desc: string };
+export type RowLine = {
+  kind: "row";
+  label: string;
+  desc: string;
+  href?: string;
+};
 
 /**
  * Clickable link row.
@@ -55,6 +81,7 @@ export type FeedLine =
   | OutLine
   | DimLine
   | BulletLine
+  | ErrorLine
   | RowLine
   | LinkLine;
 
@@ -85,30 +112,66 @@ export type CommandResult =
 
 const sp: SpLine = { kind: "sp" };
 
+/**
+ * A `/help` row, carrying an `href` when the command has a page of its own.
+ *
+ * Declared as a function rather than a const so it can be used above the
+ * `COMMAND_PAGES` declaration it reads: function declarations hoist, a const
+ * set would sit in the temporal dead zone at module evaluation.
+ */
+function row(label: string, desc: string): RowLine {
+  const token = label.replace(/^\//, "");
+  // Every command page, plus the two editorial routes, which are real pages
+  // as well — `/portfolio` and `/blog` are absent from COMMAND_PAGES only
+  // because they are NOT rendered by the `[command]` route.
+  const routable =
+    COMMAND_PAGES.some((p) => p.token === token) ||
+    token === "portfolio" ||
+    token === "blog";
+  return routable
+    ? { kind: "row", label, desc, href: `/${token}` }
+    : { kind: "row", label, desc };
+}
+
 function helpLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "available commands" },
-    { kind: "row", label: "/about",     desc: "who I am & how I work" },
-    { kind: "row", label: "/services",  desc: "what I help teams with" },
-    { kind: "row", label: "/portfolio", desc: "browse my work ↵" },
-    { kind: "row", label: "/blog",      desc: "long-form writing on AI engineering ↵" },
-    { kind: "row", label: "/stack",     desc: "tools, models & tech" },
-    { kind: "row", label: "/contact",   desc: "how to reach me" },
-    { kind: "row", label: "/agents",    desc: "plaintext version for agents (llms.txt)" },
-    { kind: "row", label: "/clear",     desc: "clear the screen" },
+    row("/about",     "who I am & how I work"),
+    row("/services",  "what I help teams with"),
+    row("/portfolio", "browse my work ↵"),
+    row("/blog",      "long-form writing on AI engineering ↵"),
+    row("/stack",     "tools, models & tech"),
+    row("/contact",   "how to reach me"),
+    // Listed because /contact calls LinkedIn the fastest channel and the AI
+    // assistant tells visitors to type it — a command the site advertises has
+    // to be in the list of commands (#13 D5). No page of its own: it opens an
+    // external profile, hence no href and the ↗ in the description.
+    row("/linkedin",  "open Bas's LinkedIn profile ↗"),
+    row("/agents",    "plaintext version for agents (llms.txt)"),
+    row("/clear",     "clear the screen"),
     { kind: "dim", text: "tip: arrow keys recall history · or just type a question" },
   ];
 }
 
 function aboutLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "$ whoami" },
     { kind: "out", text: ABOUT.name },
     ...ABOUT.lines.map((text): FeedLine => ({ kind: "out", text })),
+    sp,
+    // The same proof line the homepage shows above the fold (#13 F1): /about
+    // is where a reader goes for the track record, so it says it here too.
+    { kind: "dim", text: CREDENTIALS },
   ];
 }
 
 function servicesLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "// what I help teams with" },
     ...SPECIALTIES.map(
@@ -118,26 +181,44 @@ function servicesLines(): FeedLine[] {
 }
 
 function stackLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "// stack" },
     ...STACK.map((text): FeedLine => ({ kind: "out", text })),
   ];
 }
 
+/**
+ * `/contact` — the two ways to reach Bas, and what happens after.
+ *
+ * The old version said "I'll pass it to Bas", in a first person the visitor
+ * had no way to place: nothing on the page said the thing answering is an AI
+ * assistant, and nothing said a human ever reads what it takes down (#13
+ * F3/F5). It also promised no response time, while the assistant told anyone
+ * who asked "24–48 hours". Both surfaces now say two working days.
+ */
 function contactLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "let's talk →" },
     { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
-    { kind: "out",  text: "or just type your message right here — I'll pass it to Bas." },
+    { kind: "out",  text: "Or type your message here — what you're building, where it's" },
+    { kind: "out",  text: "stuck, and roughly when. An AI assistant takes it down and shows" },
+    { kind: "out",  text: "it to you before it goes; Bas reads every one himself and replies" },
+    { kind: "out",  text: "within two working days." },
     { kind: "dim",  text: CONTACT.note },
   ];
 }
 
 /** Points visitors and AI agents at the plain-text, machine-readable source. */
 function agentsLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "head", text: "// plaintext version for agents" },
-    { kind: "out",  text: "A plain-text, machine-readable copy of everything here —" },
+    { kind: "out",  text: "A plain-text map of this site — one link per case and post," },
     { kind: "out",  text: "so AI agents & crawlers can read the source directly." },
     { kind: "link", label: "file", text: "llms.txt", href: "/llms.txt" },
   ];
@@ -147,6 +228,8 @@ function agentsLines(): FeedLine[] {
  * Registry of known slash-commands. Keys are the lowercase command tokens
  * (without the leading slash).
  */
+// Keys aligned on purpose.
+// prettier-ignore
 const COMMANDS: Record<string, () => FeedLine[]> = {
   help:     helpLines,
   about:    aboutLines,
@@ -155,7 +238,12 @@ const COMMANDS: Record<string, () => FeedLine[]> = {
   contact:  contactLines,
   agents:   agentsLines,
   llms:     agentsLines,
-  whoami:   () => [{ kind: "out", text: "guest@headingfwd — welcome :)" }],
+  // An easter egg that still answers in the shell's own voice: the old
+  // "welcome :)" broke the character the rest of the terminal keeps (#13 F20).
+  whoami:   () => [
+    { kind: "out", text: "guest@headingfwd — logged in as a visitor." },
+    { kind: "out", text: "Try /about for the host." },
+  ],
   ls:       () => [{ kind: "out", text: "about/  services/  stack/  contact/" }],
 };
 
@@ -167,6 +255,8 @@ const COMMANDS: Record<string, () => FeedLine[]> = {
  * the browser blocks the popup.
  */
 function linkedinLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
     { kind: "out",  text: "→ opening Bas's LinkedIn profile in a new tab…" },
     { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
@@ -224,9 +314,12 @@ export const COMMAND_PAGES: CommandPage[] = [
   {
     token: "stack",
     title: "Stack — tools, models & tech",
+    // Derived in spirit from STACK, not from the literal: a meta description
+    // is prose with commas, not the terminal's middle dots. Kept in step with
+    // it by hand — the two lines above are the source (#13 F9).
     description:
-      "The HeadingFWD stack: LLMs, agents, RAG, evals, prompt + context " +
-      "engineering · Python, TypeScript, React, Ruby on Rails, Docker.",
+      "The HeadingFWD stack: LLMs, agents, LangGraph, RAG, evals, prompt + " +
+      "context engineering · Python, FastAPI, TypeScript, Next.js, Docker.",
   },
   {
     token: "contact",
@@ -246,12 +339,19 @@ export const COMMAND_PAGES: CommandPage[] = [
 
 /**
  * Fallback response for input that is not a recognised slash-command.
- * Points the visitor toward /help and the contact email.
+ *
+ * "I'm a lightweight demo assistant on this page" talked the assistant down
+ * in the one moment a visitor had just tried something (#13 F13). It is not a
+ * demo: it answers questions about the work and it gets a message to Bas. The
+ * line says what went wrong, what to do instead, and what it can do.
  */
 function freeformLines(): FeedLine[] {
+  // Columns aligned on purpose.
+  // prettier-ignore
   return [
-    { kind: "out",  text: "→ I'm a lightweight demo assistant on this page." },
-    { kind: "out",  text: "  Type /help for commands, or reach Bas directly:" },
+    { kind: "out",  text: "→ Not a command. Type /help for the list, or just ask a" },
+    { kind: "out",  text: "  question — I'm Bas's AI assistant and I can pass a message" },
+    { kind: "out",  text: "  to him." },
     { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
   ];
 }

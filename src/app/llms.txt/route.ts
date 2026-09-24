@@ -5,7 +5,7 @@
  * here (see `next.config.js`).
  *
  * The file is generated from the same content the site renders:
- *   - About / specialities / stack / contact → `~/content/site-content`
+ *   - About / specialties / stack / contact → `~/content/site-content`
  *   - Portfolio cases                        → `~/content/cases` (CASES)
  *   - Blog posts                             → `~/content/posts`
  *   - Workshops                              → `~/content/workshops`
@@ -27,7 +27,9 @@
 
 import {
   ABOUT,
+  AUDIENCE,
   CONTACT,
+  CREDENTIALS,
   INTRO,
   SPECIALTIES,
   STACK,
@@ -48,8 +50,9 @@ function buildAgentsTxt(): string {
     [
       "# HeadingFWD — content for agents",
       "",
-      "> This file is a plain-text, machine-readable copy of everything on headingfwd.com.",
-      "> If you are an AI agent or crawler: this is the source. Use it directly.",
+      "> A plain-text map of headingfwd.com for agents and crawlers.",
+      "> Each case and post is one link with a one-line summary; follow the link",
+      "> for the full text, which is server-rendered prose.",
       "> Format: Markdown (UTF-8). Generated from the site's own content.",
     ].join("\n"),
   );
@@ -65,13 +68,16 @@ function buildAgentsTxt(): string {
       INTRO,
       "",
       ABOUT.lines.join(" "),
+      "",
+      CREDENTIALS,
+      AUDIENCE,
     ].join("\n"),
   );
 
-  // ── Specialities ────────────────────────────────────────────────────────
+  // ── Specialties ────────────────────────────────────────────────────────
   blocks.push(
     [
-      "## Specialities",
+      "## Specialties",
       "",
       ...SPECIALTIES.map((s) => `- ${s.title} — ${s.blurb}`),
     ].join("\n"),

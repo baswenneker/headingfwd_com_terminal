@@ -104,6 +104,12 @@
   line-height: 1.7;
 }
 
+.comingSoonText a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* ─── Case footer ────────────────────────────────────────────────────────── */
 
 .footer {
@@ -151,6 +157,23 @@
   text-decoration: none;
 }
 
+/* The second choice beside the CTA: a text link, deliberately not a button. */
+.secondaryLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  font-size: 13px;
+  color: var(--ink-dim);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.secondaryLink:hover,
+.secondaryLink:focus-visible {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
 .footerLinks {
   margin: 18px 0 0;
   font-size: 12px;
@@ -170,6 +193,16 @@
   font-weight: 700;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
+}
+
+/* The caveat a card states under its `kind` — quieter than the summary, one
+ * step brighter than the tag line beneath it, so it reads as a remark rather
+ * than as part of the pitch. */
+.listNote {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--ink-dim);
 }
 
 .listTags {

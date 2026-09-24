@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { type FeedLine } from "./terminal-commands";
 import styles from "./terminal.module.css";
 
@@ -73,6 +74,19 @@ export function renderFeedLine(
         </div>
       );
 
+    case "error":
+      // role="alert" so the failure is announced, not only drawn (#13 U4).
+      return (
+        <div
+          key={key}
+          className={`${styles.feedLine} ${styles.aiError}`}
+          role="alert"
+          data-testid="error-message"
+        >
+          {line.text}
+        </div>
+      );
+
     case "bullet":
       return (
         <div key={key} className={`${styles.feedLine} ${styles.feedBullet}`}>
@@ -82,14 +96,35 @@ export function renderFeedLine(
       );
 
     case "row":
-      // When the label is a slash-command and a dispatch function is provided,
-      // render the label as a button so touch visitors can tap it to run the
-      // command without having to type. Keyboard users continue to navigate via
-      // the input field as before. stopPropagation prevents the body's
-      // click-to-refocus handler from conflicting with the button action.
+      // Three shapes, in order of preference:
+      //
+      //   href + dispatch — an anchor to the command's own page whose click is
+      //     intercepted: the crawler follows the href and indexes the page,
+      //     the visitor stays in the terminal and sees the output in the feed.
+      //     prefetch={false}: /help lists six pages at once and a visitor
+      //     reads rather than opens them.
+      //   dispatch only — a button, for commands with no page (/clear).
+      //   neither — plain text, as on the server-rendered deep-link pages
+      //     before hydration.
+      //
+      // stopPropagation in both interactive shapes keeps the body's
+      // click-to-refocus handler from fighting the activation.
       return (
         <div key={key} className={`${styles.feedLine} ${styles.feedRow}`}>
-          {onRunCommand && line.label.startsWith("/") ? (
+          {onRunCommand && line.href ? (
+            <Link
+              href={line.href}
+              prefetch={false}
+              className={`${styles.feedRowLabel} ${styles.feedRowLabelBtn}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onRunCommand(line.label);
+              }}
+            >
+              {line.label}
+            </Link>
+          ) : onRunCommand && line.label.startsWith("/") ? (
             <button
               className={`${styles.feedRowLabel} ${styles.feedRowLabelBtn}`}
               onClick={(e) => {

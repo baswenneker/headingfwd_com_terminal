@@ -23,17 +23,18 @@ export const metadata: Metadata = {
   description:
     "That route doesn’t exist on headingfwd.com. Head back to the terminal, " +
     "or jump to the portfolio, blog, services, about or contact pages.",
-  // Both lines below override something the root layout would otherwise hand
-  // down to this page.
+  // `robots: null` CLEARS what the root layout hands down, the way
+  // `alternates.canonical: null` below does. Next injects `<meta
+  // name="robots" content="noindex">` into every not-found render by itself;
+  // the layout's `index: true, follow: true` came along on top of it, and an
+  // explicit `noindex, follow` here only replaced one contradiction with a
+  // duplicate. Cleared, the served 404 carries Next's single `noindex`.
   //
-  // `robots`: the layout sets `index: true, follow: true` for the real pages.
-  // Inheriting that here would contradict the `noindex` Next injects on every
-  // 404. The two tags then disagree, so say noindex explicitly instead.
-  robots: { index: false, follow: true },
   // `alternates`: the layout sets `canonical: "/"`. A 404 carrying it tells
   // crawlers the homepage is this URL's real version, and Search Console files
   // the URL under "Alternative page with proper canonical tag". A page that
   // does not exist has no canonical, so drop it.
+  robots: null,
   alternates: { canonical: null },
 };
 
@@ -92,7 +93,7 @@ export default function NotFound() {
           </p>
 
           {/* Terminal-style comment label above the routes */}
-          <div className={styles.specialitiesLabel}>{"// available routes"}</div>
+          <div className={styles.specialtiesLabel}>{"// available routes"}</div>
           <nav className={nf.routes} aria-label="Working routes">
             {ROUTES.map((r) => (
               <Link key={r.href} href={r.href} className={nf.route}>
@@ -105,20 +106,23 @@ export default function NotFound() {
             ))}
           </nav>
 
+          {/* The tip used to end "or just ask me anything" on a page with no
+              input to ask it in (#13 U12). */}
           <p className={styles.tip}>
             tip: type{" "}
             <Link href="/help" className={styles.tipCommand}>
               /help
             </Link>{" "}
-            once you’re back, or just ask me anything
+            once you’re back.
           </p>
 
-          {/* Divider + a fresh prompt, ready for the next command */}
+          {/* Divider + a fresh prompt. It looked ready for a command that
+              could never be typed here, so it is the link back instead. */}
           <div className={styles.divider} />
-          <div className={styles.promptLine}>
-            {"bas@headingfwd:~$ "}
+          <Link href="/" className={`${styles.promptLine} ${nf.promptLink}`}>
+            {"bas@headingfwd:~$ cd ~"}
             <span className={nf.cursor} aria-hidden="true" />
-          </div>
+          </Link>
         </div>
 
         {/* ── Status bar ── */}
@@ -129,6 +133,20 @@ export default function NotFound() {
           </span>
           <span>main</span>
           <span>utf-8</span>
+          {/*
+           * The same three links the terminal's status bar carries. The 404
+           * dropped them, so the one page a visitor reaches by mistake offered
+           * less of a way on than the page they meant to reach (#13 D4).
+           */}
+          <Link className={styles.statusLink} href="/portfolio">
+            portfolio
+          </Link>
+          <Link className={styles.statusLink} href="/blog">
+            blog
+          </Link>
+          <Link className={styles.statusLink} href="/contact">
+            contact
+          </Link>
           <a
             className={styles.statusAgents}
             href="/llms.txt"
@@ -141,7 +159,9 @@ export default function NotFound() {
             </span>
             <span className={styles.statusAgentsShort}>llms.txt</span>
           </a>
-          <span className={styles.statusRight}>error 404 · route not found</span>
+          <span className={styles.statusRight}>
+            error 404 · route not found
+          </span>
         </div>
       </div>
     </main>

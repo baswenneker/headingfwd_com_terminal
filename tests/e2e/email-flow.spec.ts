@@ -23,7 +23,7 @@ import { MOCK_TOOL_OPTIONS } from "../fixtures/mock-responses";
  * Two paths are covered:
  *
  *   Success  — tool output { success: true } → terminal shows
- *              "✓ message sent to bas@headingfwd.com".
+ *              "✓ message sent to Bas".
  *
  *   Failure  — tool output { success: false, error } → terminal shows the
  *              error text in a red line. The raw JSON object must NOT appear.
@@ -48,7 +48,7 @@ test.describe("Email tool stream", () => {
     const reply = page.locator('[data-testid="assistant-message"]').last();
     await expect(reply).toBeVisible();
     // The terminal renders the success state as a styled div with this text.
-    await expect(reply).toContainText("✓ message sent to bas@headingfwd.com");
+    await expect(reply).toContainText("✓ message sent to Bas");
   });
 
   test("rate-limited tool call shows the error text — not raw JSON", async ({

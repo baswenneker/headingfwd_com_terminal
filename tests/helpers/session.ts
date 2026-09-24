@@ -1,5 +1,4 @@
 import { type Page } from "@playwright/test";
-import { createTestSession } from "./database";
 
 /**
  * Navigation and interaction helpers for the terminal E2E tests.
@@ -14,19 +13,16 @@ import { createTestSession } from "./database";
  *   environment), the session is created automatically on the first message.
  *
  * Use `sendCommand` for slash-commands and `sendAIMessage` for free-text.
- * The unified `sendTerminalMessage` dispatches to the appropriate helper
- * based on whether the input starts with "/".
+ *
+ * Kept intentionally small: every export here is used by a real spec. A
+ * larger set of helpers (setupTestSession, sendTerminalMessage,
+ * getLastMessage, getAllMessages, isCaptchaVisible) used to live here
+ * unreferenced by any spec — removed rather than kept as dead code (#13 T7).
+ * `sessionIdRef` in terminal.tsx is only ever set by a real `initSession`
+ * tRPC call, so a pre-made session cannot be handed to the browser this way;
+ * see tests/helpers/database.ts's `expireSession` for how the session-expiry
+ * test works around that instead.
  */
-
-/**
- * Create a verified test session directly in the database.
- * Useful for pre-seeding rate-limit state before navigating to the page.
- */
-export async function setupTestSession(_page: Page) {
-  const session = await createTestSession({ verified: true, messageCount: 0 });
-  if (!session) throw new Error("Failed to create test session in test DB");
-  return session;
-}
 
 /**
  * Navigate to the terminal homepage and wait for the page to be fully loaded.
@@ -104,38 +100,6 @@ export async function sendAIMessage(page: Page, text: string) {
 }
 
 /**
- * Unified send helper that routes to the correct wait strategy.
- * Slash-commands (starting with "/") complete immediately.
- * Free-text messages wait for the AI response.
- */
-export async function sendTerminalMessage(page: Page, message: string) {
-  if (message.trim().startsWith("/")) {
-    await sendCommand(page, message);
-  } else {
-    await sendAIMessage(page, message);
-  }
-}
-
-/**
- * Return the text content of the last `[data-testid="assistant-message"]`
- * element in the terminal feed, or null if no AI reply has arrived yet.
- */
-export async function getLastMessage(page: Page) {
-  const messages = await page
-    .locator('[data-testid="assistant-message"]')
-    .all();
-  if (messages.length === 0) return null;
-  return messages[messages.length - 1]!.textContent();
-}
-
-/**
- * Return the text contents of all `[data-testid*="message"]` elements.
- */
-export async function getAllMessages(page: Page) {
-  return page.locator('[data-testid*="message"]').allTextContents();
-}
-
-/**
  * Wait until `[data-testid="loading-indicator"]` is no longer visible.
  *
  * Playwright's `state: "hidden"` matches both elements that are detached
@@ -148,11 +112,4 @@ export async function waitForLoadingComplete(page: Page) {
     state: "hidden",
     timeout: 20000,
   });
-}
-
-/**
- * Return true if the CAPTCHA overlay is currently visible.
- */
-export async function isCaptchaVisible(page: Page) {
-  return page.getByTestId("captcha-overlay").isVisible();
 }

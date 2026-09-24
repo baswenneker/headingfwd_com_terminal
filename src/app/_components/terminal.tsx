@@ -2,15 +2,40 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { api } from "~/trpc/react";
 import { env } from "~/env";
+import {
+  AUDIENCE,
+  CONTACT,
+  CREDENTIALS,
+  INTRO_FIRST_PERSON,
+  SPECIALTIES,
+} from "~/content/site-content";
 import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
-import { CaptchaOverlay } from "./captcha-overlay";
 import { MemoizedMarkdown } from "./memoized-markdown";
+import { groupTurns, withoutLastTurn } from "./chat-turns";
+
+/**
+ * The CAPTCHA overlay, loaded the first time it is shown rather than with the
+ * page.
+ *
+ * `@marsidev/react-turnstile` is the single largest thing the terminal used to
+ * ship — around 730 KB raw in one chunk — and it is needed only once a visitor
+ * types a free-text message, which most never do (#13 P2). A static import put
+ * it in the initial script list of `/` and of all six command pages.
+ *
+ * `ssr: false` because the widget has no server rendering to contribute: the
+ * overlay is mounted from an event handler, never during the first paint.
+ */
+const CaptchaOverlay = dynamic(
+  () => import("./captcha-overlay").then((m) => m.CaptchaOverlay),
+  { ssr: false },
+);
 
 // ── Feed block model ────────────────────────────────────────────────────────
 //
@@ -21,8 +46,18 @@ import { MemoizedMarkdown } from "./memoized-markdown";
 // top-to-bottom in the order events happened.
 
 type CommandBlock = { type: "cmd"; lines: FeedLine[] };
-type AiTurnBlock  = { type: "ai";  userText: string };
-type FeedBlock    = CommandBlock | AiTurnBlock;
+type AiTurnBlock = { type: "ai"; userText: string };
+type FeedBlock = CommandBlock | AiTurnBlock;
+
+/**
+ * Id of the error line belonging to the latest AI turn. The input points at
+ * it with aria-describedby while it is on screen, so the two are one thing to
+ * a screen reader instead of two unrelated ones.
+ */
+const TERMINAL_ERROR_ID = "terminal-error";
+
+/** Id of the command input — the skip link's target (#13 U11). */
+const TERMINAL_INPUT_ID = "terminal-input";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -66,10 +101,24 @@ function initialCommandBlocks(command?: string): FeedBlock[] {
  * of raw JSON. If the input is not JSON, or the JSON does not contain an
  * "error" string, the raw text is returned as-is. An empty result falls back
  * to a generic prompt.
+ *
+ * A dropped connection never produces a body at all: fetch rejects with a
+ * TypeError whose message is the browser's own wording — "Failed to fetch" in
+ * Chrome, "NetworkError when attempting to fetch resource" in Firefox — which
+ * the terminal used to print verbatim (#13 U7). Those are recognised and
+ * answered in the site's own voice instead.
  */
 function readableError(err: unknown): string {
   const raw =
     err instanceof Error ? err.message : typeof err === "string" ? err : "";
+
+  if (
+    err instanceof TypeError ||
+    /failed to fetch|networkerror|network request failed|load failed/i.test(raw)
+  ) {
+    return "No connection. Check your network and try again.";
+  }
+
   try {
     const parsed: unknown = JSON.parse(raw);
     if (parsed && typeof parsed === "object" && "error" in parsed) {
@@ -80,6 +129,76 @@ function readableError(err: unknown): string {
     // raw was not JSON — fall through to the raw text
   }
   return raw.trim() || "Something went wrong. Please try again.";
+}
+
+/**
+ * Reads the error code out of a failed /api/chat response, when it carries
+ * one of the two that mean "this session is no longer valid".
+ *
+ * The route answers `{"error":"…","code":"SESSION_EXPIRED"}` (see
+ * `~/lib/errors`), and the AI SDK hands the raw body over as the Error's
+ * message. Anything else — a rate limit, a network failure, a malformed
+ * body — returns null and is shown to the visitor as it always was.
+ */
+function sessionErrorCode(err: unknown): string | null {
+  const raw = err instanceof Error ? err.message : "";
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const code =
+      parsed && typeof parsed === "object" && "code" in parsed
+        ? (parsed as { code?: unknown }).code
+        : undefined;
+    return code === "SESSION_EXPIRED" || code === "SESSION_NOT_FOUND"
+      ? code
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The phrases the hero paragraph lifts out of the sentence, longest first so
+ * a longer phrase always wins over a shorter one it contains.
+ *
+ * The sentence itself comes from `INTRO` in site-content.ts; this list is the
+ * styling laid over it. A phrase that is no longer in the sentence simply
+ * highlights nothing — the text renders whole either way, which is what makes
+ * it safe to keep the colour after the copy became derived (#13 F6).
+ */
+const HERO_HIGHLIGHTS: { phrase: string; accent?: true }[] = [
+  { phrase: "Generative AI", accent: true },
+  { phrase: "AI workflows" },
+  { phrase: "AI strategy" },
+  { phrase: "assistants" },
+  { phrase: "dev teams" },
+  { phrase: "agents" },
+];
+
+/** One sentence with the HERO_HIGHLIGHTS phrases wrapped in their own span. */
+function Highlighted({ text }: { text: string }) {
+  const pattern = new RegExp(
+    `(${HERO_HIGHLIGHTS.map((h) => h.phrase).join("|")})`,
+    "g",
+  );
+
+  return (
+    <>
+      {text.split(pattern).map((part, i) => {
+        const hit = HERO_HIGHLIGHTS.find((h) => h.phrase === part);
+        if (!hit) return <Fragment key={i}>{part}</Fragment>;
+        return (
+          <span
+            key={i}
+            className={
+              hit.accent ? styles.valuePropAccent : styles.valuePropBright
+            }
+          >
+            {part}
+          </span>
+        );
+      })}
+    </>
+  );
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -119,13 +238,24 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   const [histIdx, setHistIdx] = useState(-1);
 
   // Session state for the AI chat.
-  // sessionIdRef is the single source of truth read at request time by the
-  // transport body callback; hasSession drives the UI gating logic.
+  //
+  // sessionIdRef is the single source of truth, read at request time by the
+  // transport body callback and by the free-text router below. It used to be
+  // shadowed by a `hasSession` boolean that no JSX read; the two could not
+  // disagree until the session-expiry recovery (#13 U6) had to clear the
+  // session from inside a callback, at which point a stale boolean would have
+  // routed the retry straight back into the expired session.
   const [captchaVisible, setCaptchaVisible] = useState(false);
-  const [hasSession, setHasSession] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
   // Holds the visitor's free-text message while the CAPTCHA overlay is open.
   const pendingMessageRef = useRef<string | null>(null);
+  // The last free-text message dispatched to the AI, kept so an expired
+  // session can be recovered by sending exactly that message again.
+  const lastFreeTextRef = useRef<string | null>(null);
+  // Automatic session recoveries since the visitor last pressed Enter. One is
+  // allowed per typed message; a second session error in a row means a new
+  // session does not help, so the terminal stops instead of looping.
+  const sessionRecoveryRef = useRef(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -150,8 +280,15 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
       }),
       onError: (err: Error) => {
         console.error("[AI Chat Error]", err.message);
+        // Through a ref, so the handler always sees the current feed rather
+        // than the one that existed when useChat was first configured.
+        chatErrorRef.current(err);
       },
     });
+
+  // Latest chat-error handler, refreshed on every render. Declared after
+  // useChat because the handler it holds needs setMessages.
+  const chatErrorRef = useRef<(err: Error) => void>(() => undefined);
 
   // Abort any in-flight stream when the component unmounts.
   useEffect(() => {
@@ -190,7 +327,6 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
     try {
       const result = await initSessionMutation.mutateAsync({ turnstileToken });
       sessionIdRef.current = result.sessionId;
-      setHasSession(true);
       return true;
     } catch (err) {
       console.error(
@@ -201,19 +337,45 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
     }
   }
 
+  /**
+   * What the terminal does when a session could not be created: say so, and
+   * give the message back.
+   *
+   * Every path into `initSession` used to fail silently — the overlay closed,
+   * the input was empty and the typed message was gone, with nothing in the
+   * feed to explain it (#13 U5). The text goes back into the input so the
+   * visitor only has to press Enter again.
+   */
+  function reportSessionFailure(text: string | null) {
+    setBlocks((prev) => [
+      ...prev,
+      {
+        type: "cmd",
+        lines: [
+          {
+            kind: "error",
+            text: "→ Couldn't start a session. Please try again.",
+          },
+        ],
+      },
+    ]);
+    if (text) setInputValue(text);
+  }
+
   // ── AI message dispatch ─────────────────────────────────────────────────
 
   /**
    * Push an AI turn block into the feed and trigger the useChat hook.
    * Only called when sessionIdRef.current is already set.
    *
-   * The N-th AI turn block maps to messages[N*2] (user) and
-   * messages[N*2+1] (assistant) in the useChat messages array. This
-   * correspondence is maintained as long as /clear resets both blocks and
-   * messages simultaneously (which it does in dispatchCommand below).
+   * The N-th AI turn block shows the N-th turn of `groupTurns(messages)`:
+   * every block adds exactly one user message. That holds as long as /clear
+   * resets both blocks and messages together (dispatchCommand below) and a
+   * dropped block also drops its messages (handleChatError).
    */
   function dispatchAiMessage(text: string) {
     if (!sessionIdRef.current) return;
+    lastFreeTextRef.current = text;
     setBlocks((prev) => [...prev, { type: "ai", userText: text }]);
     void sendMessage({ text });
   }
@@ -228,7 +390,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
    * until the visitor solves the challenge.
    */
   async function handleFreeText(text: string) {
-    if (hasSession) {
+    if (sessionIdRef.current) {
       dispatchAiMessage(text);
       return;
     }
@@ -240,9 +402,11 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
       // placeholder token. The server's Turnstile service returns success
       // when DISABLE_CAPTCHA is true, so any token string works here.
       const ok = await initSession("dev-bypass-token");
+      pendingMessageRef.current = null;
       if (ok) {
-        pendingMessageRef.current = null;
         dispatchAiMessage(text);
+      } else {
+        reportSessionFailure(text);
       }
       return;
     }
@@ -260,12 +424,74 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   async function handleCaptchaSuccess(token: string) {
     setCaptchaVisible(false);
     const ok = await initSession(token);
+    const pending = pendingMessageRef.current;
+    pendingMessageRef.current = null;
     if (ok) {
-      const pending = pendingMessageRef.current;
-      pendingMessageRef.current = null;
       if (pending) dispatchAiMessage(pending);
+    } else {
+      reportSessionFailure(pending);
     }
   }
+
+  /**
+   * Recover from a session the server no longer accepts.
+   *
+   * After thirty minutes /api/chat answers 403 with `SESSION_EXPIRED`, and a
+   * session cleared from the database answers `SESSION_NOT_FOUND`. The
+   * terminal used to print "Session expired. Please refresh and start a new
+   * session." and leave the visitor to do exactly that, losing the message
+   * they had just typed (#13 U6).
+   *
+   * Instead the failed turn is taken back out of the feed and out of the
+   * useChat history, the session is cleared, and the same message is sent
+   * again through the normal route — which puts the CAPTCHA back up in place
+   * and, once it is solved, delivers the message. Nothing is reloaded.
+   *
+   * Only once per typed message: if the fresh session is refused as well,
+   * another one will not help, so the turn is dropped, the text goes back
+   * into the input and the feed says the session could not be started.
+   */
+  function handleChatError(err: Error) {
+    const code = sessionErrorCode(err);
+    if (!code) return;
+
+    const text = lastFreeTextRef.current;
+    if (!text) return;
+
+    sessionIdRef.current = null;
+    const giveUp = sessionRecoveryRef.current >= 1;
+    sessionRecoveryRef.current += 1;
+
+    // Drop the turn that failed, from the messages and from the feed, so
+    // the N-th AI block still shows the N-th turn.
+    setMessages(withoutLastTurn(messages));
+    setBlocks((prev) => {
+      const last = prev.map((b) => b.type).lastIndexOf("ai");
+      const kept = last >= 0 ? prev.filter((_, i) => i !== last) : prev;
+      if (giveUp) return kept;
+      return [
+        ...kept,
+        {
+          type: "cmd",
+          lines: [{ kind: "dim", text: "→ session expired, one more check…" }],
+        },
+      ];
+    });
+
+    if (giveUp) {
+      reportSessionFailure(text);
+      return;
+    }
+    void handleFreeText(text);
+  }
+
+  // Keep the ref that useChat's onError reaches through pointing at the
+  // handler built from this render's state. In an effect rather than during
+  // render: an error can only follow an interaction, and every interaction
+  // comes after the commit that updated this.
+  useEffect(() => {
+    chatErrorRef.current = handleChatError;
+  });
 
   // ── Slash-command dispatch ──────────────────────────────────────────────
 
@@ -331,6 +557,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
         // Free text: record to history here (dispatchCommand handles its own)
         // then route to the AI.
         setHistory((prev) => [raw, ...prev].slice(0, 40));
+        sessionRecoveryRef.current = 0;
         void handleFreeText(raw);
       }
     } else if (e.key === "ArrowUp") {
@@ -355,8 +582,9 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   // ── Derived values for rendering ────────────────────────────────────────
 
   // Collect all AI turn blocks in order so we can derive the turn index of
-  // each block (the N-th AI block maps to messages[N*2] and messages[N*2+1]).
+  // each block: the N-th AI block shows the N-th turn.
   const aiTurnBlocks = blocks.filter((b): b is AiTurnBlock => b.type === "ai");
+  const turns = groupTurns(messages);
 
   // True while the AI has a request in flight (waiting or streaming).
   const isAiInFlight = status === "submitted" || status === "streaming";
@@ -372,12 +600,21 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
 
   return (
     <main className={styles.page}>
+      {/*
+       * First focusable element on the page. Without it a keyboard visitor
+       * who lands before the autofocus fires tabs through the tip tokens and
+       * the whole feed before reaching the one control that does anything
+       * (#13 U11). Hidden until focused.
+       */}
+      <a href={`#${TERMINAL_INPUT_ID}`} className={styles.skipLink}>
+        Skip to command input
+      </a>
+
       {/* Faint repeating dot grid — sits behind the terminal window */}
       <div className={styles.grid} aria-hidden="true" />
 
       {/* macOS-style terminal window */}
       <div className={styles.window}>
-
         {/* ── Title bar ── */}
         <div className={styles.titleBar}>
           <div className={styles.trafficLights}>
@@ -406,7 +643,9 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
           }}
         >
           {/* Shell prompt that precedes the intro */}
-          <div className={styles.promptLine}>bas@headingfwd:~$ ./hello --who</div>
+          <div className={styles.promptLine}>
+            bas@headingfwd:~$ ./hello --who
+          </div>
 
           {/* Wordmark: "Heading" in white, "FWD" in accent. The site's single
               level-one heading — names the brand for assistive tech and search. */}
@@ -420,74 +659,108 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             AI engineering &amp; consultancy · Bas Wenneker — AI Lead / Engineer
           </div>
 
-          {/* Value proposition */}
+          {/* Who this is for, and from where. The site said it nowhere, so a
+              visitor had to infer the audience from a Dutch post on an
+              English shell (#13 F18). */}
+          <div className={styles.subtitle}>{AUDIENCE}</div>
+
+          {/* Value proposition — one sentence, derived from INTRO rather than
+              written out a second time (#13 F6). The highlighting is applied
+              on top of it, not baked into it. */}
           <div className={styles.valueProp}>
-            I help teams get real value from{" "}
-            <span className={styles.valuePropAccent}>Generative AI</span> —
-            designing and building{" "}
-            <span className={styles.valuePropBright}>agents</span>,{" "}
-            <span className={styles.valuePropBright}>assistants</span> and{" "}
-            <span className={styles.valuePropBright}>AI workflows</span> that
-            actually make it to production, training{" "}
-            <span className={styles.valuePropBright}>dev teams</span>, and
-            consulting on{" "}
-            <span className={styles.valuePropBright}>AI strategy</span>.
+            <Highlighted text={INTRO_FIRST_PERSON} />
           </div>
 
-          {/* "// specialities" is terminal-style comment decoration */}
-          <div className={styles.specialitiesLabel}>{'// specialities'}</div>
-          <div className={styles.specialitiesGrid}>
-            <div>
-              <span className={styles.specialityBullet}>*</span>
-              Agentic workflow development
-            </div>
-            <div>
-              <span className={styles.specialityBullet}>*</span>
-              AI strategy &amp; consulting
-            </div>
-            <div>
-              <span className={styles.specialityBullet}>*</span>
-              Agentic coding training for dev teams
-            </div>
-            <div>
-              <span className={styles.specialityBullet}>*</span>
-              AI techniques: RAG, graphs, memory and more
-            </div>
+          {/*
+           * The one proof line above the fold. Nothing else here says what has
+           * actually shipped, and a reader who decides in ten seconds decides
+           * on this (#13 F1). It is a single source in site-content.ts, said
+           * the same way by /about and by /llms.txt.
+           */}
+          <div className={styles.credentials}>{CREDENTIALS}</div>
+
+          {/* "// specialties" is terminal-style comment decoration.
+              The grid comes from SPECIALTIES, the same list /services and
+              /llms.txt read: the hand-written copy here had drifted into a
+              different order and different wording (#13 F6). Titles only —
+              the blurb after the em dash belongs to /services, where there is
+              room to read it. */}
+          <div className={styles.specialtiesLabel}>{"// specialties"}</div>
+          <div className={styles.specialtiesGrid}>
+            {SPECIALTIES.map((s) => (
+              <div key={s.title}>
+                <span className={styles.specialtyBullet}>*</span>
+                {s.title}
+              </div>
+            ))}
           </div>
 
-          {/* Hint line — command tokens are real buttons for touch visitors */}
+          {/*
+           * Hint line. Each token is an anchor to the command's own page whose
+           * click is intercepted and run in the terminal instead: a crawler
+           * following the homepage reaches /help, and a visitor clicking it
+           * stays here and sees the output in the feed (#13 D1). `/portfolio`
+           * and `/blog` are real pages outside the terminal, so their dispatch
+           * still leaves — the anchor and the command agree either way.
+           *
+           * prefetch={false}: these are the terminal's own route group, and
+           * prefetching several pages nobody asked for is the cost this file
+           * already avoids in the status bar.
+           */}
           <div className={styles.tip}>
             tip: type{" "}
-            <button
+            <Link
+              href="/help"
+              prefetch={false}
               className={styles.tipCommand}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 dispatchCommand("/help");
               }}
             >
               /help
-            </button>
-            {" "}for commands ·{" "}
-            <button
+            </Link>{" "}
+            for commands ·{" "}
+            <Link
+              href="/portfolio"
+              prefetch={false}
               className={styles.tipCommand}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 dispatchCommand("/portfolio");
               }}
             >
               /portfolio
-            </button>
-            {" "}to browse my work ·{" "}
-            <button
+            </Link>{" "}
+            for the work ·{" "}
+            <Link
+              href="/blog"
+              prefetch={false}
               className={styles.tipCommand}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 dispatchCommand("/blog");
               }}
             >
               /blog
-            </button>
-            {" "}to read what I write · or just ask
+            </Link>{" "}
+            to read what I write ·{" "}
+            <Link
+              href="/contact"
+              prefetch={false}
+              className={styles.tipCommand}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatchCommand("/contact");
+              }}
+            >
+              /contact
+            </Link>{" "}
+            to reach me · or just ask
           </div>
 
           {/* Divider separating the intro from the chronological feed */}
@@ -509,14 +782,14 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
 
               // ── AI turn block ──────────────────────────────────
               //
-              // The N-th AI turn (0-indexed within aiTurnBlocks) maps to
-              // messages[N*2] (user message) and messages[N*2+1] (assistant).
-              // This is valid as long as /clear resets both arrays together.
+              // The N-th AI turn (0-indexed within aiTurnBlocks) shows the
+              // N-th turn from groupTurns, which a failed turn without an
+              // answer cannot shift.
               const turnIdx = aiTurnBlocks.indexOf(block);
               const isLatestTurn = turnIdx === aiTurnBlocks.length - 1;
 
-              const userMsg = messages[turnIdx * 2];
-              const assistantMsg = messages[turnIdx * 2 + 1];
+              const userMsg = turns[turnIdx]?.user;
+              const assistantMsg = turns[turnIdx]?.assistant;
 
               // Determine what to show for this turn.
               // isInFlight: this specific turn is still being processed.
@@ -539,8 +812,14 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               const showCursor = isLatestTurn && status === "streaming";
 
               // Show an error line when this is the latest turn and the
-              // request ended in an error state.
-              const showError = isLatestTurn && status === "error";
+              // request ended in an error state. Not for a session error:
+              // handleChatError has already taken that turn out and reports
+              // on its own, so here it would land on the previous, answered
+              // turn.
+              const showError =
+                isLatestTurn &&
+                status === "error" &&
+                sessionErrorCode(error) === null;
 
               return (
                 <div key={blockIdx} className={styles.aiTurn}>
@@ -584,11 +863,19 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                     </div>
                   )}
 
-                  {/* Streamed or completed assistant response */}
+                  {/*
+                   * Streamed or completed assistant response.
+                   *
+                   * The latest turn is a polite live region, so a screen
+                   * reader hears the answer arrive instead of nothing at all
+                   * (#13 U4). Older turns are not: re-announcing a finished
+                   * answer because a later turn re-rendered would be noise.
+                   */}
                   {assistantMsg && (
                     <div
                       className={styles.aiResponse}
                       data-testid="assistant-message"
+                      aria-live={isLatestTurn ? "polite" : undefined}
                     >
                       {assistantMsg.parts.map((part, partIdx) => {
                         // Render the email-send tool outcome as a terminal-style
@@ -615,11 +902,11 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                           if (toolPart.state === "output-available") {
                             if (toolPart.output?.success) {
                               return (
-                                <div
-                                  key={partIdx}
-                                  className={styles.toolSent}
-                                >
-                                  {"✓ message sent to bas@headingfwd.com"}
+                                <div key={partIdx} className={styles.toolSent}>
+                                  {/* "to Bas", not the address: the site
+                                      does not publish it and the preview
+                                      above no longer does either (#13 F5). */}
+                                  {"✓ message sent to Bas"}
                                 </div>
                               );
                             }
@@ -627,10 +914,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                             // Show the error text in the same red style used for
                             // network/stream errors so it is clearly a problem.
                             return (
-                              <div
-                                key={partIdx}
-                                className={styles.aiError}
-                              >
+                              <div key={partIdx} className={styles.aiError}>
                                 {"→ "}
                                 {toolPart.output?.error ??
                                   "Failed to send your message."}
@@ -642,10 +926,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                             // The tool threw an exception rather than returning
                             // a structured failure; show the raw error text.
                             return (
-                              <div
-                                key={partIdx}
-                                className={styles.aiError}
-                              >
+                              <div key={partIdx} className={styles.aiError}>
                                 {"→ "}
                                 {toolPart.errorText ??
                                   "Failed to send your message."}
@@ -656,10 +937,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                           // While the tool's input is still being built or the
                           // execution is pending, show a dim placeholder.
                           return (
-                            <div
-                              key={partIdx}
-                              className={styles.toolSending}
-                            >
+                            <div key={partIdx} className={styles.toolSending}>
                               {"✉ sending your message…"}
                             </div>
                           );
@@ -691,11 +969,15 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                     </div>
                   )}
 
-                  {/* Error display in terminal style */}
+                  {/* Error display in terminal style. role="alert" so it is
+                      announced the moment it appears, and an id so the input
+                      below can point at it while it is up (#13 U4). */}
                   {showError && (
                     <div
                       className={styles.aiError}
                       data-testid="error-message"
+                      role="alert"
+                      id={TERMINAL_ERROR_ID}
                     >
                       {"→ "}
                       {readableError(error)}
@@ -704,6 +986,20 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                 </div>
               );
             })}
+          </div>
+
+          {/*
+           * Progress, for assistive tech only. "Thinking…" is drawn in the
+           * feed but nothing announced it, so a screen-reader user had no way
+           * to tell a slow answer from a dead page (#13 U4). Kept out of the
+           * visual feed, which already shows all of this.
+           */}
+          <div role="status" aria-live="polite" className={styles.srOnly}>
+            {isAiInFlight
+              ? "Thinking…"
+              : aiTurnBlocks.length > 0 && status === "ready"
+                ? "Answer complete."
+                : ""}
           </div>
 
           {/* ── Input row ── */}
@@ -715,6 +1011,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             </span>
             <input
               ref={inputRef}
+              id={TERMINAL_INPUT_ID}
               className={styles.input}
               type="text"
               aria-label="Terminal command input — type a command like /help or ask a question"
@@ -726,14 +1023,47 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                   ? "complete verification to continue…"
                   : isAiInFlight
                     ? "AI is responding…"
-                    : "type a command…"
+                    : "type a command, or ask the AI assistant anything…"
               }
               disabled={captchaVisible || isAiInFlight}
               spellCheck={false}
               autoComplete="off"
               data-testid="terminal-input"
+              // While an error is on screen the input says so and points at
+              // it, so the message is read with the field rather than only
+              // sitting above it (#13 U4).
+              aria-invalid={status === "error" || undefined}
+              aria-describedby={
+                status === "error" ? TERMINAL_ERROR_ID : undefined
+              }
             />
           </div>
+
+          {/*
+           * Without JavaScript the input above renders and does nothing: no
+           * command runs, no message is sent, and the page said so nowhere
+           * (#13 U8). The editorial pages need no such notice — they are
+           * fully readable without script, by design.
+           */}
+          <noscript>
+            <p className={styles.noscript}>
+              This terminal needs JavaScript. Without it:{" "}
+              {/* Link, not a bare anchor, only to satisfy the Next lint rule:
+                  inside noscript it renders as the plain <a> it has to be. */}
+              <Link href="/portfolio" prefetch={false}>
+                portfolio
+              </Link>
+              ,{" "}
+              <Link href="/blog" prefetch={false}>
+                blog
+              </Link>
+              , or{" "}
+              <a href={CONTACT.linkedin} rel="noreferrer">
+                LinkedIn
+              </a>
+              .
+            </p>
+          </noscript>
         </div>
 
         {/* ── Status bar ── */}
@@ -751,7 +1081,11 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
            * in the initial HTML gives crawlers (and visitors who don't type
            * commands) the way in: home → list → case.
            */}
-          <Link className={styles.statusLink} href="/portfolio" prefetch={false}>
+          <Link
+            className={styles.statusLink}
+            href="/portfolio"
+            prefetch={false}
+          >
             portfolio
           </Link>
           {/*
@@ -761,6 +1095,15 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
            */}
           <Link className={styles.statusLink} href="/blog" prefetch={false}>
             blog
+          </Link>
+          {/*
+           * The one way to reach Bas that does not require typing. The status
+           * bar offered the work and the writing and nothing else, so the
+           * homepage had no contact affordance at all (#13 D4). `/contact` is
+           * a terminal page, so this is a normal in-app link.
+           */}
+          <Link className={styles.statusLink} href="/contact" prefetch={false}>
+            contact
           </Link>
           {/*
            * Plain-text source for AI agents & crawlers. Points at the
@@ -801,8 +1144,24 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               void handleCaptchaSuccess(token);
             }}
             onError={() => {
+              // A rejected or dismissed challenge used to close the overlay
+              // and drop the message without a word (#13 U5). Same treatment
+              // as a failed session call: say so, hand the text back.
               setCaptchaVisible(false);
+              const pending = pendingMessageRef.current;
               pendingMessageRef.current = null;
+              reportSessionFailure(pending);
+            }}
+            onCancel={() => {
+              // Escape: the visitor changed their mind. Nothing failed, so
+              // no error line — the text goes back into the input for them
+              // to edit or send again.
+              setCaptchaVisible(false);
+              const pending = pendingMessageRef.current;
+              pendingMessageRef.current = null;
+              if (pending) setInputValue(pending);
+              // After the commit that re-enables the input.
+              setTimeout(() => inputRef.current?.focus(), 0);
             }}
           />
         )}

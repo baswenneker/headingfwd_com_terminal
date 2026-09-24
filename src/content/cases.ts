@@ -92,8 +92,23 @@ export interface Case {
   title: string;
   /** One-line outcome/role summary — the `/portfolio` list subtitle. */
   kind: string;
+  /**
+   * A caveat the overview card states beside `kind`, when the case is not
+   * what the list around it implies. Only case 03 carries one: it is a
+   * product-management engagement in a list of AI builds, and saying so on
+   * the card is what stopped `/portfolio` claiming "product design" as a
+   * fifth service (#13 F10).
+   */
+  note?: string;
   /** Sector / domain label. */
   sector: string;
+  /**
+   * ISO date (`YYYY-MM-DD`) the case was first published on this site. Drives
+   * `Article.datePublished` and `article:published_time`, and — with `updated`
+   * absent — the sitemap's `lastModified`. Required: a case with no date at
+   * all is a case a crawler cannot place in time.
+   */
+  date: string;
   /** Engagement period, shown in the metadata line (e.g. "Q1 2025", "2024–2025"). */
   period?: string;
   /** Lifecycle status. */
@@ -106,7 +121,7 @@ export interface Case {
   visibility?: CaseVisibility;
   /** My role on the engagement (frontmatter `rol`). */
   role?: string;
-  /** Client name, when not anonymised (frontmatter `klant`). */
+  /** Client name, when not anonymized (frontmatter `klant`). */
   client?: string;
   /** Methodology / technology labels, rendered as chips. */
   tags: string[];
@@ -133,14 +148,20 @@ export const CASES: Case[] = [
     slug: "ai-writing-assistant",
     n: "01",
     title: "AI Writing Assistant",
-    kind: "AI writing assistant that guards the house style — data stays in-house",
+    kind: "Style-guide and B1 rewrites in seconds, without a sentence leaving the building",
     sector: "Government",
+    date: "2026-07-10",
     period: "Q1 2025",
     status: "live",
     role: "Initiator / AI engineer",
     tags: ["LLM", "Writing", "Marketing", "Python", "VectorDB"],
     stack: ["Azure OpenAI", "Python", "Agentic architecture", "VSCode"],
-    sources: ["headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/page.tsx", "headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/schrijfhulp-demo.tsx", "headingfwd-com/src/data/index/page.json (teaser \"AI Schrijfhulp\")", "dspy-writing-style (gerelateerd R&D-experiment)"],
+    sources: [
+      "headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/page.tsx",
+      "headingfwd-demo-playground/src/app/showcase/ai-schrijfhulp/schrijfhulp-demo.tsx",
+      'headingfwd-com/src/data/index/page.json (teaser "AI Schrijfhulp")',
+      "dspy-writing-style (gerelateerd R&D-experiment)",
+    ],
     updated: "2026-07-10",
     body: `
 A generative-AI writing assistant for a large public-sector organization. It rewrites
@@ -221,13 +242,18 @@ organization.
     title: "Hintsay: AI writing assistant for LinkedIn",
     kind: "Months of LinkedIn content in minutes, in your own voice",
     sector: "Marketing",
+    date: "2026-07-10",
     period: "2022–2023",
     status: "live",
     role: "Maker / AI engineer",
     tags: ["LLM", "Marketing", "SaaS"],
     stack: ["React", "Advanced language models", "Cloud infrastructure"],
     links: ["https://hintsay.com"],
-    sources: ["headingfwd-demo-playground/src/app/cases/hintsay/page.tsx", "headingfwd-com/src/data/index/page.json (teaser \"LinkedIn Schrijfhulp\")", "vibes-chrome-li-extension (gerelateerd, los experiment)"],
+    sources: [
+      "headingfwd-demo-playground/src/app/cases/hintsay/page.tsx",
+      'headingfwd-com/src/data/index/page.json (teaser "LinkedIn Schrijfhulp")',
+      "vibes-chrome-li-extension (gerelateerd, los experiment)",
+    ],
     updated: "2026-07-10",
     body: `
 Hintsay is an AI writing assistant that helps professionals build their personal brand
@@ -258,7 +284,7 @@ the person out of the loop.
 
 - Generates posts from proven, high-performing templates
 - Turns a keyword into ready-to-use topic suggestions
-- Personalises to your LinkedIn profile so it sounds like you
+- Personalizes to your LinkedIn profile so it sounds like you
 - Works in English and Dutch
 - Keeps your personal voice and style intact
 
@@ -266,9 +292,9 @@ the person out of the loop.
 
 | Phase | What happened |
 |---|---|
-| Research & discovery | Analysed LinkedIn posting patterns, interviewed content creators, ran competitive and performance analysis |
+| Research & discovery | Analyzed LinkedIn posting patterns, interviewed content creators, ran competitive and performance analysis |
 | Design & prototyping | Minimalist, speed-first UI; iterated on UX and A/B-tested key features |
-| AI integration | Trained on high-performing posts, built personalisation, added quality checks and a continuous-improvement loop |
+| AI integration | Trained on high-performing posts, built personalization, added quality checks and a continuous-improvement loop |
 
 ### How it works
 
@@ -276,7 +302,7 @@ the person out of the loop.
 
 - AI-written posts from a keyword or idea
 - Proven templates for different content types
-- Personalisation based on your LinkedIn profile
+- Personalization based on your LinkedIn profile
 - Adjustable tone of voice
 - English & Dutch (EN/NL)
 - Real-time preview and inline editing
@@ -297,40 +323,45 @@ the person out of the loop.
 | Figure | Meaning |
 |---|---|
 | 10× | Faster content creation |
-| 7 days | Free trial |
 | 2 languages | English & Dutch |
-| ∞ | Content possibilities |
 
 ### Tech & stack
 
 - **Frontend & UX** — modern React interface, real-time content preview, responsive design, fast load times
-- **AI & backend** — LLM-powered generation with a personalisation layer, a continuous-learning pipeline, secure API architecture, and scalable cloud infrastructure
+- **AI & backend** — LLM-powered generation with a personalization layer, a continuous-learning pipeline, secure API architecture, and scalable cloud infrastructure
 
 ### Key takeaways
 
 1. **AI as assistant, not replacement** — people want to stay in control of what goes out under their name.
 2. **Speed is the product** — professionals have little time; every second of friction costs a post.
-3. **Personalisation is non-negotiable** — generic content doesn't land; context is everything.
+3. **Personalization is non-negotiable** — generic content doesn't land; context is everything.
 4. **Keep up or fall behind** — LinkedIn's algorithm keeps shifting, so the tool has to keep learning.
 
 ### Status
 
-**Live** — a SaaS product, available at [hintsay.com](https://hintsay.com).
+**Live** — a SaaS product, available at [hintsay.com](https://hintsay.com), with a
+seven-day free trial.
 `,
   },
   {
     slug: "myworq",
     n: "03",
     title: "MyWorq: employee app for horticulture",
-    kind: "Employee app for horticulture — live with thousands of users",
+    kind: "Live with thousands of greenhouse workers across the sector",
+    note: "A product-management case, not an AI build.",
     sector: "Horticulture",
+    date: "2026-07-15",
     period: "2022–2024",
     status: "live",
     role: "Product Manager",
     client: "bQurius",
     tags: ["Mobile App", "Product Management", "Design Thinking"],
     stack: [],
-    sources: ["headingfwd-demo-playground/src/app/showcase/myworq/page.tsx", "headingfwd-demo-playground/src/app/showcase/myworq/myworq-intro.tsx", "headingfwd-demo-playground/src/app/showcase/myworq/process-ticker.tsx"],
+    sources: [
+      "headingfwd-demo-playground/src/app/showcase/myworq/page.tsx",
+      "headingfwd-demo-playground/src/app/showcase/myworq/myworq-intro.tsx",
+      "headingfwd-demo-playground/src/app/showcase/myworq/process-ticker.tsx",
+    ],
     updated: "2026-07-15",
     videos: [
       {
@@ -384,14 +415,14 @@ largely deskless workforce.
 4. 💻 **Building** — engineers build the feature into the app
 5. 🧪 **Testing** — test the new feature thoroughly
 6. 🚀 **Rollout** — ship the update to users
-7. 🔄 **Iterate** — analyse data, gather feedback, and start again
+7. 🔄 **Iterate** — analyze data, gather feedback, and start again
 
 ## Outcome
 
 ### Role
 
 This is a **product-management case**. The app itself was built by an external software
-agency — my job was to own the product: discovery with real users, prioritisation, and
+agency — my job was to own the product: discovery with real users, prioritization, and
 steering design and engineering toward what mattered most. In other words: I was
 accountable for *what* got built and *why*, not for writing the code.
 
@@ -407,11 +438,19 @@ the product role over to the client after roughly two years.
     title: "BriefWijzer",
     kind: "Make unreadable letters understandable with a single photo",
     sector: "Communication",
+    date: "2025-07-03",
+    period: "2025",
     status: "demo",
     role: "AI engineer",
     tags: ["RAG", "OCR", "LLM", "Marketing"],
     stack: ["Python", "Google Vision", "Claude Code", "VSCode"],
-    sources: ["headingfwd-demo-playground/src/app/showcase/briefwijzer/page.tsx", "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/briefwijzer-intro.tsx", "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/how-it-works.tsx", "headingfwd-com/src/data/index/page.json (teaser \"Briefwijzer\")", "headingfwd_toolkit (promptfoo-test verwijst naar briefwijzer)"],
+    sources: [
+      "headingfwd-demo-playground/src/app/showcase/briefwijzer/page.tsx",
+      "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/briefwijzer-intro.tsx",
+      "headingfwd-demo-playground/src/app/showcase/briefwijzer/components/how-it-works.tsx",
+      'headingfwd-com/src/data/index/page.json (teaser "Briefwijzer")',
+      "headingfwd_toolkit (promptfoo-test verwijst naar briefwijzer)",
+    ],
     updated: "2025-07-03",
     body: `
 BriefWijzer makes unreadable (government) letters understandable. Your customer takes a
@@ -479,14 +518,27 @@ bodies that want to make their letters more accessible.
     slug: "ai-personal-trainer",
     n: "05",
     title: "AI Personal Trainer",
-    kind: "Custom AI that analyzes fitness videos where ChatGPT fails",
+    kind: "Turn a training video into specific form feedback that generic chatbots cannot give",
     sector: "Sports & Fitness",
+    date: "2025-06-19",
+    period: "2025",
     status: "experiment",
     role: "Maker / AI engineer",
     tags: ["LLM", "Multimodal", "Motion recognition", "Python"],
-    stack: ["Google Gemini 2.5 Pro", "Python", "ChatGPT", "GitHub Copilot", "VSCode"],
-    links: ["https://www.linkedin.com/posts/baswenneker_kan-chatgpt-een-personal-trainer-vervangen-activity-7330482395533430785-CqxF/", "https://www.linkedin.com/feed/update/urn:li:activity:7338437372616826883/"],
-    sources: ["headingfwd-demo-playground/src/app/showcase/ai-personal-trainer/page.tsx"],
+    stack: [
+      "Google Gemini 2.5 Pro",
+      "Python",
+      "ChatGPT",
+      "GitHub Copilot",
+      "VSCode",
+    ],
+    links: [
+      "https://www.linkedin.com/posts/baswenneker_kan-chatgpt-een-personal-trainer-vervangen-activity-7330482395533430785-CqxF/",
+      "https://www.linkedin.com/feed/update/urn:li:activity:7338437372616826883/",
+    ],
+    sources: [
+      "headingfwd-demo-playground/src/app/showcase/ai-personal-trainer/page.tsx",
+    ],
     updated: "2025-06-19",
     videos: [
       {
@@ -578,11 +630,14 @@ multimodal models fall short for movement analysis, while a custom approach with
     title: "Chatbot: a Q&A hub for your team",
     kind: "Chat with your manuals instead of searching them",
     sector: "Government",
+    date: "2025-06-19",
     status: "concept",
-    visibility: "coming-soon",
     tags: ["RAG", "LLM", "Chatbot", "Marketing"],
     stack: [],
-    sources: ["headingfwd-demo-playground/src/data/projects.json (entry \"Chatbot: Vraagbaak voor je team\")", "headingfwd-demo-playground/src/app/showcase/coming-soon/page.tsx"],
+    sources: [
+      'headingfwd-demo-playground/src/data/projects.json (entry "Chatbot: Vraagbaak voor je team")',
+      "headingfwd-demo-playground/src/app/showcase/coming-soon/page.tsx",
+    ],
     updated: "2025-06-19",
     body: `
 A chatbot that acts as a Q&A hub for a team and saves a lot of time: chat instead of
@@ -608,20 +663,20 @@ themselves.
     slug: "podcast-transcription",
     n: "07",
     title: "Podcast transcription and segmentation",
-    kind: "Automatically transcribe and segment podcasts with timecodes",
+    kind: "Turn a two-hour episode into a navigable, searchable transcript",
     sector: "Media",
+    date: "2025-06-19",
     status: "concept",
-    visibility: "coming-soon",
     tags: ["Transcription", "LLM", "Audio"],
     stack: [],
-    sources: ["headingfwd-com/src/data/index/page.json (teaser \"Podcast transcriptie en segmentering\")", "whisperfwd (gerelateerde, echte transcriptie-tech)"],
+    sources: [
+      'headingfwd-com/src/data/index/page.json (teaser "Podcast transcriptie en segmentering")',
+      "whisperfwd (gerelateerde, echte transcriptie-tech)",
+    ],
     body: `
-Upload your podcast and automatically get a full transcription plus a segment breakdown
-with timecodes — for example:
-
-- \`0:00–1:30\` Introduction
-- \`1:30–3:00\` Collaboration in healthcare
-- …
+Upload your podcast and get a full transcription back, together with a segment breakdown
+carrying timecodes — so a two-hour episode becomes something a listener can navigate and
+search instead of scrub through.
 
 ## The work
 
@@ -629,7 +684,11 @@ with timecodes — for example:
 
 Audio is automatically converted to text (transcription), after which a model divides the
 content into logical segments with timecodes. This makes a long episode searchable and
-easy to navigate.
+easy to navigate. A breakdown reads like this:
+
+- \`0:00–1:30\` Introduction
+- \`1:30–3:00\` Collaboration in healthcare
+- …
 
 ## Outcome
 

@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Dummy values only, shared by every job below — no repository secrets, and no
+# test here ever touches an external service (OpenAI, Resend, Cloudflare,
+# Turso). NODE_ENV is deliberately NOT set here: it can change how `next
+# build` behaves, so it is only set for the e2e dev run, matching what
+# playwright.config.ts injects into the dev webServer process. The prod run
+# leaves it to `next build` and `next start`, which set production.
+env:
+  SKIP_ENV_VALIDATION: "1"
+  NEXT_PUBLIC_DISABLE_CAPTCHA: "true"
+  ENVIRONMENT: "test"
+  DATABASE_URL: "file:./tmp/db/test.db"
+  MESSAGE_RATE_LIMIT: "10"
+  # Cloudflare's published Turnstile test keys (always pass validation), see
+  # https://developers.cloudflare.com/turnstile/troubleshooting/testing/
+  TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA"
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA"
+  OPENAI_API_KEY: "sk-dummy"
+  RESEND_API_KEY: "re_dummy"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:unit
+
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # dev exercises Turbopack dev (the day-to-day workflow); prod exercises
+        # a real `next build && next start` (see T8 in playwright.config.ts).
+        server: [dev, prod]
+    env:
+      E2E_SERVER: ${{ matrix.server }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: e2e (next dev)
+        if: matrix.server == 'dev'
+        run: pnpm test:e2e
+        env:
+          NODE_ENV: "test"
+      - name: e2e (next build && next start)
+        if: matrix.server == 'prod'
+        run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.server }}
+          path: playwright-report/
+          retention-days: 14

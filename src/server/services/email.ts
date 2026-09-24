@@ -3,7 +3,7 @@ import type { ModelMessage } from "ai";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { emailLogs } from "~/server/db/schema";
-import { logError } from "~/lib/errors";
+import { logError, redactSessionId } from "~/lib/errors";
 import { CONTACT } from "~/content/site-content";
 
 // Initialize Resend client
@@ -137,7 +137,10 @@ export async function sendContactEmail(params: {
   if (!resend || !env.RESEND_API_KEY) {
     const error =
       "Email service is not configured. Missing RESEND_API_KEY environment variable.";
-    logError("sendContactEmail", new Error(error), { sessionId, senderEmail });
+    logError("sendContactEmail", new Error(error), {
+      session: redactSessionId(sessionId),
+      senderEmail,
+    });
     return { success: false, error };
   }
 
@@ -181,7 +184,7 @@ export async function sendContactEmail(params: {
       });
 
       logError("sendContactEmail - Resend API error", error, {
-        sessionId,
+        session: redactSessionId(sessionId),
         senderEmail,
       });
       return { success: false, error: error.message };
@@ -216,7 +219,7 @@ export async function sendContactEmail(params: {
     });
 
     logError("sendContactEmail - Unexpected error", error, {
-      sessionId,
+      session: redactSessionId(sessionId),
       senderEmail,
     });
 

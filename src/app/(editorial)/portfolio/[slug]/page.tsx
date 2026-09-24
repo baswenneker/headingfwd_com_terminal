@@ -9,12 +9,9 @@ import { VideoPreviews } from "~/app/_components/video-previews";
 import { postAssets } from "~/content/blog/assets";
 import { isComingSoonCase, visibleCases, type Case } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
-import {
-  ORGANIZATION_ID,
-  PERSON_ID,
-  SITE_NAME,
-  SITE_URL,
-} from "~/config/site";
+import { socialMeta } from "~/config/metadata";
+import { articleGraph } from "~/config/structured-data";
+import { SITE_URL } from "~/config/site";
 
 /**
  * `/portfolio/<slug>` — one case, server-rendered on the editorial layout.
@@ -67,50 +64,29 @@ function caseDescription(c: Case): string {
  * Case". Coming-soon cases emit the same shape — they are real, linkable
  * pages; hidden cases have no page and therefore no structured data.
  *
- * `dateModified` comes from the case's `updated` field, the same single
- * source the sitemap's `lastModified` uses.
+ * `datePublished` comes from the case's `date` and `dateModified` from
+ * `updated ?? date` — the same single source, and the same fallback, the
+ * sitemap's `lastModified` uses.
  */
 function caseJsonLd(c: Case) {
   const url = `${SITE_URL}/portfolio/${c.slug}`;
 
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Article",
-        "@id": `${url}#article`,
-        url,
-        mainEntityOfPage: url,
-        headline: c.title,
-        description: caseDescription(c),
-        inLanguage: "en",
-        author: { "@id": PERSON_ID },
-        publisher: { "@id": ORGANIZATION_ID },
-        articleSection: c.sector,
-        keywords: c.tags,
-        ...(c.updated ? { dateModified: c.updated } : {}),
-      },
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${url}#breadcrumb`,
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: SITE_NAME,
-            item: `${SITE_URL}/`,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Portfolio",
-            item: `${SITE_URL}/portfolio`,
-          },
-          { "@type": "ListItem", position: 3, name: c.title, item: url },
-        ],
-      },
+  return articleGraph({
+    url,
+    headline: c.title,
+    description: caseDescription(c),
+    inLanguage: "en",
+    datePublished: c.date,
+    // A case that was never revised is unchanged since publication, so it says
+    // so rather than leaving a crawler to guess.
+    dateModified: c.updated ?? c.date,
+    keywords: c.tags,
+    articleSection: c.sector,
+    trail: [
+      { name: "Portfolio", path: "/portfolio" },
+      { name: c.title, path: `/portfolio/${c.slug}` },
     ],
-  };
+  });
 }
 
 export async function generateMetadata({
@@ -125,19 +101,53 @@ export async function generateMetadata({
   return {
     title: c.title,
     description,
-    alternates: {
-      canonical: `/portfolio/${c.slug}`,
-    },
-    openGraph: {
-      // "article", matching the Article node in the JSON-LD below — the two
-      // must agree or a scraper gets contradictory signals. Title and
-      // description are unchanged, so link previews keep looking the same.
-      type: "article",
-      ...(c.updated ? { modifiedTime: c.updated } : {}),
-      url: `/portfolio/${c.slug}`,
-      title: `${c.title} — HeadingFWD`,
+    // "article", matching the Article node in the JSON-LD above — the two must
+    // agree or a scraper gets contradictory signals.
+    ...socialMeta({
+      title: c.title,
       description,
-    },
+      path: `/portfolio/${c.slug}`,
+      type: "article",
+      tags: c.tags,
+      authors: ["Bas Wenneker"],
+      publishedTime: c.date,
+      modifiedTime: c.updated ?? c.date,
+    }),
+  };
+}
+
+/**
+ * The cases a reader is handed on to from one case page: the previous and the
+ * next written-up case, wrapping at both ends.
+ *
+ * The ring skips coming-soon shells — a "next →" that lands on a page saying
+ * the write-up is not ready is a dead end wearing a button. A shell's own page
+ * still offers both neighbours: the nearest real case before and after the
+ * position the shell occupies in the display order.
+ *
+ * Both are undefined only when no written-up case exists at all, which the
+ * footer below handles by rendering no ring.
+ */
+function neighbours(current: Case): { prev?: Case; next?: Case } {
+  const ring = CASES.filter((x) => !isComingSoonCase(x));
+  if (ring.length === 0) return {};
+
+  const inRing = ring.findIndex((x) => x.slug === current.slug);
+  if (inRing >= 0) {
+    return {
+      prev: ring[(inRing - 1 + ring.length) % ring.length],
+      next: ring[(inRing + 1) % ring.length],
+    };
+  }
+
+  // A shell: take the nearest written-up case on either side of its own
+  // position in the full list, wrapping the way the ring above does.
+  const pos = CASES.findIndex((x) => x.slug === current.slug);
+  const before = ring.filter((x) => CASES.indexOf(x) < pos).at(-1);
+  const after = ring.find((x) => CASES.indexOf(x) > pos);
+  return {
+    prev: before ?? ring.at(-1),
+    next: after ?? ring[0],
   };
 }
 
@@ -146,7 +156,13 @@ export async function generateMetadata({
  * the file at build time, exactly as a post image is, so the box is reserved
  * before the bytes arrive and the page never jumps mid-read.
  */
-function Hero({ image, slug }: { image: NonNullable<Case["image"]>; slug: string }) {
+function Hero({
+  image,
+  slug,
+}: {
+  image: NonNullable<Case["image"]>;
+  slug: string;
+}) {
   const resolved = postAssets(`/portfolio/${slug}`).resolve(image.src);
   if (resolved?.kind !== "raster") {
     throw new Error(
@@ -178,17 +194,17 @@ export default async function CasePage({ params }: CasePageProps) {
 
   // Sector leads the kicker, so the metadata line carries what is left:
   // period, state and role, each only when the case has it.
-  const meta = [
-    c.period,
-    comingSoon ? "coming soon" : c.status,
-    c.role,
-  ].filter(Boolean);
+  const meta = [c.period, comingSoon ? "coming soon" : c.status, c.role].filter(
+    Boolean,
+  );
 
-  // Neighbouring cases, wrapping — the same order the overview shows.
-  const all = CASES;
-  const i = all.findIndex((x) => x.slug === c.slug);
-  const prev = all[(i - 1 + all.length) % all.length]!;
-  const next = all[(i + 1) % all.length]!;
+  // Neighbouring cases, wrapping — the same order the overview shows, minus
+  // the coming-soon shells. A prev/next button promises something to read,
+  // and `podcast-transcription`, a shell, was the "prev" of case 01 (#13 D6).
+  // The shells keep their place in the list and their badge; they are simply
+  // not offered as a next stop. A shell's own page hands the reader on to the
+  // nearest real cases on either side of where it sits.
+  const { prev, next } = neighbours(c);
 
   return (
     <div className={styles.shell}>
@@ -227,7 +243,13 @@ export default async function CasePage({ params }: CasePageProps) {
             <p className={pf.comingSoonMark}>🚧 coming soon</p>
             <p className={pf.comingSoonText}>
               This case is being written up soon. Want to know more now, or
-              build something similar? Feel free to get in touch.
+              build something similar? Feel free to{" "}
+              {/* Was plain text, on the one page that has nothing else to
+                  offer the reader (#13 D6). */}
+              <Link href="/contact" prefetch={false}>
+                get in touch
+              </Link>
+              .
             </p>
           </div>
         ) : (
@@ -247,20 +269,24 @@ export default async function CasePage({ params }: CasePageProps) {
 
       <footer className={pf.footer}>
         <nav className={pf.buttons} aria-label="Other cases">
-          <Link
-            href={`/portfolio/${prev.slug}`}
-            rel="prev"
-            className={pf.outlineBtn}
-          >
-            ← prev
-          </Link>
-          <Link
-            href={`/portfolio/${next.slug}`}
-            rel="next"
-            className={pf.outlineBtn}
-          >
-            next →
-          </Link>
+          {prev && (
+            <Link
+              href={`/portfolio/${prev.slug}`}
+              rel="prev"
+              className={pf.outlineBtn}
+            >
+              ← prev
+            </Link>
+          )}
+          {next && (
+            <Link
+              href={`/portfolio/${next.slug}`}
+              rel="next"
+              className={pf.outlineBtn}
+            >
+              next →
+            </Link>
+          )}
 
           {/*
            * "read the case study →" appears only when caseUrl is set. Add it in
@@ -277,20 +303,31 @@ export default async function CasePage({ params }: CasePageProps) {
             </a>
           )}
 
+          {/*
+           * The one call to action on a case used to leave the site for
+           * LinkedIn, on the page where a reader is most convinced (#13 D7).
+           * It points at /contact now, with LinkedIn kept beside it as the
+           * second choice rather than the only one.
+           */}
+          <Link href="/contact" prefetch={false} className={pf.ctaBtn}>
+            work with me →
+          </Link>
           <a
             href={CONTACT.linkedin}
             target="_blank"
             rel="noreferrer"
-            className={pf.ctaBtn}
+            className={pf.secondaryLink}
           >
-            work with me →
+            or connect on LinkedIn
           </a>
         </nav>
 
         <p className={pf.footerLinks}>
           <Link href="/portfolio">← all work</Link>
           {" · "}
-          <Link href="/">back to the terminal</Link>
+          <Link href="/" prefetch={false}>
+            back to the terminal
+          </Link>
         </p>
       </footer>
     </div>

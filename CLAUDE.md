@@ -16,7 +16,7 @@ A terminal-style chatbot website for HeadingFWD (AI engineering consultancy), bu
 pnpm dev              # Start dev server on port 3000 (with Turbo)
 pnpm build            # Build for production
 pnpm start            # Start production server
-pnpm check            # Run linter + type checking
+pnpm check            # Run linter + type checking + unit tests
 pnpm typecheck        # Type check only (tsc --noEmit)
 ```
 
@@ -39,6 +39,8 @@ pnpm db:studio        # Open Drizzle Studio (visual database browser)
 ```
 
 **Important:** In development, automatic migrations are disabled. Use `pnpm db:push` for fast iteration. In production, migrations run automatically on server startup via `src/instrumentation.ts`.
+
+**Env loading for `db:push`/`db:generate`/`db:migrate`/`db:studio`:** these run `drizzle-kit`, a separate CLI process that never goes through Next.js's own env loading — it only sees the real process env. `drizzle.config.ts` loads `.env.local` then `.env` with `dotenv` itself (`override: false`, so a variable already set in the real process env always wins over either file), so a fresh checkout with only `.env.local` in place works with no extra step. If you export `DATABASE_URL` directly in the shell instead, that value is used as-is.
 
 ### Testing
 
@@ -69,10 +71,9 @@ pnpm run deploy       # Merge main→production and push (triggers Vercel deploy
 
 2. **Slash Commands (Instant Responses)**
    - User types `/help`, `/services`, `/contact`, etc.
-   - Frontend calls `/api/commands/[command]` API route
-   - `src/server/services/command-executor.ts` executes command server-side
-   - Returns markdown response immediately (no LLM involved)
-   - Commands defined in `src/config/commands.ts` registry
+   - `runCommand()` in `src/app/_components/terminal-commands.ts` parses the raw input entirely client-side and returns a `CommandResult` (feed lines to append, or a `clear`/`navigate`/`openurl` action)
+   - No network call and no LLM involved — the terminal calls `runCommand()` directly, in the browser
+   - Commands are registered in the `COMMANDS` map in that same file; `COMMAND_PAGES` lists the subset that also gets a real, shareable URL under `src/app/(terminal)/[command]/`
 
 3. **Natural Language Chat (AI Responses)**
    - User types natural language message
@@ -86,9 +87,9 @@ pnpm run deploy       # Merge main→production and push (triggers Vercel deploy
 
 **Dual Command System:**
 
-- **Slash commands** (`/help`, `/services`, etc.) → instant server-side responses, no LLM
-- **Natural chat** → streams through OpenAI with tool calling
-- Rationale: Fast responses for common queries, AI for complex interactions
+- **Slash commands** (`/help`, `/services`, etc.) → parsed and answered entirely client-side by `runCommand()` in `terminal-commands.ts`, no network call and no LLM
+- **Natural chat** → streams through OpenAI with tool calling, via `/api/chat`
+- Rationale: instant responses for common queries, AI for complex interactions
 
 **Database Strategy:**
 
@@ -99,6 +100,7 @@ pnpm run deploy       # Merge main→production and push (triggers Vercel deploy
 **Rate Limiting:**
 
 - Message rate limit per session (configured via `MESSAGE_RATE_LIMIT` env var)
+- Session creation: 20 per hour per client address (`SESSION_RATE_LIMIT`); a refused attempt does not count
 - Email sending: 3 emails per hour per session
 - Tracked in `rateLimitLogs` table with periodic cleanup
 
@@ -178,8 +180,7 @@ src/
 ### Important Files
 
 - **`src/app/api/chat/route.ts`** - Main AI chat endpoint, uses Vercel AI SDK's `streamText`, includes `sendMessage` tool for email sending
-- **`src/server/services/command-executor.ts`** - All slash command handlers, returns markdown
-- **`src/app/_components/terminal-commands.ts`** - Command registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link routes and the sitemap. `/portfolio` and `/blog` are absent from it on purpose: both have a real route under `src/app/(editorial)/`
+- **`src/app/_components/terminal-commands.ts`** - `runCommand()`, the client-side slash-command parser, plus the `COMMANDS` registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link routes and the sitemap. `/portfolio` and `/blog` are absent from `COMMAND_PAGES` on purpose: both have a real route under `src/app/(editorial)/`
 - **`src/content/cases.ts`** - Portfolio cases: the single source of truth for the `/portfolio` overview, the case pages, `/llms.txt` and the generated `cases/*.md` archive
 - **`src/content/workshops.ts`** - The workshop offer page(s): source of truth for `/workshops/<slug>` and its `/llms.txt` line. Unlisted: no link anywhere, not in the sitemap, `noindex`. See `docs/adr/0004-unlisted-offer-page.md`
 - **`src/app/_components/post-body.tsx`** - Renders one Markdown body through the remark pipeline. Used by both a post and a case; takes `{ markdown, assetBase, lang }`
@@ -192,9 +193,9 @@ src/
 
 ### Adding New Slash Commands
 
-1. Add command definition to `src/config/commands.ts` in `COMMAND_REGISTRY`
-2. If dynamic response, add handler function to `commandHandlers` in `src/server/services/command-executor.ts`
-3. Command automatically available via `/api/commands/[command]` route
+1. Add a handler function to the `COMMANDS` map in `src/app/_components/terminal-commands.ts` (it returns `FeedLine[]`), or add a branch in `runCommand()` directly if the command needs its own `action` (like `/portfolio`'s `navigate` or `/linkedin`'s `openurl`)
+2. There is no API route and nothing runs server-side: `runCommand()` is a pure function the terminal calls in the browser
+3. To also give the command a real, shareable URL (e.g. `/help`), add an entry to `COMMAND_PAGES` in the same file — `src/app/(terminal)/[command]/page.tsx` and `src/app/sitemap.ts` both derive their routes from it
 
 ### Adding a Blog Post
 
@@ -236,15 +237,18 @@ See `.env.example` for all required variables. Key ones:
 - `RESEND_API_KEY` - Required for email sending
 - `TURNSTILE_SECRET_KEY` / `NEXT_PUBLIC_TURNSTILE_SITE_KEY` - Cloudflare CAPTCHA
 - `MESSAGE_RATE_LIMIT` - Messages per minute (default: 10)
+- `SESSION_RATE_LIMIT` - Sessions one client address may start per hour (default: 20)
 - `ENVIRONMENT` - `development` | `test` | `production`. Distinct from `NODE_ENV`. Outside production, blog drafts are previewable. Unset means production, so it fails closed and Vercel needs no new variable
 
 ### Testing Notes
 
-- E2E tests in `tests/e2e/` use Playwright
+- Unit tests in `tests/unit/` use Vitest (`pnpm test:unit`, also run as part of `pnpm check`). No browser, no dev server: `tests/unit/setup.ts` seeds a dummy env before any module imports `~/env` or `~/server/db`, and `tests/unit/helpers/db.ts` gives a migrated in-memory database for DB-backed tests. Security-sensitive units (rate limiter, Turnstile, the chat route) live under `tests/unit/security/`
+- E2E tests in `tests/e2e/` use Playwright (`pnpm test:e2e`)
 - Tests run on port 3099 with CAPTCHA disabled
-- Global setup/teardown handles test database
+- `E2E_SERVER=prod pnpm test:e2e` runs the same suite against a production build (`next build && next start`) instead of `next dev`
+- Global setup/teardown handles the test database (path derived from `DATABASE_URL`, see `.env.test`)
 - Tests are sequential to avoid SQLite locking
-- Test fixtures in `tests/fixtures/` for mock data
+- Test fixtures in `tests/fixtures/` for mock data; helpers in `tests/helpers/`
 
 ### LangSmith Observability
 

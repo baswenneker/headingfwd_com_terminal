@@ -393,8 +393,11 @@ test.describe("Feed, sitemap and llms.txt", () => {
     expect(xml).toContain("https://headingfwd.com/blog/rss.xml");
 
     // Checked against the post source itself, so the expectation cannot drift
-    // when the first real post lands.
-    for (const post of publishedPosts()) {
+    // when the first real post lands. Guarded so an empty publishedPosts()
+    // cannot make this loop pass vacuously.
+    const posts = publishedPosts();
+    expect(posts.length).toBeGreaterThan(0);
+    for (const post of posts) {
       expect(xml, `missing feed item for ${post.slug}`).toContain(
         `https://headingfwd.com/blog/${post.slug}`,
       );
@@ -427,7 +430,12 @@ test.describe("Feed, sitemap and llms.txt", () => {
     const xml = await res.text();
 
     expect(xml).toContain("https://headingfwd.com/blog<");
-    for (const post of publishedPosts()) {
+
+    // Guarded so an empty publishedPosts() cannot make this loop pass
+    // vacuously.
+    const posts = publishedPosts();
+    expect(posts.length).toBeGreaterThan(0);
+    for (const post of posts) {
       expect(xml, `missing sitemap entry for ${post.slug}`).toContain(
         `https://headingfwd.com/blog/${post.slug}`,
       );
@@ -442,7 +450,11 @@ test.describe("Feed, sitemap and llms.txt", () => {
     const res = await page.request.get("/llms.txt");
     const text = await res.text();
 
-    for (const post of publishedPosts()) {
+    // Guarded so an empty publishedPosts() cannot make this loop pass
+    // vacuously.
+    const posts = publishedPosts();
+    expect(posts.length).toBeGreaterThan(0);
+    for (const post of posts) {
       expect(text, `missing llms.txt entry for ${post.slug}`).toContain(
         `- [${post.title}](https://headingfwd.com/blog/${post.slug}): ${post.excerpt}`,
       );
@@ -469,7 +481,11 @@ test.describe("Feed, sitemap and llms.txt", () => {
   test("the blog overview and every post point at the feed", async ({
     page,
   }) => {
-    for (const path of ["/blog", ...publishedPosts().map((p) => postPath(p))]) {
+    // Guarded so an empty publishedPosts() cannot make this loop check only
+    // "/blog" and pass vacuously for every post path.
+    const posts = publishedPosts();
+    expect(posts.length).toBeGreaterThan(0);
+    for (const path of ["/blog", ...posts.map((p) => postPath(p))]) {
       const html = await (await page.request.get(path)).text();
       expect(html, `${path} has no feed autodiscovery`).toContain(
         'type="application/rss+xml"',
@@ -494,11 +510,14 @@ test.describe("Terminal integration", () => {
     ).toBeVisible();
   });
 
-  // The tip line above the prompt is the first thing a visitor reads, and its
-  // command tokens are real buttons so a touch visitor never has to type.
+  // The tip line above the prompt is the first thing a visitor reads. Its
+  // command tokens are anchors to the page each command opens (#13 D1), so a
+  // touch visitor never has to type and a crawler finds the blog from here.
   test("the tip line offers /blog and it navigates", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: "/blog", exact: true }).click();
+    const token = page.getByRole("link", { name: "/blog", exact: true });
+    await expect(token).toHaveAttribute("href", "/blog");
+    await token.click();
     await expect(page).toHaveURL("/blog");
   });
 

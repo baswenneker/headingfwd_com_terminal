@@ -26,6 +26,10 @@ export const env = createEnv({
     TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
     OPENAI_API_KEY: z.string().min(1).optional(),
     RESEND_API_KEY: z.string().min(1).optional(),
+    /** Messages per minute per session; see limitFromEnv for the fallback. */
+    MESSAGE_RATE_LIMIT: z.string().optional(),
+    /** Sessions per hour per client address; see limitFromEnv. */
+    SESSION_RATE_LIMIT: z.string().optional(),
     LANGSMITH_TRACING: z.enum(["true", "false"]).optional(),
     LANGSMITH_API_KEY: z.string().optional(),
     LANGSMITH_PROJECT: z.string().optional(),
@@ -58,6 +62,8 @@ export const env = createEnv({
     NEXT_PUBLIC_DISABLE_CAPTCHA: process.env.NEXT_PUBLIC_DISABLE_CAPTCHA,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    MESSAGE_RATE_LIMIT: process.env.MESSAGE_RATE_LIMIT,
+    SESSION_RATE_LIMIT: process.env.SESSION_RATE_LIMIT,
     LANGSMITH_TRACING: process.env.LANGSMITH_TRACING,
     LANGSMITH_API_KEY: process.env.LANGSMITH_API_KEY,
     LANGSMITH_PROJECT: process.env.LANGSMITH_PROJECT,

@@ -82,6 +82,31 @@
   padding-inline: clamp(16px, 4vw, 56px);
 }
 
+/*
+ * Skip link (#13 U11): off-screen until focused, then a plain bordered chip
+ * in the top-left corner, in the same register as the meta bar below.
+ */
+.skipLink {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  transform: translateY(-200%);
+  padding: 8px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.skipLink:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ─── Meta bar ───────────────────────────────────────────────────────────── */
 
 .metaBar {
@@ -597,6 +622,69 @@
 .empty {
   margin-top: 32px;
   color: var(--ink-dim);
+}
+
+/* ─── Site footer ────────────────────────────────────────────────────────── */
+/*
+ * Shared by every editorial page (the layout renders it once). Same reading
+ * column and gutters as `.shell`, a hairline above it, and the dim, uppercase
+ * register of the meta bar so it reads as the closing bracket of the page
+ * rather than a second navigation.
+ */
+
+.siteFooter {
+  border-top: 1px solid var(--rule);
+}
+
+.siteFooterInner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-block: 20px clamp(28px, 4vw, 48px);
+  padding-inline: clamp(16px, 4vw, 56px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 24px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.siteFooterBrand {
+  margin: 0;
+}
+
+.siteFooterNav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.siteFooterNav a {
+  /* 24px minimum hit box on a phone without changing the baseline rhythm. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--ink-dim);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.siteFooterNav a:hover,
+.siteFooterNav a:focus-visible {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* The middot between links is decoration: drawn in CSS, never announced. */
+.siteFooterNav a + a::before {
+  content: "·";
+  margin-right: 12px;
+  color: var(--rule);
+  border-bottom: none;
 }
 
 /* ─── Single column ──────────────────────────────────────────────────────── */

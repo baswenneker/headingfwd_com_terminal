@@ -33,6 +33,20 @@ function xml(value: string): string {
     .replace(/'/g, "&apos;");
 }
 
+/**
+ * The channel's language: the one every published post shares, else "en".
+ *
+ * RSS 2.0 has a single `<language>` for the whole channel, so a feed whose
+ * only item was Dutch used to announce itself as English. When the posts
+ * disagree the channel falls back to the site's own language and each item
+ * keeps saying what it is in `xml:lang`.
+ */
+function channelLanguage(posts: { lang: keyof typeof POST_LOCALES }[]): string {
+  const languages = new Set(posts.map((p) => POST_LOCALES[p.lang].html));
+  const only = [...languages];
+  return only.length === 1 ? only[0]! : "en";
+}
+
 function buildFeed(): string {
   const posts = publishedPosts();
   const newest = posts[0];
@@ -42,8 +56,7 @@ function buildFeed(): string {
       const url = `${SITE_URL}${postPath(post)}`;
       return [
         // RSS 2.0 has no per-item language element, so a Dutch post carries
-        // its language as `xml:lang` on the item. The channel language below
-        // stays "en", the site's own language.
+        // its language as `xml:lang` on the item, whatever the channel says.
         `    <item xml:lang="${POST_LOCALES[post.lang].html}">`,
         `      <title>${xml(post.title)}</title>`,
         `      <link>${xml(url)}</link>`,
@@ -63,7 +76,7 @@ function buildFeed(): string {
     `    <title>${xml(`${SITE_NAME} — Blog`)}</title>`,
     `    <link>${SITE_URL}/blog</link>`,
     `    <description>${xml(BLOG.description)}</description>`,
-    "    <language>en</language>",
+    `    <language>${channelLanguage(posts)}</language>`,
     `    <atom:link href="${FEED_URL}" rel="self" type="application/rss+xml" />`,
     ...(newest
       ? [`    <lastBuildDate>${toRfc822(lastModified(newest))}</lastBuildDate>`]

@@ -81,8 +81,13 @@ test.describe("AI chat streaming", () => {
       .count();
     expect(countAfterFirst).toBe(1);
 
-    // Re-register the mock for the second request (route mocks are consumed
-    // once by default; re-registering replaces the previous handler).
+    // Re-register the mock for the second request. page.route handlers are
+    // NOT consumed after one request — the same handler keeps answering
+    // every matching request. Registering a second page.route call for the
+    // same pattern does not remove the first: Playwright runs the
+    // most-recently-registered matching handler first, and since this one
+    // never calls route.fallback(), it shadows the earlier handler rather
+    // than replacing it.
     await mockChatSuccess(page, MOCK_AI_RESPONSES.MULTI_PARAGRAPH);
     await sendAIMessage(page, "Second message");
 
