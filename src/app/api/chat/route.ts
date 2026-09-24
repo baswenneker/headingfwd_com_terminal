@@ -211,15 +211,15 @@ export async function POST(req: Request) {
     // Rate limit the validated session
     const rateLimit = await checkMessageRateLimit(sessionId);
     if (!rateLimit.allowed) {
+      // No count in the text: a refused request always has 0 left, and
+      // "(0 remaining)" reads as a hard stop rather than "wait a minute".
       logError("Chat API", "Rate limit exceeded", {
         session: redactSessionId(sessionId),
-        remaining: rateLimit.remaining,
       });
       return createErrorJsonResponse(
-        `Rate limit exceeded. Please wait before sending more messages. (${rateLimit.remaining} remaining)`,
+        "Rate limit exceeded. Please wait a minute before sending more.",
         429,
         ErrorCode.RATE_LIMIT_EXCEEDED,
-        { remaining: rateLimit.remaining },
       );
     }
 

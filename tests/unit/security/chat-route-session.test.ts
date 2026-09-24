@@ -138,4 +138,30 @@ describe("/api/chat session handling", () => {
     expect(streamTextSpy).toHaveBeenCalledTimes(1);
     expect(await db.query.rateLimitLogs.findMany()).toHaveLength(1);
   });
+
+  it("answers a refused message with a 429 that names no count", async () => {
+    const db = await migratedDb();
+    await insertSession("session_busy", true);
+    await db.insert(schema.rateLimitLogs).values(
+      Array.from({ length: 10 }, () => ({
+        identifier: "session_busy",
+        action: "message",
+        createdAt: new Date(),
+      })),
+    );
+
+    const res = await POST(
+      chatRequest({
+        messages: [userMessage("one too many")],
+        sessionId: "session_busy",
+      }),
+    );
+
+    expect(res.status).toBe(429);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe(
+      "Rate limit exceeded. Please wait a minute before sending more.",
+    );
+    expect(streamTextSpy).not.toHaveBeenCalled();
+  });
 });

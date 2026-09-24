@@ -26,6 +26,7 @@ describe("checkRateLimit", () => {
     }
     expect(results.map((r) => r.allowed)).toEqual([true, true, true, false]);
     expect(results[2]?.remaining).toBe(0);
+    expect(results[3]?.remaining).toBe(0);
   });
 
   it("never lets more than the cap through when calls overlap", async () => {
