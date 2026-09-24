@@ -12,11 +12,12 @@ interface CaptchaOverlayProps {
 
 /** Elements that can hold focus inside the panel, in DOM order. */
 const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])';
+  'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), iframe, [tabindex]:not([tabindex="-1"])';
 
 /**
- * The focus stops inside `root`, looking into open shadow roots too: the
- * Turnstile widget may put its iframe in one.
+ * The focus stops inside `root`, looking into open shadow roots too. The
+ * Turnstile widget puts its iframe in a closed one, which no script can
+ * reach; the panel is then the last stop Shift+Tab can wrap to.
  */
 function focusStops(root: Element): HTMLElement[] {
   const stops: HTMLElement[] = [];
@@ -101,7 +102,13 @@ export function CaptchaOverlay({
     const panel = panelRef.current;
     if (!panel) return;
     const stops = [panel, ...focusStops(panel)];
-    (edge === "first" ? stops[0] : stops[stops.length - 1])?.focus();
+    if (edge === "last") stops.reverse();
+    // Some stops refuse focus (not rendered, or inert); take the first,
+    // counting from that edge, that actually takes it.
+    for (const stop of stops) {
+      stop.focus();
+      if (document.activeElement === stop) return;
+    }
   };
 
   return (
