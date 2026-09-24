@@ -211,8 +211,10 @@ export async function ogCard({
               maxWidth: 940,
             }}
           >
+            {/* Keyed by position: two wrapped lines can read the same, and
+                the list is built once and never reordered. */}
             {leadLines.map((line, i) => (
-              <span key={line} style={{ color: i === 0 ? INK : INK_DIM }}>
+              <span key={i} style={{ color: i === 0 ? INK : INK_DIM }}>
                 {line}
               </span>
             ))}
