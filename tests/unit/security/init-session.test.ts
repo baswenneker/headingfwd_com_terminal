@@ -17,9 +17,12 @@ vi.mock("~/server/services/turnstile", () => ({ verifyTurnstileToken }));
 
 // A small cap keeps these tests fast: every tRPC call waits 100-500 ms in
 // dev (see timingMiddleware). The default of 20 is covered in
-// rate-limiter.test.ts, without tRPC in between.
-const SESSION_CAP = 5;
-vi.stubEnv("SESSION_RATE_LIMIT", String(SESSION_CAP));
+// rate-limiter.test.ts, without tRPC in between. Hoisted, because `~/env`
+// reads the value once, when the static imports above load it.
+const SESSION_CAP = vi.hoisted(() => {
+  process.env.SESSION_RATE_LIMIT = "5";
+  return 5;
+});
 
 const { createCaller } = await import("~/server/api/root");
 

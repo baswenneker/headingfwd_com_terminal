@@ -2,6 +2,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   checkRateLimit,
   checkSessionRateLimit,
+  limitFromEnv,
 } from "~/server/services/rate-limiter";
 import { migratedDb, truncateAll, schema } from "../helpers/db";
 
@@ -96,5 +97,19 @@ describe("checkRateLimit", () => {
     expect(results.slice(0, 20).every((r) => r.allowed)).toBe(true);
     expect(results[20]?.allowed).toBe(false);
     expect(await db.query.rateLimitLogs.findMany()).toHaveLength(20);
+  });
+});
+
+describe("limitFromEnv", () => {
+  it("falls back on an empty, non-numeric, zero or negative value", () => {
+    expect(limitFromEnv(undefined, 10)).toBe(10);
+    expect(limitFromEnv("", 10)).toBe(10);
+    expect(limitFromEnv("abc", 10)).toBe(10);
+    expect(limitFromEnv("0", 20)).toBe(20);
+    expect(limitFromEnv("-3", 20)).toBe(20);
+  });
+
+  it("uses a positive number as given", () => {
+    expect(limitFromEnv("15", 10)).toBe(15);
   });
 });

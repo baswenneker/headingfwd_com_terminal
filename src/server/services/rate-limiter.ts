@@ -1,4 +1,5 @@
 import { and, asc, eq, gte, lt, lte, or } from "drizzle-orm";
+import { env } from "~/env";
 import { db } from "~/server/db";
 import { rateLimitLogs } from "~/server/db/schema";
 
@@ -96,13 +97,23 @@ export async function checkRateLimit(
 }
 
 /**
+ * A limit read from the environment. An empty, non-numeric, zero or negative
+ * value falls back to the default instead of becoming `NaN` (which refuses
+ * every request) or a cap that lets nobody through.
+ */
+export function limitFromEnv(value: string | undefined, fallback: number) {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+/**
  * Check message rate limit (default: 10 messages per minute)
  * Configurable via MESSAGE_RATE_LIMIT environment variable
  */
 export async function checkMessageRateLimit(
   identifier: string,
 ): Promise<RateLimitResult> {
-  const limit = parseInt(process.env.MESSAGE_RATE_LIMIT ?? "10", 10);
+  const limit = limitFromEnv(env.MESSAGE_RATE_LIMIT, 10);
   return checkRateLimit(identifier, "message", limit, 60 * 1000);
 }
 
@@ -115,7 +126,7 @@ export async function checkMessageRateLimit(
 export async function checkSessionRateLimit(
   identifier: string,
 ): Promise<RateLimitResult> {
-  const limit = parseInt(process.env.SESSION_RATE_LIMIT ?? "20", 10);
+  const limit = limitFromEnv(env.SESSION_RATE_LIMIT, 20);
   return checkRateLimit(identifier, "session_create", limit, MAX_WINDOW_MS, {
     countDenied: false,
   });
