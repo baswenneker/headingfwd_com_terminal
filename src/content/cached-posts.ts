@@ -28,7 +28,7 @@ import {
  */
 function cacheVisibility(): void {
   if (draftPreviewEnabled()) {
-    cacheLife({ stale: 30, revalidate: 1, expire: 300 });
+    cacheLife({ stale: 300, revalidate: 1, expire: 300 });
   } else {
     cacheLife("hours");
   }

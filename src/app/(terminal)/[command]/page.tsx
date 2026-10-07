@@ -28,6 +28,24 @@ export function generateStaticParams() {
   return COMMAND_PAGES.map((c) => ({ command: c.token }));
 }
 
+/**
+ * A token outside the registry must be a hard 404, so the page reads the
+ * token and calls `notFound()` before anything streams. That puts URL data
+ * outside `<Suspense>`, which Partial Prefetching's navigation check flags;
+ * this opts the route out of that check only. The page is still fully
+ * static, and the links into it set `prefetch`, so a prefetch carries the
+ * whole page.
+ */
+export const instant = false;
+
+/**
+ * The deep links are static, and must stay so for the 404 above to hold: with
+ * Partial Prefetching, a token that was not prerendered is otherwise answered
+ * with the route's fallback shell and status 200 while the page renders. With
+ * `"navigation"` Next waits for the full static result, `notFound()` included.
+ */
+export const ensureStatic = "navigation";
+
 function findPage(token: string): CommandPage | undefined {
   return COMMAND_PAGES.find((c) => c.token === token);
 }

@@ -72,7 +72,10 @@ export default function WorkshopPage() {
       >
         <p>
           Interesse? Stuur me een bericht via{" "}
-          <Link href="/contact">/contact</Link>.
+          <Link href="/contact" prefetch>
+            /contact
+          </Link>
+          .
         </p>
       </footer>
     </div>

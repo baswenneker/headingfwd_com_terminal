@@ -9,6 +9,9 @@ const config = {
   // Caching is explicit: `"use cache"` + `cacheLife` where content may change
   // after the build (scheduled blog posts), everything else prerenders.
   cacheComponents: true,
+  // A <Link> prefetches the destination's static shell; links into the
+  // editorial pages opt into prefetching the whole (static) page as well.
+  partialPrefetching: true,
   // Ensure drizzle migrations are included in production builds
   outputFileTracingIncludes: {
     "/api/**/*": ["./drizzle/**/*"],

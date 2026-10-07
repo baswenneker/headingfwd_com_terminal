@@ -68,7 +68,7 @@ export default async function BlogIndexPage() {
               className={styles.listItem}
               lang={POST_LOCALES[post.lang].html}
             >
-              <Link href={postPath(post)} className={styles.listLink}>
+              <Link href={postPath(post)} prefetch className={styles.listLink}>
                 <time className={styles.listMeta} dateTime={post.date}>
                   {formatPostDate(post.date, post.lang)}
                 </time>

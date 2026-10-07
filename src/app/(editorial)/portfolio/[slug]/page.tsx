@@ -40,6 +40,15 @@ export function generateStaticParams() {
   return CASES.map((c) => ({ slug: c.slug }));
 }
 
+/**
+ * A slug that does not resolve must be a hard 404, so the page reads it and
+ * calls `notFound()` before anything streams. That puts URL data outside
+ * `<Suspense>`, which Partial Prefetching's navigation check flags; this
+ * opts the route out of that check only. The page is still fully static,
+ * and the links into it set `prefetch`, so a prefetch carries the whole page.
+ */
+export const instant = false;
+
 function findCase(slug: string): Case | undefined {
   return CASES.find((c) => c.slug === slug);
 }
@@ -246,6 +255,7 @@ export default async function CasePage({ params }: CasePageProps) {
         <nav className={pf.buttons} aria-label="Other cases">
           <Link
             href={`/portfolio/${prev.slug}`}
+            prefetch
             rel="prev"
             className={pf.outlineBtn}
           >
@@ -253,6 +263,7 @@ export default async function CasePage({ params }: CasePageProps) {
           </Link>
           <Link
             href={`/portfolio/${next.slug}`}
+            prefetch
             rel="next"
             className={pf.outlineBtn}
           >

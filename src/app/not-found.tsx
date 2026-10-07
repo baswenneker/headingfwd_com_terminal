@@ -95,7 +95,7 @@ export default function NotFound() {
           <div className={styles.specialitiesLabel}>{"// available routes"}</div>
           <nav className={nf.routes} aria-label="Working routes">
             {ROUTES.map((r) => (
-              <Link key={r.href} href={r.href} className={nf.route}>
+              <Link key={r.href} href={r.href} prefetch className={nf.route}>
                 <span className={nf.routeMark} aria-hidden="true">
                   →
                 </span>
@@ -107,7 +107,7 @@ export default function NotFound() {
 
           <p className={styles.tip}>
             tip: type{" "}
-            <Link href="/help" className={styles.tipCommand}>
+            <Link href="/help" prefetch className={styles.tipCommand}>
               /help
             </Link>{" "}
             once you’re back, or just ask me anything

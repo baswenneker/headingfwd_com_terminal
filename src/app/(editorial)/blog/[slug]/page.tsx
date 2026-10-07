@@ -46,6 +46,15 @@ export async function generateStaticParams() {
 }
 
 /**
+ * A slug that does not resolve must be a hard 404, so the page reads it and
+ * calls `notFound()` before anything streams. That puts URL data outside
+ * `<Suspense>`, which Partial Prefetching's navigation check flags; this
+ * opts the route out of that check only. The page is still fully static,
+ * and the links into it set `prefetch`, so a prefetch carries the whole page.
+ */
+export const instant = false;
+
+/**
  * Structured data for one post: an `Article` wired into the site-wide graph
  * from the root layout (the same `#person` / `#organization` ids), plus the
  * `BreadcrumbList` that lets a search result show "HeadingFWD › Blog › Post".
