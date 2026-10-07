@@ -47,9 +47,10 @@ pnpm test:e2e         # Run E2E tests with Playwright
 pnpm test:e2e:ui      # Run tests with Playwright UI
 pnpm test:e2e:headed  # Run tests in headed mode (visible browser)
 pnpm test:e2e:debug   # Debug tests with Playwright inspector
+pnpm test:e2e:prod    # Run the @prod tests against a production build (port 3098)
 ```
 
-Tests run on port 3099 with CAPTCHA disabled. Tests are sequential (workers: 1) to avoid SQLite locking issues.
+Tests run on port 3099 with CAPTCHA disabled. Status codes, the proxy and the route cache only behave for real on a production build: those tests carry the `@prod` tag, live in `tests/e2e/production.spec.ts` and run through `playwright.prod.config.ts`. Tests are sequential (workers: 1) to avoid SQLite locking issues.
 
 ### Deployment
 

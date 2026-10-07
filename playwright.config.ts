@@ -60,6 +60,8 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      // `@prod` tests need a production build: playwright.prod.config.ts.
+      grepInvert: /@prod/,
     },
   ],
 
