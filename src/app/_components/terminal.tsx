@@ -734,7 +734,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             online
           </span>
           <span>main</span>
-          <span>utf-8</span>
+          <span className={styles.statusWideOnly}>utf-8</span>
           {/*
            * Crawl path into the case pages. `/portfolio` is a real route
            * outside the terminal, so this is a plain link — clicking it leaves
@@ -760,26 +760,23 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
           {/*
            * Plain-text source for AI agents & crawlers. Points at the
            * statically-generated /llms.txt (see app/llms.txt/route.ts).
-           * The descriptive label collapses to just "llms.txt" on narrow
-           * screens to keep the status bar compact.
+           * Hidden on narrow screens, where it crowded the status bar; the
+           * link stays in the HTML for crawlers.
            */}
           <a
-            className={styles.statusAgents}
+            className={`${styles.statusAgents} ${styles.statusWideOnly}`}
             href="/llms.txt"
             target="_blank"
             rel="noopener noreferrer"
           >
             <span className={styles.statusAgentsDot} />
-            <span className={styles.statusAgentsFull}>
-              Plaintext version for agents (llms.txt)
-            </span>
-            <span className={styles.statusAgentsShort}>llms.txt</span>
+            <span>Plaintext version for agents (llms.txt)</span>
           </a>
           {/*
            * Line count: 18 for the fixed intro block; feedLineCount for the
            * growing command + AI turn content.
            */}
-          <span className={styles.statusRight}>
+          <span className={`${styles.statusRight} ${styles.statusWideOnly}`}>
             {18 + feedLineCount} lines · /help
           </span>
         </div>

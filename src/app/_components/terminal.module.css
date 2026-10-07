@@ -364,16 +364,6 @@
   box-shadow: 0 0 8px var(--accent);
 }
 
-/* Full descriptive label — shown on wide screens; hidden on narrow (below). */
-.statusAgentsFull {
-  display: inline;
-}
-
-/* Compact "llms.txt" label — hidden on wide screens, shown on narrow (below). */
-.statusAgentsShort {
-  display: none;
-}
-
 /* Right-aligned line counter */
 .statusRight {
   margin-left: auto;
@@ -636,13 +626,10 @@
     font-size: 10px;
   }
 
-  /* On narrow screens show only the compact "llms.txt" label. */
-  .statusAgentsFull {
+  /* Keep only online, branch and the portfolio and blog links: utf-8, the
+     llms.txt link and the line count crowded the bar onto two lines. */
+  .statusWideOnly {
     display: none;
-  }
-
-  .statusAgentsShort {
-    display: inline;
   }
 
   .specialitiesGrid {

@@ -124,18 +124,15 @@ export function NotFoundScreen() {
             online
           </span>
           <span>main</span>
-          <span>utf-8</span>
+          <span className={styles.statusWideOnly}>utf-8</span>
           <a
-            className={styles.statusAgents}
+            className={`${styles.statusAgents} ${styles.statusWideOnly}`}
             href="/llms.txt"
             target="_blank"
             rel="noopener noreferrer"
           >
             <span className={styles.statusAgentsDot} />
-            <span className={styles.statusAgentsFull}>
-              Plaintext version for agents (llms.txt)
-            </span>
-            <span className={styles.statusAgentsShort}>llms.txt</span>
+            <span>Plaintext version for agents (llms.txt)</span>
           </a>
           <span className={styles.statusRight}>
             error 404 · route not found
