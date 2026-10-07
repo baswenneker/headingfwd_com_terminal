@@ -281,10 +281,20 @@
   color: var(--accent);
 }
 
+/* Holds the input and the block cursor drawn over it */
+.inputWrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  font-size: 14px;
+}
+
 /* Borderless, transparent text input */
 .input {
   flex: 1;
   min-width: 0;
+  padding: 0;
   background: transparent;
   border: none;
   outline: none;
@@ -292,6 +302,48 @@
   font-family: inherit;
   font-size: 14px;
   caret-color: var(--accent);
+}
+
+/* The block cursor replaces the native caret while it shows. The right
+   padding keeps one character free, so on a line too long for the field the
+   block still fits after the last character. */
+.inputWrapCursor .input {
+  caret-color: transparent;
+  padding-right: 1ch;
+}
+
+/* Keep the hint clear of the cursor, which sits at the start of an empty line */
+.inputWrapCursor .input:placeholder-shown {
+  padding-left: 1.5ch;
+}
+
+/*
+ * Blinking block cursor over the input, one character wide. terminal.tsx
+ * moves it to the caret with a transform and puts the character under it
+ * inside, drawn dark on the block like a terminal does.
+ */
+.caret {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1ch;
+  height: 1.3em;
+  margin-top: -0.65em;
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(46, 230, 246, 0.5);
+  color: #0a0e11;
+  line-height: 1.3em;
+  pointer-events: none;
+  white-space: pre;
+  overflow: hidden;
+  animation: cursorBlink 1s step-start infinite;
+}
+
+/* Respect users who ask for less motion — hold the cursor solid. */
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
 }
 
 .input::placeholder {
