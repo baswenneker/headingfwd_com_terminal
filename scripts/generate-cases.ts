@@ -58,7 +58,8 @@ function caseToFileMarkdown(c: Case): string {
   ];
   if (c.period) fm.push(`period: ${yamlScalar(c.period)}`);
   // Only surface visibility when it differs from the default ("published").
-  if (caseVisibility(c) !== "published") fm.push(`visibility: ${caseVisibility(c)}`);
+  if (caseVisibility(c) !== "published")
+    fm.push(`visibility: ${caseVisibility(c)}`);
   if (c.role) fm.push(`role: ${yamlScalar(c.role)}`);
   if (c.client) fm.push(`client: ${yamlScalar(c.client)}`);
   fm.push(`tags: [${c.tags.join(", ")}]`);
@@ -74,7 +75,8 @@ function caseToFileMarkdown(c: Case): string {
   if (!c.videos || c.videos.length === 0) return base;
 
   const vids = c.videos.map((v) => {
-    const mark = v.result === "fail" ? "❌ " : v.result === "success" ? "✅ " : "";
+    const mark =
+      v.result === "fail" ? "❌ " : v.result === "success" ? "✅ " : "";
     const note = v.note ? ` — ${v.note}` : "";
     return `- ${mark}[${v.title}](${v.url})${note}`;
   });

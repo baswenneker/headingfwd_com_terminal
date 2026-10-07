@@ -9,12 +9,7 @@ import { VideoPreviews } from "~/app/_components/video-previews";
 import { postAssets } from "~/content/blog/assets";
 import { isComingSoonCase, visibleCases, type Case } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
-import {
-  ORGANIZATION_ID,
-  PERSON_ID,
-  SITE_NAME,
-  SITE_URL,
-} from "~/config/site";
+import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
 
 /**
  * `/portfolio/<slug>` — one case, server-rendered on the editorial layout.
@@ -146,7 +141,13 @@ export async function generateMetadata({
  * the file at build time, exactly as a post image is, so the box is reserved
  * before the bytes arrive and the page never jumps mid-read.
  */
-function Hero({ image, slug }: { image: NonNullable<Case["image"]>; slug: string }) {
+function Hero({
+  image,
+  slug,
+}: {
+  image: NonNullable<Case["image"]>;
+  slug: string;
+}) {
   const resolved = postAssets(`/portfolio/${slug}`).resolve(image.src);
   if (resolved?.kind !== "raster") {
     throw new Error(
@@ -178,11 +179,9 @@ export default async function CasePage({ params }: CasePageProps) {
 
   // Sector leads the kicker, so the metadata line carries what is left:
   // period, state and role, each only when the case has it.
-  const meta = [
-    c.period,
-    comingSoon ? "coming soon" : c.status,
-    c.role,
-  ].filter(Boolean);
+  const meta = [c.period, comingSoon ? "coming soon" : c.status, c.role].filter(
+    Boolean,
+  );
 
   // Neighbouring cases, wrapping — the same order the overview shows.
   const all = CASES;

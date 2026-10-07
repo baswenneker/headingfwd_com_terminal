@@ -88,15 +88,26 @@ const sp: SpLine = { kind: "sp" };
 function helpLines(): FeedLine[] {
   return [
     { kind: "head", text: "available commands" },
-    { kind: "row", label: "/about",     desc: "who I am & how I work" },
-    { kind: "row", label: "/services",  desc: "what I help teams with" },
+    { kind: "row", label: "/about", desc: "who I am & how I work" },
+    { kind: "row", label: "/services", desc: "what I help teams with" },
     { kind: "row", label: "/portfolio", desc: "browse my work ↵" },
-    { kind: "row", label: "/blog",      desc: "long-form writing on AI engineering ↵" },
-    { kind: "row", label: "/stack",     desc: "tools, models & tech" },
-    { kind: "row", label: "/contact",   desc: "how to reach me" },
-    { kind: "row", label: "/agents",    desc: "plaintext version for agents (llms.txt)" },
-    { kind: "row", label: "/clear",     desc: "clear the screen" },
-    { kind: "dim", text: "tip: arrow keys recall history · or just type a question" },
+    {
+      kind: "row",
+      label: "/blog",
+      desc: "long-form writing on AI engineering ↵",
+    },
+    { kind: "row", label: "/stack", desc: "tools, models & tech" },
+    { kind: "row", label: "/contact", desc: "how to reach me" },
+    {
+      kind: "row",
+      label: "/agents",
+      desc: "plaintext version for agents (llms.txt)",
+    },
+    { kind: "row", label: "/clear", desc: "clear the screen" },
+    {
+      kind: "dim",
+      text: "tip: arrow keys recall history · or just type a question",
+    },
   ];
 }
 
@@ -111,9 +122,10 @@ function aboutLines(): FeedLine[] {
 function servicesLines(): FeedLine[] {
   return [
     { kind: "head", text: "// what I help teams with" },
-    ...SPECIALTIES.map(
-      (s): FeedLine => ({ kind: "bullet", text: `${s.title} — ${s.blurb}` }),
-    ),
+    ...SPECIALTIES.map((s): FeedLine => ({
+      kind: "bullet",
+      text: `${s.title} — ${s.blurb}`,
+    })),
   ];
 }
 
@@ -127,9 +139,17 @@ function stackLines(): FeedLine[] {
 function contactLines(): FeedLine[] {
   return [
     { kind: "head", text: "let's talk →" },
-    { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
-    { kind: "out",  text: "or just type your message right here — I'll pass it to Bas." },
-    { kind: "dim",  text: CONTACT.note },
+    {
+      kind: "link",
+      label: "linkedin",
+      text: "linkedin.com/in/baswenneker",
+      href: CONTACT.linkedin,
+    },
+    {
+      kind: "out",
+      text: "or just type your message right here — I'll pass it to Bas.",
+    },
+    { kind: "dim", text: CONTACT.note },
   ];
 }
 
@@ -137,8 +157,14 @@ function contactLines(): FeedLine[] {
 function agentsLines(): FeedLine[] {
   return [
     { kind: "head", text: "// plaintext version for agents" },
-    { kind: "out",  text: "A plain-text, machine-readable copy of everything here —" },
-    { kind: "out",  text: "so AI agents & crawlers can read the source directly." },
+    {
+      kind: "out",
+      text: "A plain-text, machine-readable copy of everything here —",
+    },
+    {
+      kind: "out",
+      text: "so AI agents & crawlers can read the source directly.",
+    },
     { kind: "link", label: "file", text: "llms.txt", href: "/llms.txt" },
   ];
 }
@@ -148,15 +174,15 @@ function agentsLines(): FeedLine[] {
  * (without the leading slash).
  */
 const COMMANDS: Record<string, () => FeedLine[]> = {
-  help:     helpLines,
-  about:    aboutLines,
+  help: helpLines,
+  about: aboutLines,
   services: servicesLines,
-  stack:    stackLines,
-  contact:  contactLines,
-  agents:   agentsLines,
-  llms:     agentsLines,
-  whoami:   () => [{ kind: "out", text: "guest@headingfwd — welcome :)" }],
-  ls:       () => [{ kind: "out", text: "about/  services/  stack/  contact/" }],
+  stack: stackLines,
+  contact: contactLines,
+  agents: agentsLines,
+  llms: agentsLines,
+  whoami: () => [{ kind: "out", text: "guest@headingfwd — welcome :)" }],
+  ls: () => [{ kind: "out", text: "about/  services/  stack/  contact/" }],
 };
 
 /**
@@ -168,8 +194,13 @@ const COMMANDS: Record<string, () => FeedLine[]> = {
  */
 function linkedinLines(): FeedLine[] {
   return [
-    { kind: "out",  text: "→ opening Bas's LinkedIn profile in a new tab…" },
-    { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
+    { kind: "out", text: "→ opening Bas's LinkedIn profile in a new tab…" },
+    {
+      kind: "link",
+      label: "linkedin",
+      text: "linkedin.com/in/baswenneker",
+      href: CONTACT.linkedin,
+    },
   ];
 }
 
@@ -249,9 +280,14 @@ export const COMMAND_PAGES: CommandPage[] = [
  */
 function freeformLines(): FeedLine[] {
   return [
-    { kind: "out",  text: "→ I'm a lightweight demo assistant on this page." },
-    { kind: "out",  text: "  Type /help for commands, or reach Bas directly:" },
-    { kind: "link", label: "linkedin", text: "linkedin.com/in/baswenneker", href: CONTACT.linkedin },
+    { kind: "out", text: "→ I'm a lightweight demo assistant on this page." },
+    { kind: "out", text: "  Type /help for commands, or reach Bas directly:" },
+    {
+      kind: "link",
+      label: "linkedin",
+      text: "linkedin.com/in/baswenneker",
+      href: CONTACT.linkedin,
+    },
   ];
 }
 

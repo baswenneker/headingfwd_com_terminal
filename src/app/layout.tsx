@@ -8,12 +8,7 @@ import { CONTACT } from "~/content/site-content";
 // Canonical production origin + brand name. `metadataBase` lets Next resolve
 // every relative URL below (canonical, Open Graph, icons) to an absolute URL,
 // which crawlers and social scrapers require.
-import {
-  ORGANIZATION_ID,
-  PERSON_ID,
-  SITE_NAME,
-  SITE_URL,
-} from "~/config/site";
+import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
 
 const TITLE = "HeadingFWD — AI Engineering & Consultancy";
 const DESCRIPTION =

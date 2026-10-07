@@ -91,7 +91,9 @@ export default function NotFound() {
           </p>
 
           {/* Terminal-style comment label above the routes */}
-          <div className={styles.specialitiesLabel}>{"// available routes"}</div>
+          <div className={styles.specialitiesLabel}>
+            {"// available routes"}
+          </div>
           <nav className={nf.routes} aria-label="Working routes">
             {ROUTES.map((r) => (
               <Link key={r.href} href={r.href} prefetch className={nf.route}>
@@ -140,7 +142,9 @@ export default function NotFound() {
             </span>
             <span className={styles.statusAgentsShort}>llms.txt</span>
           </a>
-          <span className={styles.statusRight}>error 404 · route not found</span>
+          <span className={styles.statusRight}>
+            error 404 · route not found
+          </span>
         </div>
       </div>
     </main>
