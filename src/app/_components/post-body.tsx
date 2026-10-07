@@ -1,4 +1,4 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Markdown from "react-markdown";
 import remarkDirective from "remark-directive";
@@ -7,7 +7,7 @@ import type { Element } from "hast";
 import { postAssets } from "~/content/blog/assets";
 import { remarkPostStructure } from "~/content/blog/remark-post-structure";
 import { POST_COPY } from "~/content/site-content";
-import { PREVIEW_CACHE_LIFE } from "~/content/cached-posts";
+import { CONTENT_TAG, PREVIEW_CACHE_LIFE } from "~/content/cached-posts";
 import { draftPreviewEnabled, type PostLanguage } from "~/content/posts";
 
 /**
@@ -48,7 +48,7 @@ function hasFlag(node: Element | undefined, name: string): boolean {
  * puts the image reads inside a cache scope, which the dev server requires
  * before it lets a prerendered page touch the file system. Outside production
  * it refreshes like the post list, so an image the author drops in after the
- * first render shows up on the second refresh.
+ * first render shows up on the next refresh.
  */
 export async function PostBody({
   markdown,
@@ -60,6 +60,7 @@ export async function PostBody({
   lang: PostLanguage;
 }) {
   "use cache";
+  cacheTag(CONTENT_TAG);
   if (draftPreviewEnabled()) {
     cacheLife(PREVIEW_CACHE_LIFE);
   } else {

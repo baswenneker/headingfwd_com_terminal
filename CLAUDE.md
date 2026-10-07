@@ -206,7 +206,7 @@ src/
 
 Sections (`##`) and items (`###`) are numbered automatically — never type the numbers. `CONTEXT.md` defines the vocabulary (kicker, lead, excerpt, item, section) and the visibility rules; `docs/adr/` records why posts are Markdown, why the blog sits outside the terminal, and why the portfolio moved onto the same layout.
 
-Drafts and future-dated posts are withheld from every public surface. Outside production (`ENVIRONMENT` is `development` or `test`) a draft is previewable with a banner and `noindex`; a future-dated post is never previewable. A future-dated post goes live within about an hour of its date, without a deploy. In dev a new or edited post shows on the second refresh.
+Drafts and future-dated posts are withheld from every public surface. Outside production (`ENVIRONMENT` is `development` or `test`) a draft is previewable with a banner and `noindex`; a future-dated post is never previewable. A future-dated post goes live within about an hour of its date, without a deploy. In dev a new or edited post shows on the first refresh: `src/instrumentation.ts` watches the content directories and expires the `content` cache tag on every change.
 
 The editorial layout sets `ensureStatic = "navigation"`: `next dev` and `next build` fail when a blog, portfolio or workshop page reads request data or uncached data. A route reads the post list through `cached-posts.ts`, never through the synchronous functions in `posts.ts`.
 

@@ -1,4 +1,4 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import {
   draftPreviewEnabled,
   findRoutablePost,
@@ -17,22 +17,33 @@ import {
  * an hour after it goes stale, so a scheduled post goes live on its date
  * without a new deploy.
  *
- * Outside production the entry is refreshed in the background a second
- * after it was served, so a post the author has just written, or a draft they
- * are editing, shows up on the second refresh. That is the shortest lifetime
- * that still prerenders: anything shorter turns the read into request-time
- * work, which Cache Components reports as an error on every page view in dev.
+ * Every entry carries the CONTENT_TAG. In dev, src/instrumentation.ts watches
+ * the content directories and expires that tag on every change, so a post the
+ * author has just written, or a draft they are editing, shows up on the first
+ * refresh. The short lifetime outside production stays as a fallback for a
+ * change the watcher misses: the entry is refreshed in the background a second
+ * after it was served, so the second refresh shows it. That is the shortest
+ * lifetime that still prerenders: anything shorter turns the read into
+ * request-time work, which Cache Components reports as an error on every page
+ * view in dev.
  *
  * This is a module of its own because `posts.ts` must load without Next.js:
  * the end-to-end suite imports it directly.
  */
 function cacheVisibility(): void {
+  cacheTag(CONTENT_TAG);
   if (draftPreviewEnabled()) {
     cacheLife(PREVIEW_CACHE_LIFE);
   } else {
     cacheLife("hours");
   }
 }
+
+/**
+ * Tag on every cache entry built from the content files. Expired by
+ * /api/dev/content-changed, which only exists outside production.
+ */
+export const CONTENT_TAG = "content";
 
 /**
  * The lifetime outside production for anything read from the content files:
@@ -64,6 +75,7 @@ export async function getPublishedPosts(): Promise<Post[]> {
  */
 export async function getRoutablePost(slug: string): Promise<Post | undefined> {
   "use cache";
+  cacheTag(CONTENT_TAG);
   const post = findRoutablePost(slug);
   if (!post && !draftPreviewEnabled()) {
     cacheLife("minutes");

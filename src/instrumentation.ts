@@ -5,6 +5,9 @@
  * Database Migration Strategy:
  * - Production: Runs migrations automatically on startup
  * - Development: Skip migrations, use `npm run db:push` for schema changes
+ *
+ * In development it also watches the content files, so an edited post shows
+ * on the first refresh (src/server/dev/content-watcher.ts).
  */
 export async function register() {
   // Only run in Node.js runtime (not Edge)
@@ -163,6 +166,9 @@ export async function register() {
         throw error;
       }
     } else {
+      const { watchContent } = await import("~/server/dev/content-watcher");
+      watchContent();
+
       // Development mode - skip automatic migrations
       console.log(
         "\x1b[33m[Database] Development mode - automatic migrations disabled\x1b[0m",
