@@ -187,17 +187,16 @@ export interface CommandPage {
 
 /**
  * The commands that get their own shareable URL, in /help order. Single
- * source of truth for those pages: `src/app/(terminal)/[command]/page.tsx`
- * derives its routes + metadata from this array and `src/app/sitemap.ts` its
- * sitemap entries, so adding one entry here publishes a new URL everywhere at
- * once.
+ * source of truth for those pages: each has a route folder under
+ * `src/app/(terminal)/` that takes its metadata from this array (see
+ * `command-deep-link.tsx`), and `src/app/sitemap.ts` its sitemap entries. A
+ * new entry needs its folder too; the e2e suite fails until it exists.
  *
  * Deliberately absent: `/clear` and `/cls` (they only mutate feed state —
  * there is no state to deep-link), the `/whoami`, `/ls` and `/llms`
  * easter-egg aliases, and `/portfolio` and `/blog`, which both have a real
  * route of their own under `src/app/(editorial)/`. Registering either here
- * would generate a dead page under the `[command]` route and a duplicate
- * sitemap entry.
+ * would add a duplicate sitemap entry.
  */
 export const COMMAND_PAGES: CommandPage[] = [
   {

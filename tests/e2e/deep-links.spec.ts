@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { sendCommand, waitForTerminalReady } from "../helpers/session";
+import { COMMAND_PAGES } from "~/app/_components/terminal-commands";
 import { visibleCases } from "~/content/cases";
 
 /**
@@ -255,6 +256,16 @@ test.describe("Command deep links (/help, /about, …)", () => {
     await sendCommand(page, "/about");
     await expect(page.getByText("$ whoami")).toBeVisible();
     await expect(page).toHaveURL("/help");
+  });
+
+  test("every registered command has a page with its own title", async ({
+    page,
+  }) => {
+    for (const c of COMMAND_PAGES) {
+      const res = await page.goto(`/${c.token}`);
+      expect(res?.status(), `/${c.token} should be a page`).toBe(200);
+      await expect(page).toHaveTitle(`${c.title} — HeadingFWD`);
+    }
   });
 
   test("unregistered commands have no page: /clear, easter eggs and typos are 404", async ({

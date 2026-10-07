@@ -13,7 +13,7 @@ A terminal-style chatbot website for HeadingFWD (AI engineering consultancy), bu
 ### Development
 
 ```bash
-pnpm dev              # Start dev server on port 3000 (with Turbo)
+pnpm dev              # Start dev server on port 3000 (Turbopack)
 pnpm build            # Build for production
 pnpm start            # Start production server
 pnpm check            # Run linter + type checking
@@ -125,7 +125,8 @@ src/
 │   ├── (terminal)/           # Route group: everything that runs the terminal
 │   │   ├── layout.tsx        # TRPCReactProvider lives here, not in the root
 │   │   ├── page.tsx          # Homepage
-│   │   └── [command]/        # /help, /about, … deep links
+│   │   ├── command-deep-link.tsx  # Shared by the deep links below
+│   │   └── help/, about/, …  # One static folder per /command deep link
 │   ├── (editorial)/          # Route group: no tRPC, no terminal bundle
 │   │   ├── layout.tsx        # data-editorial-root wrapper
 │   │   ├── editorial.module.css  # Shared reading layout (shell, body, list)
@@ -168,8 +169,7 @@ src/
 │       ├── rate-limiter.ts        # Rate limiting logic
 │       └── turnstile.ts           # CAPTCHA verification
 ├── trpc/
-│   ├── react.tsx             # tRPC React provider
-│   └── server.ts             # Server-side tRPC caller
+│   └── react.tsx             # tRPC React provider
 ├── lib/
 │   └── errors.ts             # Error handling utilities
 └── instrumentation.ts        # Next.js startup hook (runs migrations)
@@ -179,7 +179,7 @@ src/
 
 - **`src/app/api/chat/route.ts`** - Main AI chat endpoint, uses Vercel AI SDK's `streamText`, includes `sendMessage` tool for email sending
 - **`src/server/services/command-executor.ts`** - All slash command handlers, returns markdown
-- **`src/app/_components/terminal-commands.ts`** - Command registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link routes and the sitemap. `/portfolio` and `/blog` are absent from it on purpose: both have a real route under `src/app/(editorial)/`
+- **`src/app/_components/terminal-commands.ts`** - Command registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link metadata and the sitemap. Each entry also needs a route folder under `src/app/(terminal)/` (copy `help/page.tsx`); the e2e suite fails until it exists. `/portfolio` and `/blog` are absent from it on purpose: both have a real route under `src/app/(editorial)/`
 - **`src/content/cases.ts`** - Portfolio cases: the single source of truth for the `/portfolio` overview, the case pages, `/llms.txt` and the generated `cases/*.md` archive
 - **`src/content/workshops.ts`** - The workshop offer page(s): source of truth for `/workshops/<slug>` and its `/llms.txt` line. Unlisted: no link anywhere, not in the sitemap, `noindex`. See `docs/adr/0004-unlisted-offer-page.md`
 - **`src/app/_components/post-body.tsx`** - Renders one Markdown body through the remark pipeline. Used by both a post and a case; takes `{ markdown, assetBase, lang }`
