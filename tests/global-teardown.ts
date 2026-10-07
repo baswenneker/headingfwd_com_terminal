@@ -14,15 +14,30 @@ async function globalTeardown(config: FullConfig) {
 
   // The dev server will be automatically stopped by Playwright's webServer config
 
-  // Clean up test database file
-  const testDbPath = path.resolve(__dirname, "../test.db");
-  try {
-    if (fs.existsSync(testDbPath)) {
-      fs.unlinkSync(testDbPath);
+  // Clean up the test database file named by DATABASE_URL (loaded from
+  // .env.test by the config). The guard mirrors global-setup: never delete
+  // anything that is not the test database.
+  const dbUrl = process.env.DATABASE_URL ?? "";
+  if (!dbUrl.startsWith("file:") || !dbUrl.includes("test.db")) {
+    console.warn(`⚠️  Skipping database cleanup for ${dbUrl}`);
+  } else {
+    const testDbPath = path.resolve(
+      __dirname,
+      "..",
+      dbUrl.slice("file:".length),
+    );
+    try {
+      for (const file of [
+        testDbPath,
+        `${testDbPath}-wal`,
+        `${testDbPath}-shm`,
+      ]) {
+        if (fs.existsSync(file)) fs.unlinkSync(file);
+      }
       console.log("✅ Test database cleaned up");
+    } catch (error) {
+      console.warn("⚠️  Could not delete test database:", error);
     }
-  } catch (error) {
-    console.warn("⚠️  Could not delete test database:", error);
   }
 
   console.log("✅ Global teardown complete");
