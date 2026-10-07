@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A terminal-style chatbot website for HeadingFWD (AI engineering consultancy), built with Next.js 15, featuring an AI assistant powered by OpenAI that answers questions about services, experience, and allows visitors to send contact messages.
+A terminal-style chatbot website for HeadingFWD (AI engineering consultancy), built with Next.js 16, featuring an AI assistant powered by OpenAI that answers questions about services, experience, and allows visitors to send contact messages.
 
-**Tech Stack:** Next.js 15 (App Router), TypeScript, tRPC, Drizzle ORM, Vercel AI SDK, Cloudflare Turnstile, Turso/SQLite, Playwright
+**Tech Stack:** Next.js 16 (App Router, Cache Components, Partial Prefetching), TypeScript, tRPC, Drizzle ORM, Vercel AI SDK, Cloudflare Turnstile, Turso/SQLite, Playwright
 
 ## Common Commands
 
@@ -184,6 +184,7 @@ src/
 - **`src/content/workshops.ts`** - The workshop offer page(s): source of truth for `/workshops/<slug>` and its `/llms.txt` line. Unlisted: no link anywhere, not in the sitemap, `noindex`. See `docs/adr/0004-unlisted-offer-page.md`
 - **`src/app/_components/post-body.tsx`** - Renders one Markdown body through the remark pipeline. Used by both a post and a case; takes `{ markdown, assetBase, lang }`
 - **`src/content/posts.ts`** - Blog post loader: frontmatter schema, the `isPublished` predicate and the date formatting. Every blog surface derives from it
+- **`src/content/cached-posts.ts`** - The cached, async views of `posts.ts` that the routes use (`"use cache"`, one-hour lifetime), so a scheduled post goes live without a deploy. `posts.ts` itself must load without Next.js, because the e2e suite imports it
 - **`src/content/blog/remark-post-structure.ts`** - Turns a post's Markdown into the editorial layout (roman-numeral sections, numbered two-column items, charts, figures)
 - **`src/server/db/schema.ts`** - Database schema (modify tables here, then run `pnpm db:push`)
 - **`src/instrumentation.ts`** - Runs automatic migrations in production on server startup
@@ -205,7 +206,9 @@ src/
 
 Sections (`##`) and items (`###`) are numbered automatically — never type the numbers. `CONTEXT.md` defines the vocabulary (kicker, lead, excerpt, item, section) and the visibility rules; `docs/adr/` records why posts are Markdown, why the blog sits outside the terminal, and why the portfolio moved onto the same layout.
 
-Drafts and future-dated posts are withheld from every public surface. Outside production (`ENVIRONMENT` is `development` or `test`) a draft is previewable with a banner and `noindex`; a future-dated post is never previewable.
+Drafts and future-dated posts are withheld from every public surface. Outside production (`ENVIRONMENT` is `development` or `test`) a draft is previewable with a banner and `noindex`; a future-dated post is never previewable. A future-dated post goes live within about an hour of its date, without a deploy. In dev a new or edited post shows on the second refresh.
+
+The editorial layout sets `ensureStatic = "navigation"`: `next dev` and `next build` fail when a blog, portfolio or workshop page reads request data or uncached data. A route reads the post list through `cached-posts.ts`, never through the synchronous functions in `posts.ts`.
 
 ### Adding a Portfolio Case
 
