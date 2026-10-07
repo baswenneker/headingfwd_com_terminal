@@ -128,6 +128,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   const pendingMessageRef = useRef<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const caretRef = useRef<HTMLSpanElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
   // tRPC mutation that creates a verified session after Turnstile challenge.
@@ -365,6 +366,22 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
 
   // True while the AI has a request in flight (waiting or streaming).
   const isAiInFlight = status === "submitted" || status === "streaming";
+
+  // Move the block cursor to the input's caret. The font is monospace, so
+  // the caret sits `selectionStart` characters (1ch each) from the left,
+  // minus however far a long line has scrolled. The block shows the
+  // character under it, like a terminal does. Written to the DOM directly:
+  // this runs on every keystroke and selection change.
+  const syncCaret = () => {
+    const input = inputRef.current;
+    const caret = caretRef.current;
+    if (!input || !caret) return;
+    const index = input.selectionStart ?? input.value.length;
+    caret.style.transform = `translateX(calc(${index}ch - ${input.scrollLeft}px))`;
+    caret.textContent = input.value[index] ?? "";
+  };
+  const inputLocked = captchaVisible || isAiInFlight;
+  useEffect(syncCaret, [inputValue, inputLocked]);
 
   // Approximate line count for the status bar: intro is fixed at 18 lines;
   // each command block contributes its line count and each AI turn adds ~2.
@@ -704,26 +721,41 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               <span className={styles.inputPromptFull}>bas@headingfwd </span>
               <span className={styles.inputPromptAccent}>~$</span>
             </span>
-            <input
-              ref={inputRef}
-              className={styles.input}
-              type="text"
-              aria-label="Terminal command input — type a command like /help or ask a question"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={
-                captchaVisible
-                  ? "complete verification to continue…"
-                  : isAiInFlight
-                    ? "AI is responding…"
-                    : "type a command…"
-              }
-              disabled={captchaVisible || isAiInFlight}
-              spellCheck={false}
-              autoComplete="off"
-              data-testid="terminal-input"
-            />
+            <div
+              className={`${styles.inputWrap} ${inputLocked ? "" : styles.inputWrapCursor}`}
+            >
+              <input
+                ref={inputRef}
+                className={styles.input}
+                type="text"
+                aria-label="Terminal command input — type a command like /help or ask a question"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onSelect={syncCaret}
+                onScroll={syncCaret}
+                placeholder={
+                  captchaVisible
+                    ? "complete verification to continue…"
+                    : isAiInFlight
+                      ? "AI is responding…"
+                      : "type a command…"
+                }
+                disabled={inputLocked}
+                spellCheck={false}
+                autoComplete="off"
+                data-testid="terminal-input"
+              />
+              {/* Blinking block cursor: tells visitors the prompt takes input.
+                Hidden while the input is locked. */}
+              {!inputLocked && (
+                <span
+                  ref={caretRef}
+                  className={styles.caret}
+                  aria-hidden="true"
+                />
+              )}
+            </div>
           </div>
         </div>
 
@@ -734,7 +766,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
             online
           </span>
           <span>main</span>
-          <span>utf-8</span>
+          <span className={styles.statusWideOnly}>utf-8</span>
           {/*
            * Crawl path into the case pages. `/portfolio` is a real route
            * outside the terminal, so this is a plain link — clicking it leaves
@@ -760,26 +792,23 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
           {/*
            * Plain-text source for AI agents & crawlers. Points at the
            * statically-generated /llms.txt (see app/llms.txt/route.ts).
-           * The descriptive label collapses to just "llms.txt" on narrow
-           * screens to keep the status bar compact.
+           * Hidden on narrow screens, where it crowded the status bar; the
+           * link stays in the HTML for crawlers.
            */}
           <a
-            className={styles.statusAgents}
+            className={`${styles.statusAgents} ${styles.statusWideOnly}`}
             href="/llms.txt"
             target="_blank"
             rel="noopener noreferrer"
           >
             <span className={styles.statusAgentsDot} />
-            <span className={styles.statusAgentsFull}>
-              Plaintext version for agents (llms.txt)
-            </span>
-            <span className={styles.statusAgentsShort}>llms.txt</span>
+            <span>Plaintext version for agents (llms.txt)</span>
           </a>
           {/*
            * Line count: 18 for the fixed intro block; feedLineCount for the
            * growing command + AI turn content.
            */}
-          <span className={styles.statusRight}>
+          <span className={`${styles.statusRight} ${styles.statusWideOnly}`}>
             {18 + feedLineCount} lines · /help
           </span>
         </div>
