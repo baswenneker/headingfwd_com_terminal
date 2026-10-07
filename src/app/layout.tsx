@@ -1,16 +1,17 @@
 import "~/styles/globals.css";
 
 import { type Metadata, type Viewport } from "next";
-import { JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CONTACT } from "~/content/site-content";
+import { jetBrainsMono } from "./fonts";
 // Canonical production origin + brand name. `metadataBase` lets Next resolve
 // every relative URL below (canonical, Open Graph, icons) to an absolute URL,
 // which crawlers and social scrapers require.
 import {
   ORGANIZATION_ID,
   PERSON_ID,
+  SITE_ICONS,
   SITE_NAME,
   SITE_URL,
 } from "~/config/site";
@@ -45,20 +46,18 @@ export const metadata: Metadata = {
   authors: [{ name: "Bas Wenneker", url: CONTACT.linkedin }],
   creator: "Bas Wenneker",
   publisher: SITE_NAME,
-  // Explicitly allow indexing so crawlers never treat the SPA as noindex.
+  // Only the preview limits live here, not `index` / `follow` or a canonical.
+  // With Cache Components a notFound() from a page is rendered with this
+  // layout's metadata and not with the metadata in not-found.tsx, so anything
+  // set here reaches that 404 as well. (A URL without a route gets
+  // global-not-found.tsx, which skips this layout.) Indexing is the default without a robots tag; each page sets
+  // its own canonical.
   robots: {
-    index: true,
-    follow: true,
     googleBot: {
-      index: true,
-      follow: true,
       "max-image-preview": "large",
       "max-snippet": -1,
       "max-video-preview": -1,
     },
-  },
-  alternates: {
-    canonical: "/",
   },
   openGraph: {
     type: "website",
@@ -76,23 +75,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
   },
-  icons: [
-    { rel: "icon", url: "/favicon.ico" },
-    { rel: "icon", type: "image/svg+xml", url: "/favicon.svg" },
-    {
-      rel: "icon",
-      type: "image/png",
-      sizes: "16x16",
-      url: "/favicon-16x16.png",
-    },
-    {
-      rel: "icon",
-      type: "image/png",
-      sizes: "32x32",
-      url: "/favicon-32x32.png",
-    },
-    { rel: "apple-touch-icon", sizes: "180x180", url: "/apple-touch-icon.png" },
-  ],
+  icons: SITE_ICONS,
   manifest: "/site.webmanifest",
 };
 
@@ -145,27 +128,6 @@ const JSON_LD = {
     },
   ],
 };
-
-// JetBrains Mono is a monospace font used throughout the terminal UI.
-// We load the four weights used by the design plus italic 400 for variety.
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-  weight: ["400", "500", "700", "800"],
-  style: ["normal", "italic"],
-  // System monospace fonts to fall back on: when the webfont fails to load, and
-  // per glyph for characters outside the latin subset (e.g. box drawing).
-  fallback: [
-    "Menlo",
-    "Consolas",
-    "DejaVu Sans Mono",
-    "ui-monospace",
-    "monospace",
-  ],
-  // Next's automatic metrics fallback is Arial for anything non-serif, which is
-  // proportional and would break the terminal's column alignment.
-  adjustFontFallback: false,
-});
 
 export default function RootLayout({
   children,

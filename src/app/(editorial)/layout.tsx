@@ -15,6 +15,15 @@ import styles from "./editorial.module.css";
  * surface and the 42px grid across the full viewport height, so no cyan shows
  * through on a page shorter than the screen.
  */
+
+/**
+ * Every editorial page is static: prose read from the repo, prerendered at
+ * build time and regenerated only by a cache lifetime. `next dev` and
+ * `next build` fail as soon as one of these pages reads request data or
+ * uncached data, so a change cannot quietly make them render per request.
+ */
+export const ensureStatic = "navigation";
+
 export default function EditorialLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

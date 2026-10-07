@@ -7,8 +7,8 @@ import {
   formatPostDate,
   POST_LOCALES,
   postPath,
-  routablePosts,
 } from "~/content/posts";
+import { getRoutablePosts } from "~/content/cached-posts";
 
 /**
  * `/blog` — every post, newest first.
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogIndexPage() {
-  const posts = routablePosts();
+export default async function BlogIndexPage() {
+  const posts = await getRoutablePosts();
   const previewing = draftPreviewEnabled();
 
   return (
@@ -68,7 +68,7 @@ export default function BlogIndexPage() {
               className={styles.listItem}
               lang={POST_LOCALES[post.lang].html}
             >
-              <Link href={postPath(post)} className={styles.listLink}>
+              <Link href={postPath(post)} prefetch className={styles.listLink}>
                 <time className={styles.listMeta} dateTime={post.date}>
                   {formatPostDate(post.date, post.lang)}
                 </time>

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { sendCommand, waitForTerminalReady } from "../helpers/session";
+import { COMMAND_PAGES } from "~/app/_components/terminal-commands";
 import { visibleCases } from "~/content/cases";
 
 /**
@@ -257,6 +258,16 @@ test.describe("Command deep links (/help, /about, …)", () => {
     await expect(page).toHaveURL("/help");
   });
 
+  test("every registered command has a page with its own title", async ({
+    page,
+  }) => {
+    for (const c of COMMAND_PAGES) {
+      const res = await page.goto(`/${c.token}`);
+      expect(res?.status(), `/${c.token} should be a page`).toBe(200);
+      await expect(page).toHaveTitle(`${c.title} — HeadingFWD`);
+    }
+  });
+
   test("unregistered commands have no page: /clear, easter eggs and typos are 404", async ({
     page,
   }) => {
@@ -264,6 +275,39 @@ test.describe("Command deep links (/help, /about, …)", () => {
       const res = await page.goto(path);
       expect(res?.status(), `${path} should be a 404`).toBe(404);
     }
+  });
+});
+
+/**
+ * A 404 must not tell crawlers anything a real page would: no canonical (Search
+ * Console then files the URL as an alternate of the homepage) and no "index"
+ * directive next to the noindex Next adds. Checked in the browser, after
+ * hydration, because metadata can also arrive in the streamed payload.
+ */
+test.describe("Search signals on a 404", () => {
+  for (const path of ["/nope", "/clear", "/blog/does-not-exist"]) {
+    test(`${path} has no canonical and only noindex robots`, async ({
+      page,
+    }) => {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+      const robots = await page
+        .locator('meta[name="robots"], meta[name="googlebot"]')
+        .evaluateAll((els) => els.map((el) => el.getAttribute("content")));
+      expect(robots.length).toBeGreaterThan(0);
+      for (const content of robots) {
+        expect(content).not.toMatch(/(^|[ ,])index/);
+      }
+    });
+  }
+
+  test("the homepage keeps its canonical", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      "https://headingfwd.com",
+    );
   });
 });
 
@@ -297,8 +341,10 @@ test.describe("Sitemap", () => {
     const xml = await res.text();
 
     const dated = visibleCases().find((c) => c.updated);
-    expect(dated, "no visible case has an `updated` value to assert on")
-      .toBeDefined();
+    expect(
+      dated,
+      "no visible case has an `updated` value to assert on",
+    ).toBeDefined();
 
     // The <url> block for that case must carry a <lastmod>.
     const block = xml

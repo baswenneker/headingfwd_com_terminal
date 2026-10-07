@@ -14,8 +14,7 @@ export const MOCK_AI_RESPONSES = {
    * Response with a markdown bold span to verify the markdown renderer
    * converts **text** to <strong>.
    */
-  WITH_BOLD:
-    "I specialise in **Generative AI** engineering and consulting.",
+  WITH_BOLD: "I specialise in **Generative AI** engineering and consulting.",
 
   /**
    * Multi-paragraph response used to verify that multiple lines render

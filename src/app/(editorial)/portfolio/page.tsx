@@ -53,7 +53,11 @@ export default function PortfolioPage() {
       <ul className={styles.list}>
         {cases.map((c) => (
           <li key={c.slug} className={styles.listItem}>
-            <Link href={`/portfolio/${c.slug}`} className={styles.listLink}>
+            <Link
+              href={`/portfolio/${c.slug}`}
+              prefetch
+              className={styles.listLink}
+            >
               <span className={`${styles.listMeta} ${pf.index}`}>{c.n}</span>
               <div>
                 <h2 className={styles.listTitle}>

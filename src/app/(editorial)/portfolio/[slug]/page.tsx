@@ -9,12 +9,7 @@ import { VideoPreviews } from "~/app/_components/video-previews";
 import { postAssets } from "~/content/blog/assets";
 import { isComingSoonCase, visibleCases, type Case } from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
-import {
-  ORGANIZATION_ID,
-  PERSON_ID,
-  SITE_NAME,
-  SITE_URL,
-} from "~/config/site";
+import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
 
 /**
  * `/portfolio/<slug>` — one case, server-rendered on the editorial layout.
@@ -25,8 +20,8 @@ import {
  * previews is server-rendered, so a crawler that runs no script still reads
  * the whole case.
  *
- * Pages exist only for the visible cases (`dynamicParams = false` below):
- * hidden cases and unknown slugs are a hard 404.
+ * Pages exist only for the visible cases: hidden cases and unknown slugs
+ * are a hard 404, decided by `notFound()` in the page.
  */
 
 const CASES = visibleCases();
@@ -40,8 +35,8 @@ export function generateStaticParams() {
   return CASES.map((c) => ({ slug: c.slug }));
 }
 
-// Slugs outside generateStaticParams (hidden cases, typos) are a hard 404.
-export const dynamicParams = false;
+// Same reason as on the post page (`blog/[slug]/page.tsx`).
+export const instant = false;
 
 function findCase(slug: string): Case | undefined {
   return CASES.find((c) => c.slug === slug);
@@ -146,7 +141,13 @@ export async function generateMetadata({
  * the file at build time, exactly as a post image is, so the box is reserved
  * before the bytes arrive and the page never jumps mid-read.
  */
-function Hero({ image, slug }: { image: NonNullable<Case["image"]>; slug: string }) {
+function Hero({
+  image,
+  slug,
+}: {
+  image: NonNullable<Case["image"]>;
+  slug: string;
+}) {
   const resolved = postAssets(`/portfolio/${slug}`).resolve(image.src);
   if (resolved?.kind !== "raster") {
     throw new Error(
@@ -178,11 +179,9 @@ export default async function CasePage({ params }: CasePageProps) {
 
   // Sector leads the kicker, so the metadata line carries what is left:
   // period, state and role, each only when the case has it.
-  const meta = [
-    c.period,
-    comingSoon ? "coming soon" : c.status,
-    c.role,
-  ].filter(Boolean);
+  const meta = [c.period, comingSoon ? "coming soon" : c.status, c.role].filter(
+    Boolean,
+  );
 
   // Neighbouring cases, wrapping — the same order the overview shows.
   const all = CASES;
@@ -249,6 +248,7 @@ export default async function CasePage({ params }: CasePageProps) {
         <nav className={pf.buttons} aria-label="Other cases">
           <Link
             href={`/portfolio/${prev.slug}`}
+            prefetch
             rel="prev"
             className={pf.outlineBtn}
           >
@@ -256,6 +256,7 @@ export default async function CasePage({ params }: CasePageProps) {
           </Link>
           <Link
             href={`/portfolio/${next.slug}`}
+            prefetch
             rel="next"
             className={pf.outlineBtn}
           >

@@ -4,16 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A terminal-style chatbot website for HeadingFWD (AI engineering consultancy), built with Next.js 15, featuring an AI assistant powered by OpenAI that answers questions about services, experience, and allows visitors to send contact messages.
+A terminal-style chatbot website for HeadingFWD (AI engineering consultancy), built with Next.js 16, featuring an AI assistant powered by OpenAI that answers questions about services, experience, and allows visitors to send contact messages.
 
-**Tech Stack:** Next.js 15 (App Router), TypeScript, tRPC, Drizzle ORM, Vercel AI SDK, Cloudflare Turnstile, Turso/SQLite, Playwright
+**Tech Stack:** Next.js 16 (App Router, Cache Components, Partial Prefetching), TypeScript, tRPC, Drizzle ORM, Vercel AI SDK, Cloudflare Turnstile, Turso/SQLite, Playwright
 
 ## Common Commands
 
 ### Development
 
 ```bash
-pnpm dev              # Start dev server on port 3000 (with Turbo)
+pnpm dev              # Start dev server on port 3000 (Turbopack)
 pnpm build            # Build for production
 pnpm start            # Start production server
 pnpm check            # Run linter + type checking
@@ -47,9 +47,10 @@ pnpm test:e2e         # Run E2E tests with Playwright
 pnpm test:e2e:ui      # Run tests with Playwright UI
 pnpm test:e2e:headed  # Run tests in headed mode (visible browser)
 pnpm test:e2e:debug   # Debug tests with Playwright inspector
+pnpm test:e2e:prod    # Run the @prod tests against a production build (port 3098)
 ```
 
-Tests run on port 3099 with CAPTCHA disabled. Tests are sequential (workers: 1) to avoid SQLite locking issues.
+Tests run on port 3099 with CAPTCHA disabled. Status codes, the proxy and the route cache only behave for real on a production build: those tests carry the `@prod` tag, live in `tests/e2e/production.spec.ts` and run through `playwright.prod.config.ts`. Tests are sequential (workers: 1) to avoid SQLite locking issues.
 
 ### Deployment
 
@@ -115,7 +116,8 @@ content/
 └── blog/                     # Blog posts — one Markdown file per post
 public/
 ├── blog/<slug>/              # Images belonging to one post
-└── portfolio/<slug>/         # Images belonging to one case
+├── portfolio/<slug>/         # Images belonging to one case
+└── workshops/<slug>/         # Images belonging to one workshop page
 docs/
 └── adr/                      # Architecture decision records
 src/
@@ -124,14 +126,17 @@ src/
 │   ├── (terminal)/           # Route group: everything that runs the terminal
 │   │   ├── layout.tsx        # TRPCReactProvider lives here, not in the root
 │   │   ├── page.tsx          # Homepage
-│   │   └── [command]/        # /help, /about, … deep links
+│   │   ├── command-deep-link.tsx  # Shared by the deep links below
+│   │   └── help/, about/, …  # One static folder per /command deep link
 │   ├── (editorial)/          # Route group: no tRPC, no terminal bundle
 │   │   ├── layout.tsx        # data-editorial-root wrapper
 │   │   ├── editorial.module.css  # Shared reading layout (shell, body, list)
 │   │   ├── blog.module.css   # Blog-only: draft banner, origin footer
 │   │   ├── portfolio.module.css  # Case-only: kind, meta, tags, footer
+│   │   ├── workshop.module.css   # Workshop-only: footer
 │   │   ├── blog/             # /blog, /blog/<slug>, /blog/rss.xml
-│   │   └── portfolio/        # /portfolio, /portfolio/<slug>
+│   │   ├── portfolio/        # /portfolio, /portfolio/<slug>
+│   │   └── workshops/        # /workshops/<slug> — unlisted offer pages
 │   ├── _components/          # React components
 │   │   ├── terminal.tsx      # Main terminal container
 │   │   ├── terminal-commands.ts  # Command registry & feed line model
@@ -143,10 +148,12 @@ src/
 │   │   └── health/route.ts   # Health check endpoint
 │   ├── llms.txt/route.ts     # Plain-text source for agents
 │   ├── sitemap.ts
-│   └── not-found.tsx
+│   ├── global-not-found.tsx  # 404 for any URL without a route (own metadata)
+│   └── not-found.tsx         # 404 for notFound() in a page
 ├── content/
 │   ├── cases.ts              # Portfolio cases (source of truth)
 │   ├── posts.ts              # Blog post loader, validation & visibility
+│   ├── workshops.ts          # Workshop offer pages (unlisted, noindex)
 │   ├── site-content.ts       # About, specialities, stack, contact
 │   └── blog/                 # Post rendering: remark plugin, charts, assets
 ├── server/
@@ -164,21 +171,23 @@ src/
 │       ├── rate-limiter.ts        # Rate limiting logic
 │       └── turnstile.ts           # CAPTCHA verification
 ├── trpc/
-│   ├── react.tsx             # tRPC React provider
-│   └── server.ts             # Server-side tRPC caller
+│   └── react.tsx             # tRPC React provider
 ├── lib/
 │   └── errors.ts             # Error handling utilities
-└── instrumentation.ts        # Next.js startup hook (runs migrations)
+├── proxy.ts                  # Rewrites unknown /blog and /portfolio slugs to the 404
+└── instrumentation.ts        # Startup hook: migrations (prod), content watcher (dev)
 ```
 
 ### Important Files
 
 - **`src/app/api/chat/route.ts`** - Main AI chat endpoint, uses Vercel AI SDK's `streamText`, includes `sendMessage` tool for email sending
 - **`src/server/services/command-executor.ts`** - All slash command handlers, returns markdown
-- **`src/app/_components/terminal-commands.ts`** - Command registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link routes and the sitemap. `/portfolio` and `/blog` are absent from it on purpose: both have a real route under `src/app/(editorial)/`
+- **`src/app/_components/terminal-commands.ts`** - Command registry (add new commands here) and the `COMMAND_PAGES` list that drives the deep-link metadata and the sitemap. Each entry also needs a route folder under `src/app/(terminal)/` (copy `help/page.tsx`); the e2e suite fails until it exists. `/portfolio` and `/blog` are absent from it on purpose: both have a real route under `src/app/(editorial)/`
 - **`src/content/cases.ts`** - Portfolio cases: the single source of truth for the `/portfolio` overview, the case pages, `/llms.txt` and the generated `cases/*.md` archive
+- **`src/content/workshops.ts`** - The workshop offer page(s): source of truth for `/workshops/<slug>` and its `/llms.txt` line. Unlisted: no link anywhere, not in the sitemap, `noindex`. See `docs/adr/0004-unlisted-offer-page.md`
 - **`src/app/_components/post-body.tsx`** - Renders one Markdown body through the remark pipeline. Used by both a post and a case; takes `{ markdown, assetBase, lang }`
 - **`src/content/posts.ts`** - Blog post loader: frontmatter schema, the `isPublished` predicate and the date formatting. Every blog surface derives from it
+- **`src/content/cached-posts.ts`** - The cached, async views of `posts.ts` that the routes use (`"use cache"`, one-hour lifetime), so a scheduled post goes live without a deploy. `posts.ts` itself must load without Next.js, because the e2e suite imports it
 - **`src/content/blog/remark-post-structure.ts`** - Turns a post's Markdown into the editorial layout (roman-numeral sections, numbered two-column items, charts, figures)
 - **`src/server/db/schema.ts`** - Database schema (modify tables here, then run `pnpm db:push`)
 - **`src/instrumentation.ts`** - Runs automatic migrations in production on server startup
@@ -200,7 +209,9 @@ src/
 
 Sections (`##`) and items (`###`) are numbered automatically — never type the numbers. `CONTEXT.md` defines the vocabulary (kicker, lead, excerpt, item, section) and the visibility rules; `docs/adr/` records why posts are Markdown, why the blog sits outside the terminal, and why the portfolio moved onto the same layout.
 
-Drafts and future-dated posts are withheld from every public surface. Outside production (`ENVIRONMENT` is `development` or `test`) a draft is previewable with a banner and `noindex`; a future-dated post is never previewable.
+Drafts and future-dated posts are withheld from every public surface. Outside production (`ENVIRONMENT` is `development` or `test`) a draft is previewable with a banner and `noindex`; a future-dated post is never previewable. A future-dated post goes live within about an hour of its date, without a deploy. In dev a new or edited post shows on the first refresh: `src/instrumentation.ts` watches the content directories and expires the `content` cache tag on every change.
+
+The editorial layout sets `ensureStatic = "navigation"`: `next dev` and `next build` fail when a blog, portfolio or workshop page reads request data or uncached data. A route reads the post list through `cached-posts.ts`, never through the synchronous functions in `posts.ts`.
 
 ### Adding a Portfolio Case
 
@@ -257,12 +268,4 @@ Optional LangSmith tracing for AI requests:
 - Migrations run automatically on production startup via instrumentation hook
 - Health check endpoint at `/api/health` for monitoring
 
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+@AGENTS.md

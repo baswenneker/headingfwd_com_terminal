@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Markdown from "react-markdown";
 import remarkDirective from "remark-directive";
@@ -6,7 +7,8 @@ import type { Element } from "hast";
 import { postAssets } from "~/content/blog/assets";
 import { remarkPostStructure } from "~/content/blog/remark-post-structure";
 import { POST_COPY } from "~/content/site-content";
-import type { PostLanguage } from "~/content/posts";
+import { CONTENT_TAG, PREVIEW_CACHE_LIFE } from "~/content/cached-posts";
+import { draftPreviewEnabled, type PostLanguage } from "~/content/posts";
 
 /**
  * The rendered body of one post or case.
@@ -40,8 +42,15 @@ function hasFlag(node: Element | undefined, name: string): boolean {
  * `markdown` is the source; `assetBase` the public directory its bare image
  * filenames resolve against (`/blog/<slug>` or `/portfolio/<slug>`); `lang`
  * picks the footnote labels.
+ *
+ * The output depends on nothing but those props and the files in the repo, so
+ * in production it is cached for as long as the deployment lives. That also
+ * puts the image reads inside a cache scope, which the dev server requires
+ * before it lets a prerendered page touch the file system. Outside production
+ * it refreshes like the post list, so an image the author drops in after the
+ * first render shows up on the next refresh.
  */
-export function PostBody({
+export async function PostBody({
   markdown,
   assetBase,
   lang,
@@ -50,6 +59,14 @@ export function PostBody({
   assetBase: string;
   lang: PostLanguage;
 }) {
+  "use cache";
+  cacheTag(CONTENT_TAG);
+  if (draftPreviewEnabled()) {
+    cacheLife(PREVIEW_CACHE_LIFE);
+  } else {
+    cacheLife("max");
+  }
+
   const assets = postAssets(assetBase);
 
   return (

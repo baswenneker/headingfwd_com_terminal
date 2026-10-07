@@ -340,7 +340,7 @@ test.describe("Post page (/blog/<slug>)", () => {
    * outside that set, a post appeared in the list and then 404'd when the
    * author clicked it.
    *
-   * This is the only test that writes into the content directory, so it
+   * This test and the next one write into the content directory, so each
    * cleans up in a `finally` even when an assertion fails.
    */
   test("a post added while the server runs is reachable at once", async ({
@@ -374,6 +374,49 @@ test.describe("Post page (/blog/<slug>)", () => {
       const res = await page.goto(`/blog/${slug}`);
       expect(res?.status()).toBe(200);
       await expect(page.locator("article")).toContainText("Hot pickup check");
+    } finally {
+      await rm(file, { force: true });
+    }
+  });
+
+  /**
+   * An edit to a draft the author already has open shows on the first reload.
+   * The rendered post is cached; the dev file watcher in instrumentation.ts
+   * expires that cache when the file changes. Without it the first reload
+   * still served the old text.
+   */
+  test("an edited draft shows its new text on the first reload", async ({
+    page,
+  }) => {
+    const slug = "e2e-edit-pickup-check";
+    const file = join(process.cwd(), "content", "blog", `${slug}.md`);
+    const source = (body: string) =>
+      [
+        "---",
+        'title: "Edit pickup check"',
+        "date: 2026-02-01",
+        "lang: en",
+        'excerpt: "Edited while the page was open."',
+        "draft: true",
+        "---",
+        "",
+        body,
+        "",
+      ].join("\n");
+
+    await writeFile(file, source("The first version of the lead."), "utf8");
+
+    try {
+      await page.goto(`/blog/${slug}`);
+      await expect(page.locator("article")).toContainText("first version");
+
+      await writeFile(file, source("The second version of the lead."), "utf8");
+      // The watcher waits 150 ms for the writes to settle, then calls the dev
+      // route that expires the cache.
+      await page.waitForTimeout(500);
+
+      await page.reload();
+      await expect(page.locator("article")).toContainText("second version");
     } finally {
       await rm(file, { force: true });
     }

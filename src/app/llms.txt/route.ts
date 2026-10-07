@@ -8,6 +8,7 @@
  *   - About / specialities / stack / contact → `~/content/site-content`
  *   - Portfolio cases                        → `~/content/cases` (CASES)
  *   - Blog posts                             → `~/content/posts`
+ *   - Workshops                              → `~/content/workshops`
  *
  * The short site copy is carried in full. The long-form writing is not: each
  * case and each post is one link line — title, URL and a one-line summary —
@@ -19,9 +20,10 @@
  * Because everything is derived from those sources, the file can never drift
  * from what visitors see. In particular the cases come from `visibleCases()` —
  * the very same list that drives `/portfolio`, so a `hidden` case is absent
- * here too and a `coming-soon` case is marked as such. The route is statically
- * rendered at build time (`force-static`) and served as a static asset — no
- * work happens per request.
+ * here too and a `coming-soon` case is marked as such. The route is
+ * prerendered at build time and served as a static asset. The post list comes
+ * from `getPublishedPosts()`, whose cache lifetime regenerates the file within
+ * an hour of a scheduled post's date — no work happens per request.
  */
 
 import {
@@ -33,12 +35,12 @@ import {
   BLOG,
 } from "~/content/site-content";
 import { isComingSoonCase, visibleCases } from "~/content/cases";
-import { postPath, publishedPosts } from "~/content/posts";
+import { postPath } from "~/content/posts";
+import { AI_CODING_WORKSHOP, workshopPath } from "~/content/workshops";
 import { SITE_URL } from "~/config/site";
+import { getPublishedPosts } from "~/content/cached-posts";
 
-export const dynamic = "force-static";
-
-function buildAgentsTxt(): string {
+async function buildAgentsTxt(): Promise<string> {
   const blocks: string[] = [];
 
   // ── Header ──────────────────────────────────────────────────────────────
@@ -98,16 +100,28 @@ function buildAgentsTxt(): string {
     ].join("\n"),
   );
 
+  // ── Workshops ───────────────────────────────────────────────────────────
+  // The workshop page is UNLISTED: linked from nowhere, absent from the
+  // sitemap, `noindex`. This line is the one place that names it, so an agent
+  // asked about HeadingFWD's services can still find the offer.
+  blocks.push(
+    [
+      "## Workshops",
+      "",
+      `- [${AI_CODING_WORKSHOP.title}](${SITE_URL}${workshopPath(AI_CODING_WORKSHOP)}): ${AI_CODING_WORKSHOP.excerpt}`,
+    ].join("\n"),
+  );
+
   // ── Blog ────────────────────────────────────────────────────────────────
   // The section is always present, even with nothing published: an agent that
   // reads this file has to be able to learn that the blog exists and where its
   // overview and feed live, and to come back to them later.
   //
-  // Only PUBLISHED posts are listed: `publishedPosts()` is the same predicate
+  // Only PUBLISHED posts are listed: `getPublishedPosts()` is the same predicate
   // the overview, the sitemap and the feed use, so a draft or a future-dated
   // post is absent here too. Each one is a link line, the way cases are; the
   // article itself is on the page.
-  const posts = publishedPosts();
+  const posts = await getPublishedPosts();
   blocks.push(
     [
       "## Blog",
@@ -149,8 +163,8 @@ function buildAgentsTxt(): string {
   return blocks.join("\n\n---\n\n") + "\n";
 }
 
-export function GET(): Response {
-  return new Response(buildAgentsTxt(), {
+export async function GET(): Promise<Response> {
+  return new Response(await buildAgentsTxt(), {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate",

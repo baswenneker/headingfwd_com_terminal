@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-import { findRoutablePost } from "~/content/posts";
+import { OG_FONTS } from "~/app/og-fonts";
+import { getRoutablePost } from "~/content/cached-posts";
 
 /**
  * `/blog/<slug>/opengraph-image` — the social card for one post.
@@ -22,28 +21,19 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "HeadingFWD blog post";
 
-/** Satori needs a real font buffer — ttf, otf or woff, never woff2. */
-async function mono(weight: "Regular" | "Bold") {
-  return readFile(
-    join(process.cwd(), "src/app/fonts", `JetBrainsMono-${weight}.ttf`),
-  );
-}
-
 export default async function Image({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = findRoutablePost(slug);
+  const post = await getRoutablePost(slug);
   const title = post?.title ?? "HeadingFWD";
 
   // The dimmed lead-in: everything up to and including the first full stop.
   const split = title.indexOf(". ");
   const lead = split === -1 ? "" : title.slice(0, split + 1);
   const rest = split === -1 ? title : title.slice(split + 2);
-
-  const [regular, bold] = await Promise.all([mono("Regular"), mono("Bold")]);
 
   return new ImageResponse(
     <div
@@ -163,10 +153,7 @@ export default async function Image({
     </div>,
     {
       ...size,
-      fonts: [
-        { name: "JetBrains Mono", data: regular, weight: 400, style: "normal" },
-        { name: "JetBrains Mono", data: bold, weight: 700, style: "normal" },
-      ],
+      fonts: [...OG_FONTS],
     },
   );
 }

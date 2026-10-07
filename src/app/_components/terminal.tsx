@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react";
 import Link from "next/link";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
@@ -21,8 +21,8 @@ import { MemoizedMarkdown } from "./memoized-markdown";
 // top-to-bottom in the order events happened.
 
 type CommandBlock = { type: "cmd"; lines: FeedLine[] };
-type AiTurnBlock  = { type: "ai";  userText: string };
-type FeedBlock    = CommandBlock | AiTurnBlock;
+type AiTurnBlock = { type: "ai"; userText: string };
+type FeedBlock = CommandBlock | AiTurnBlock;
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -138,6 +138,10 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   // read the latest ref value rather than a stale closure value.
   const { messages, setMessages, sendMessage, status, error, stop } =
     useChat<UIMessage>({
+      // A fixed id: without one the SDK calls `Math.random()` during render,
+      // which Cache Components rejects in a prerendered page. There is one
+      // terminal per page and the server never reads the chat id.
+      id: "terminal",
       // eslint-disable-next-line react-hooks/refs
       transport: new DefaultChatTransport({
         api: "/api/chat",
@@ -153,12 +157,13 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
       },
     });
 
-  // Abort any in-flight stream when the component unmounts.
+  // Abort any in-flight stream when the component unmounts. An effect event
+  // always calls the latest `stop`, so the effect itself never re-runs.
+  const stopStream = useEffectEvent(() => {
+    void stop();
+  });
   useEffect(() => {
-    return () => {
-      void stop();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => stopStream();
   }, []);
 
   // Auto-focus the input shortly after mount on fine-pointer devices.
@@ -377,7 +382,6 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
 
       {/* macOS-style terminal window */}
       <div className={styles.window}>
-
         {/* ── Title bar ── */}
         <div className={styles.titleBar}>
           <div className={styles.trafficLights}>
@@ -406,7 +410,9 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
           }}
         >
           {/* Shell prompt that precedes the intro */}
-          <div className={styles.promptLine}>bas@headingfwd:~$ ./hello --who</div>
+          <div className={styles.promptLine}>
+            bas@headingfwd:~$ ./hello --who
+          </div>
 
           {/* Wordmark: "Heading" in white, "FWD" in accent. The site's single
               level-one heading — names the brand for assistive tech and search. */}
@@ -435,7 +441,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
           </div>
 
           {/* "// specialities" is terminal-style comment decoration */}
-          <div className={styles.specialitiesLabel}>{'// specialities'}</div>
+          <div className={styles.specialitiesLabel}>{"// specialities"}</div>
           <div className={styles.specialitiesGrid}>
             <div>
               <span className={styles.specialityBullet}>*</span>
@@ -466,8 +472,8 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               }}
             >
               /help
-            </button>
-            {" "}for commands ·{" "}
+            </button>{" "}
+            for commands ·{" "}
             <button
               className={styles.tipCommand}
               onClick={(e) => {
@@ -476,8 +482,8 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               }}
             >
               /portfolio
-            </button>
-            {" "}to browse my work ·{" "}
+            </button>{" "}
+            to browse my work ·{" "}
             <button
               className={styles.tipCommand}
               onClick={(e) => {
@@ -486,8 +492,8 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
               }}
             >
               /blog
-            </button>
-            {" "}to read what I write · or just ask
+            </button>{" "}
+            to read what I write · or just ask
           </div>
 
           {/* Divider separating the intro from the chronological feed */}
@@ -615,10 +621,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                           if (toolPart.state === "output-available") {
                             if (toolPart.output?.success) {
                               return (
-                                <div
-                                  key={partIdx}
-                                  className={styles.toolSent}
-                                >
+                                <div key={partIdx} className={styles.toolSent}>
                                   {"✓ message sent to bas@headingfwd.com"}
                                 </div>
                               );
@@ -627,10 +630,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                             // Show the error text in the same red style used for
                             // network/stream errors so it is clearly a problem.
                             return (
-                              <div
-                                key={partIdx}
-                                className={styles.aiError}
-                              >
+                              <div key={partIdx} className={styles.aiError}>
                                 {"→ "}
                                 {toolPart.output?.error ??
                                   "Failed to send your message."}
@@ -642,10 +642,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                             // The tool threw an exception rather than returning
                             // a structured failure; show the raw error text.
                             return (
-                              <div
-                                key={partIdx}
-                                className={styles.aiError}
-                              >
+                              <div key={partIdx} className={styles.aiError}>
                                 {"→ "}
                                 {toolPart.errorText ??
                                   "Failed to send your message."}
@@ -656,10 +653,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
                           // While the tool's input is still being built or the
                           // execution is pending, show a dim placeholder.
                           return (
-                            <div
-                              key={partIdx}
-                              className={styles.toolSending}
-                            >
+                            <div key={partIdx} className={styles.toolSending}>
                               {"✉ sending your message…"}
                             </div>
                           );
@@ -693,10 +687,7 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
 
                   {/* Error display in terminal style */}
                   {showError && (
-                    <div
-                      className={styles.aiError}
-                      data-testid="error-message"
-                    >
+                    <div className={styles.aiError} data-testid="error-message">
                       {"→ "}
                       {readableError(error)}
                     </div>
@@ -751,7 +742,11 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
            * in the initial HTML gives crawlers (and visitors who don't type
            * commands) the way in: home → list → case.
            */}
-          <Link className={styles.statusLink} href="/portfolio" prefetch={false}>
+          <Link
+            className={styles.statusLink}
+            href="/portfolio"
+            prefetch={false}
+          >
             portfolio
           </Link>
           {/*

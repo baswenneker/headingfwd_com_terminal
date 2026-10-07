@@ -1,9 +1,11 @@
 /**
  * `/blog/rss.xml` — the blog's feed.
  *
- * Built from `publishedPosts()`, the same list the overview and the sitemap
- * use, so a draft or a future-dated post can never leak into it. The route is
- * statically rendered at build time and served as a static asset.
+ * Built from `getPublishedPosts()`, the same list the overview and the
+ * sitemap use, so a draft or a future-dated post can never leak into it. The
+ * route is prerendered at build time and served as a static asset; the post
+ * list's cache lifetime regenerates it within an hour of a scheduled post's
+ * date.
  *
  * `/blog/rss.xml` is a static segment and therefore wins over the sibling
  * `[slug]` route; the feed is not reachable as a post.
@@ -15,11 +17,9 @@ import {
   lastModified,
   POST_LOCALES,
   postPath,
-  publishedPosts,
   toRfc822,
 } from "~/content/posts";
-
-export const dynamic = "force-static";
+import { getPublishedPosts } from "~/content/cached-posts";
 
 const FEED_URL = `${SITE_URL}/blog/rss.xml`;
 
@@ -33,8 +33,8 @@ function xml(value: string): string {
     .replace(/'/g, "&apos;");
 }
 
-function buildFeed(): string {
-  const posts = publishedPosts();
+async function buildFeed(): Promise<string> {
+  const posts = await getPublishedPosts();
   const newest = posts[0];
 
   const items = posts
@@ -77,8 +77,8 @@ function buildFeed(): string {
     .join("\n");
 }
 
-export function GET(): Response {
-  return new Response(buildFeed(), {
+export async function GET(): Promise<Response> {
+  return new Response(await buildFeed(), {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate",

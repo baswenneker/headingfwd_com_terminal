@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { OG_FONTS } from "~/app/og-fonts";
 
 /**
  * `/opengraph-image` — the site-wide social card.
@@ -19,16 +18,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "HeadingFWD — AI Engineering & Consultancy";
 
-/** Satori needs a real font buffer — ttf, otf or woff, never woff2. */
-async function mono(weight: "Regular" | "Bold") {
-  return readFile(
-    join(process.cwd(), "src/app/fonts", `JetBrainsMono-${weight}.ttf`),
-  );
-}
-
-export default async function Image() {
-  const [regular, bold] = await Promise.all([mono("Regular"), mono("Bold")]);
-
+export default function Image() {
   return new ImageResponse(
     <div
       style={{
@@ -156,10 +146,7 @@ export default async function Image() {
     </div>,
     {
       ...size,
-      fonts: [
-        { name: "JetBrains Mono", data: regular, weight: 400, style: "normal" },
-        { name: "JetBrains Mono", data: bold, weight: 700, style: "normal" },
-      ],
+      fonts: [...OG_FONTS],
     },
   );
 }

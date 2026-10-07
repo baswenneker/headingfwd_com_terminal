@@ -1,0 +1,20 @@
+/*
+ * Workshop-only styles. The shell, meta bar, title and article body come from
+ * `editorial.module.css`. What is left is the footer with the contact line.
+ */
+
+/* ─── Article footer ─────────────────────────────────────────────────────── */
+
+.footer {
+  margin-top: clamp(34px, 5vw, 60px);
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
