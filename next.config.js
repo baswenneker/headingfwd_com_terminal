@@ -12,6 +12,11 @@ const config = {
   // A <Link> prefetches the destination's static shell; links into the
   // editorial pages opt into prefetching the whole (static) page as well.
   partialPrefetching: true,
+  experimental: {
+    // src/app/global-not-found.tsx renders the 404 for every URL without a
+    // route, with its own metadata (title, noindex, no canonical).
+    globalNotFound: true,
+  },
   // Ensure drizzle migrations are included in production builds
   outputFileTracingIncludes: {
     "/api/**/*": ["./drizzle/**/*"],

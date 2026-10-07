@@ -1,3 +1,5 @@
+import { type Metadata } from "next";
+
 /**
  * Canonical origin of the production site — the single source for every
  * absolute URL the app emits: `metadataBase` (and therefore every canonical
@@ -16,3 +18,25 @@ export const SITE_NAME = "HeadingFWD";
 /** Stable JSON-LD node ids, referenced from per-page structured data. */
 export const PERSON_ID = `${SITE_URL}/#person`;
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+
+/**
+ * Favicons and touch icons. Shared by the root layout and global-not-found.tsx,
+ * which skips the layout and so must declare its own metadata.
+ */
+export const SITE_ICONS: Metadata["icons"] = [
+  { rel: "icon", url: "/favicon.ico" },
+  { rel: "icon", type: "image/svg+xml", url: "/favicon.svg" },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "16x16",
+    url: "/favicon-16x16.png",
+  },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "32x32",
+    url: "/favicon-32x32.png",
+  },
+  { rel: "apple-touch-icon", sizes: "180x180", url: "/apple-touch-icon.png" },
+];
