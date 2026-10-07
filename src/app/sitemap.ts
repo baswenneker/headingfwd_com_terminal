@@ -1,8 +1,9 @@
 import { type MetadataRoute } from "next";
 import { COMMAND_PAGES } from "~/app/_components/terminal-commands";
 import { visibleCases } from "~/content/cases";
-import { lastModified, postPath, publishedPosts } from "~/content/posts";
+import { lastModified, postPath } from "~/content/posts";
 import { SITE_URL } from "~/config/site";
+import { getPublishedPosts } from "~/content/cached-posts";
 
 /**
  * `/sitemap.xml` — the indexable surfaces of the site. The two hand-written
@@ -12,7 +13,7 @@ import { SITE_URL } from "~/config/site";
  * routes themselves are generated from, so the sitemap can never drift.
  * `/llms.txt`, the plain-text agent source, is a real crawlable URL too.
  *
- * The blog adds `/blog` plus one URL per PUBLISHED post — `publishedPosts()`,
+ * The blog adds `/blog` plus one URL per PUBLISHED post — `getPublishedPosts()`,
  * the same predicate the overview and the feed use, so a draft or a
  * future-dated post is absent here as well.
  *
@@ -24,7 +25,7 @@ import { SITE_URL } from "~/config/site";
  * worse than none.
  */
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const casePages = visibleCases().map((c) => ({
     url: `${SITE_URL}/portfolio/${c.slug}`,
     ...(c.updated ? { lastModified: c.updated } : {}),
@@ -32,7 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const postPages = publishedPosts().map((p) => ({
+  const postPages = (await getPublishedPosts()).map((p) => ({
     url: `${SITE_URL}${postPath(p)}`,
     lastModified: lastModified(p),
     changeFrequency: "monthly" as const,

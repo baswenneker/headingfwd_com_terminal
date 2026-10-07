@@ -138,6 +138,10 @@ export function Terminal({ initialCommand }: TerminalProps = {}) {
   // read the latest ref value rather than a stale closure value.
   const { messages, setMessages, sendMessage, status, error, stop } =
     useChat<UIMessage>({
+      // A fixed id: without one the SDK calls `Math.random()` during render,
+      // which Cache Components rejects in a prerendered page. There is one
+      // terminal per page and the server never reads the chat id.
+      id: "terminal",
       // eslint-disable-next-line react-hooks/refs
       transport: new DefaultChatTransport({
         api: "/api/chat",

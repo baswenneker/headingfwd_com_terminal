@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import Image from "next/image";
 import Markdown from "react-markdown";
 import remarkDirective from "remark-directive";
@@ -40,8 +41,13 @@ function hasFlag(node: Element | undefined, name: string): boolean {
  * `markdown` is the source; `assetBase` the public directory its bare image
  * filenames resolve against (`/blog/<slug>` or `/portfolio/<slug>`); `lang`
  * picks the footnote labels.
+ *
+ * The output depends on nothing but those props and the files in the repo, so
+ * it is cached for as long as the deployment lives. That also puts the image
+ * reads inside a cache scope, which the dev server requires before it lets a
+ * prerendered page touch the file system.
  */
-export function PostBody({
+export async function PostBody({
   markdown,
   assetBase,
   lang,
@@ -50,6 +56,9 @@ export function PostBody({
   assetBase: string;
   lang: PostLanguage;
 }) {
+  "use cache";
+  cacheLife("max");
+
   const assets = postAssets(assetBase);
 
   return (

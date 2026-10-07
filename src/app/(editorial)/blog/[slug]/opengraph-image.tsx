@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { findRoutablePost } from "~/content/posts";
+import { getRoutablePost } from "~/content/cached-posts";
 
 /**
  * `/blog/<slug>/opengraph-image` — the social card for one post.
@@ -22,12 +22,18 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "HeadingFWD blog post";
 
-/** Satori needs a real font buffer — ttf, otf or woff, never woff2. */
+/**
+ * Satori needs a real font buffer — ttf, otf or woff, never woff2. Read once
+ * at module load: a file read inside the render would stop Cache Components
+ * from prerendering the card.
+ */
 async function mono(weight: "Regular" | "Bold") {
   return readFile(
     join(process.cwd(), "src/app/fonts", `JetBrainsMono-${weight}.ttf`),
   );
 }
+
+const [regular, bold] = await Promise.all([mono("Regular"), mono("Bold")]);
 
 export default async function Image({
   params,
@@ -35,15 +41,13 @@ export default async function Image({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = findRoutablePost(slug);
+  const post = await getRoutablePost(slug);
   const title = post?.title ?? "HeadingFWD";
 
   // The dimmed lead-in: everything up to and including the first full stop.
   const split = title.indexOf(". ");
   const lead = split === -1 ? "" : title.slice(0, split + 1);
   const rest = split === -1 ? title : title.slice(split + 2);
-
-  const [regular, bold] = await Promise.all([mono("Regular"), mono("Bold")]);
 
   return new ImageResponse(
     <div

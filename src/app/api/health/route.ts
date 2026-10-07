@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { connection } from "next/server";
 import { db } from "~/server/db";
 import { ErrorCode } from "~/lib/errors";
 import { chatSessions } from "~/server/db/schema";
@@ -14,6 +15,10 @@ import { chatSessions } from "~/server/db/schema";
  * - Debugging database connectivity issues
  */
 export async function GET() {
+  // Always measure at request time. Without this, Cache Components tries to
+  // prerender the handler during the build and runs the query there.
+  await connection();
+
   try {
     // Simple query to test database connectivity
     // This will throw if the database is unreachable

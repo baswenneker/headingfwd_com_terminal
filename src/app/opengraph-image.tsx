@@ -19,16 +19,20 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "HeadingFWD — AI Engineering & Consultancy";
 
-/** Satori needs a real font buffer — ttf, otf or woff, never woff2. */
+/**
+ * Satori needs a real font buffer — ttf, otf or woff, never woff2. Read once
+ * at module load: a file read inside the render would stop Cache Components
+ * from prerendering the card.
+ */
 async function mono(weight: "Regular" | "Bold") {
   return readFile(
     join(process.cwd(), "src/app/fonts", `JetBrainsMono-${weight}.ttf`),
   );
 }
 
-export default async function Image() {
-  const [regular, bold] = await Promise.all([mono("Regular"), mono("Bold")]);
+const [regular, bold] = await Promise.all([mono("Regular"), mono("Bold")]);
 
+export default function Image() {
   return new ImageResponse(
     <div
       style={{

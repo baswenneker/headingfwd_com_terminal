@@ -15,8 +15,8 @@ import {
  * COMMAND_PAGES in terminal-commands.ts, the single source of truth shared
  * with the sitemap. Static routes (/, /portfolio, /llms.txt, /api) take
  * precedence over this dynamic segment; anything not in the registry is a
- * hard 404 (`dynamicParams = false`) — including /clear, which only mutates
- * feed state and has nothing to deep-link.
+ * hard 404 (the page calls `notFound()`) — including /clear, which only
+ * mutates feed state and has nothing to deep-link.
  */
 
 interface CommandPageProps {
@@ -27,9 +27,6 @@ interface CommandPageProps {
 export function generateStaticParams() {
   return COMMAND_PAGES.map((c) => ({ command: c.token }));
 }
-
-// Tokens outside the registry (typos, /clear, easter eggs) are a hard 404.
-export const dynamicParams = false;
 
 function findPage(token: string): CommandPage | undefined {
   return COMMAND_PAGES.find((c) => c.token === token);

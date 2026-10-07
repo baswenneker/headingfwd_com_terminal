@@ -8,9 +8,9 @@ import { NotFoundConsole } from "./_components/not-found-console";
  * Global 404. Next.js renders this for any unmatched URL and whenever a route
  * calls notFound() — the command deep-links (`/[command]`), the case deep-links
  * (`/portfolio/[slug]`) and the post pages (`/blog/[slug]`) all do for
- * tokens/slugs outside their registries. A draft or future-dated post lands
- * here too: it is absent from `generateStaticParams` and `dynamicParams` is
- * false, so its URL is a hard 404 rather than a soft one.
+ * tokens/slugs outside their registries. A draft (in production) or a
+ * future-dated post lands here too: `getRoutablePost` does not return it, so
+ * its URL is a hard 404 rather than a soft one.
  *
  * It reuses the terminal window chrome (title bar, dot grid, status bar) from
  * terminal.module.css, so a wrong turn still lands the visitor inside the same

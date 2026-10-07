@@ -8,55 +8,42 @@ import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
 import { POST_COPY } from "~/content/site-content";
 import {
   draftPreviewEnabled,
-  findRoutablePost,
   formatPostDate,
   lastModified,
   POST_LOCALES,
   postPath,
-  routablePosts,
   type Post,
 } from "~/content/posts";
+import { getRoutablePost, getRoutablePosts } from "~/content/cached-posts";
 
 /**
  * `/blog/<slug>` — one post, server-rendered outside the terminal.
  *
- * The route enumerates its slugs at build time and, in production, treats
- * anything outside that set as a hard 404, matching the case and command
- * routes. Which slugs exist depends on the environment: published posts
- * everywhere, plus drafts outside production, which render with a visible
- * banner and `noindex`. A future-dated post has no page at all until its date
- * arrives — and because the set is computed at build time, it appears only
- * after the next deploy. That is accepted, not a bug.
+ * The route prerenders one page per routable post at build time. Which slugs
+ * exist depends on the environment: published posts everywhere, plus drafts
+ * outside production, which render with a visible banner and `noindex`.
+ *
+ * A slug outside that set renders on demand, so a post that reaches its date
+ * after the deploy gets a page without a rebuild, and a post the author has
+ * just written is reachable under a running dev server. Nothing is thereby
+ * reachable that should not be: `getRoutablePost` is the single gate, and the
+ * page calls `notFound()` for every slug it does not return. A typo, a
+ * future-dated post and — in production — a draft are all hard 404s.
+ * `ENVIRONMENT` defaults to production, so an unset variable still hides
+ * drafts.
  */
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
-/** Pre-render one page per routable post. */
-export function generateStaticParams() {
-  return routablePosts().map((p) => ({ slug: p.slug }));
-}
-
 /**
- * Slugs outside `generateStaticParams` render on demand rather than being
- * refused by the router, because `generateStaticParams` runs once and is not
- * re-evaluated when a file appears under a running dev server. Pinned false,
- * a post the author had just written showed up in the overview — `allPosts()`
- * skips its cache outside production for exactly that — but 404'd on its own
- * URL until the server was restarted.
- *
- * Nothing is thereby reachable that was not reachable before: `routablePosts`
- * remains the single gate, and the page below calls `notFound()` for every
- * slug `findRoutablePost` does not return. A typo, a future-dated post and —
- * in production — a draft are all still 404s, now decided by that predicate
- * instead of by the router's param list. `ENVIRONMENT` defaults to production,
- * so an unset variable still hides drafts.
- *
- * Next requires this to be a literal boolean; it cannot be computed per
- * environment, which is why the check lives in the page instead.
+ * Pre-render one page per routable post. With Cache Components the list must
+ * not be empty, so the blog needs at least one published post to build.
  */
-export const dynamicParams = true;
+export async function generateStaticParams() {
+  return (await getRoutablePosts()).map((p) => ({ slug: p.slug }));
+}
 
 /**
  * Structured data for one post: an `Article` wired into the site-wide graph
@@ -114,7 +101,7 @@ export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = findRoutablePost(slug);
+  const post = await getRoutablePost(slug);
   if (!post) return {};
 
   const isDraft = Boolean(post.draft);
@@ -146,7 +133,7 @@ export async function generateMetadata({
 
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
-  const post = findRoutablePost(slug);
+  const post = await getRoutablePost(slug);
   if (!post) notFound();
 
   const isDraft = Boolean(post.draft) && draftPreviewEnabled();

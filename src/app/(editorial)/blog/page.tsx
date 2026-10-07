@@ -7,8 +7,8 @@ import {
   formatPostDate,
   POST_LOCALES,
   postPath,
-  routablePosts,
 } from "~/content/posts";
+import { getRoutablePosts } from "~/content/cached-posts";
 
 /**
  * `/blog` — every post, newest first.
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogIndexPage() {
-  const posts = routablePosts();
+export default async function BlogIndexPage() {
+  const posts = await getRoutablePosts();
   const previewing = draftPreviewEnabled();
 
   return (

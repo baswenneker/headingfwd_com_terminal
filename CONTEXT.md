@@ -83,8 +83,9 @@ it appears in the overview with a badge, and its page renders with a DRAFT
 banner and `noindex`.
 
 **Future-dated** — a date that has not arrived. Withheld everywhere, preview
-included; its URL is a hard 404. Because the routable set is computed at build
-time, a future-dated post appears only after the next deploy.
+included; its URL is a hard 404. The blog routes cache the post list for an
+hour (`src/content/cached-posts.ts`), so a future-dated post goes live within
+about an hour of midnight in Amsterdam on its date, without a deploy.
 
 **Unlisted** — reachable on its URL and named in `/llms.txt`, but linked from
 no page, absent from the sitemap and `noindex`. Anyone with the link reads it;

@@ -25,8 +25,8 @@ import {
  * previews is server-rendered, so a crawler that runs no script still reads
  * the whole case.
  *
- * Pages exist only for the visible cases (`dynamicParams = false` below):
- * hidden cases and unknown slugs are a hard 404.
+ * Pages exist only for the visible cases: hidden cases and unknown slugs
+ * are a hard 404, decided by `notFound()` in the page.
  */
 
 const CASES = visibleCases();
@@ -39,9 +39,6 @@ interface CasePageProps {
 export function generateStaticParams() {
   return CASES.map((c) => ({ slug: c.slug }));
 }
-
-// Slugs outside generateStaticParams (hidden cases, typos) are a hard 404.
-export const dynamicParams = false;
 
 function findCase(slug: string): Case | undefined {
   return CASES.find((c) => c.slug === slug);
