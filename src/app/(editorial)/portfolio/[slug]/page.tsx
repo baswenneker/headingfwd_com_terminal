@@ -40,13 +40,7 @@ export function generateStaticParams() {
   return CASES.map((c) => ({ slug: c.slug }));
 }
 
-/**
- * A slug that does not resolve must be a hard 404, so the page reads it and
- * calls `notFound()` before anything streams. That puts URL data outside
- * `<Suspense>`, which Partial Prefetching's navigation check flags; this
- * opts the route out of that check only. The page is still fully static,
- * and the links into it set `prefetch`, so a prefetch carries the whole page.
- */
+// Same reason as on the post page (`blog/[slug]/page.tsx`).
 export const instant = false;
 
 function findCase(slug: string): Case | undefined {

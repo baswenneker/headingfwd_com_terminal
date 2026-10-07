@@ -7,7 +7,8 @@ import type { Element } from "hast";
 import { postAssets } from "~/content/blog/assets";
 import { remarkPostStructure } from "~/content/blog/remark-post-structure";
 import { POST_COPY } from "~/content/site-content";
-import type { PostLanguage } from "~/content/posts";
+import { PREVIEW_CACHE_LIFE } from "~/content/cached-posts";
+import { draftPreviewEnabled, type PostLanguage } from "~/content/posts";
 
 /**
  * The rendered body of one post or case.
@@ -43,9 +44,11 @@ function hasFlag(node: Element | undefined, name: string): boolean {
  * picks the footnote labels.
  *
  * The output depends on nothing but those props and the files in the repo, so
- * it is cached for as long as the deployment lives. That also puts the image
- * reads inside a cache scope, which the dev server requires before it lets a
- * prerendered page touch the file system.
+ * in production it is cached for as long as the deployment lives. That also
+ * puts the image reads inside a cache scope, which the dev server requires
+ * before it lets a prerendered page touch the file system. Outside production
+ * it refreshes like the post list, so an image the author drops in after the
+ * first render shows up on the second refresh.
  */
 export async function PostBody({
   markdown,
@@ -57,7 +60,11 @@ export async function PostBody({
   lang: PostLanguage;
 }) {
   "use cache";
-  cacheLife("max");
+  if (draftPreviewEnabled()) {
+    cacheLife(PREVIEW_CACHE_LIFE);
+  } else {
+    cacheLife("max");
+  }
 
   const assets = postAssets(assetBase);
 

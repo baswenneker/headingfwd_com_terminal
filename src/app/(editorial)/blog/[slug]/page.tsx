@@ -38,11 +38,17 @@ interface PostPageProps {
 }
 
 /**
- * Pre-render one page per routable post. With Cache Components the list must
- * not be empty, so the blog needs at least one published post to build.
+ * Pre-render one page per routable post.
+ *
+ * With Cache Components the list must not be empty, or the build fails. With
+ * nothing published — every post a draft or scheduled — it names one slug no
+ * post can have (frontmatter slugs are lowercase kebab-case), which
+ * prerenders as a 404. A scheduled post then still goes live on its date.
  */
 export async function generateStaticParams() {
-  return (await getRoutablePosts()).map((p) => ({ slug: p.slug }));
+  const posts = await getRoutablePosts();
+  if (posts.length === 0) return [{ slug: "_none" }];
+  return posts.map((p) => ({ slug: p.slug }));
 }
 
 /**

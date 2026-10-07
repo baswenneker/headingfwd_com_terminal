@@ -28,11 +28,18 @@ import {
  */
 function cacheVisibility(): void {
   if (draftPreviewEnabled()) {
-    cacheLife({ stale: 300, revalidate: 1, expire: 300 });
+    cacheLife(PREVIEW_CACHE_LIFE);
   } else {
     cacheLife("hours");
   }
 }
+
+/**
+ * The lifetime outside production for anything read from the content files:
+ * refreshed in the background a second after it was served. Exported for
+ * `PostBody`, which caches its rendering of those files the same way.
+ */
+export const PREVIEW_CACHE_LIFE = { stale: 300, revalidate: 1, expire: 300 };
 
 /** `routablePosts()`, cached for the routes. */
 export async function getRoutablePosts(): Promise<Post[]> {
@@ -48,9 +55,20 @@ export async function getPublishedPosts(): Promise<Post[]> {
   return publishedPosts();
 }
 
-/** `findRoutablePost()`, cached for the routes. */
+/**
+ * `findRoutablePost()`, cached for the routes.
+ *
+ * A miss is cached for minutes, not hours. Someone who opens a scheduled
+ * post's URL the day before would otherwise pin its 404 for up to an hour
+ * after the date, while the overview and the feed already link to it.
+ */
 export async function getRoutablePost(slug: string): Promise<Post | undefined> {
   "use cache";
-  cacheVisibility();
-  return findRoutablePost(slug);
+  const post = findRoutablePost(slug);
+  if (!post && !draftPreviewEnabled()) {
+    cacheLife("minutes");
+  } else {
+    cacheVisibility();
+  }
+  return post;
 }

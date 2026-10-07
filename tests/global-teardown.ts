@@ -15,17 +15,18 @@ async function globalTeardown(config: FullConfig) {
   // The dev server will be automatically stopped by Playwright's webServer config
 
   // Clean up the test database file named by DATABASE_URL (loaded from
-  // .env.test by the config). The guard mirrors global-setup: never delete
-  // anything that is not the test database.
+  // .env.test by the config). Never delete anything that is not the test
+  // database.
   const dbUrl = process.env.DATABASE_URL ?? "";
-  if (!dbUrl.startsWith("file:") || !dbUrl.includes("test.db")) {
+  // Strip any query string (`?mode=rwc`) and require the file to be named
+  // exactly test.db, so `latest.db` or `contest.db` can never match.
+  const dbFile = dbUrl.startsWith("file:")
+    ? dbUrl.slice("file:".length).split("?")[0]!
+    : "";
+  if (path.basename(dbFile) !== "test.db") {
     console.warn(`⚠️  Skipping database cleanup for ${dbUrl}`);
   } else {
-    const testDbPath = path.resolve(
-      __dirname,
-      "..",
-      dbUrl.slice("file:".length),
-    );
+    const testDbPath = path.resolve(__dirname, "..", dbFile);
     try {
       for (const file of [
         testDbPath,

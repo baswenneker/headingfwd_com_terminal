@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { OG_FONTS } from "~/app/og-fonts";
 import { AI_CODING_WORKSHOP } from "~/content/workshops";
 
 /**
@@ -18,19 +17,6 @@ import { AI_CODING_WORKSHOP } from "~/content/workshops";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = AI_CODING_WORKSHOP.title;
-
-/**
- * Satori needs a real font buffer — ttf, otf or woff, never woff2. Read once
- * at module load: a file read inside the render would stop Cache Components
- * from prerendering the card.
- */
-async function mono(weight: "Regular" | "Bold") {
-  return readFile(
-    join(process.cwd(), "src/app/fonts", `JetBrainsMono-${weight}.ttf`),
-  );
-}
-
-const [regular, bold] = await Promise.all([mono("Regular"), mono("Bold")]);
 
 export default function Image() {
   return new ImageResponse(
@@ -145,10 +131,7 @@ export default function Image() {
     </div>,
     {
       ...size,
-      fonts: [
-        { name: "JetBrains Mono", data: regular, weight: 400, style: "normal" },
-        { name: "JetBrains Mono", data: bold, weight: 700, style: "normal" },
-      ],
+      fonts: [...OG_FONTS],
     },
   );
 }

@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
@@ -16,15 +15,8 @@ import { env } from "~/env";
 import styles from "./terminal.module.css";
 import { renderFeedLine } from "./terminal-feed";
 import { type FeedLine, runCommand } from "./terminal-commands";
+import { CaptchaOverlay } from "./captcha-overlay";
 import { MemoizedMarkdown } from "./memoized-markdown";
-
-// The CAPTCHA overlay and the Turnstile widget inside it are needed only for
-// a visitor's first free-text message, so their code loads on that moment
-// rather than with the terminal.
-const CaptchaOverlay = dynamic(
-  () => import("./captcha-overlay").then((m) => m.CaptchaOverlay),
-  { ssr: false },
-);
 
 // ── Feed block model ────────────────────────────────────────────────────────
 //
