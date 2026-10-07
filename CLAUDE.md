@@ -148,7 +148,8 @@ src/
 │   │   └── health/route.ts   # Health check endpoint
 │   ├── llms.txt/route.ts     # Plain-text source for agents
 │   ├── sitemap.ts
-│   └── not-found.tsx
+│   ├── global-not-found.tsx  # 404 for any URL without a route (own metadata)
+│   └── not-found.tsx         # 404 for notFound() in a page
 ├── content/
 │   ├── cases.ts              # Portfolio cases (source of truth)
 │   ├── posts.ts              # Blog post loader, validation & visibility
@@ -173,7 +174,8 @@ src/
 │   └── react.tsx             # tRPC React provider
 ├── lib/
 │   └── errors.ts             # Error handling utilities
-└── instrumentation.ts        # Next.js startup hook (runs migrations)
+├── proxy.ts                  # Rewrites unknown /blog and /portfolio slugs to the 404
+└── instrumentation.ts        # Startup hook: migrations (prod), content watcher (dev)
 ```
 
 ### Important Files
