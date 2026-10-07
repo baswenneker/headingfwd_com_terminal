@@ -23,17 +23,17 @@ export const metadata: Metadata = {
   description:
     "That route doesn’t exist on headingfwd.com. Head back to the terminal, " +
     "or jump to the portfolio, blog, services, about or contact pages.",
-  // Both lines below override something the root layout would otherwise hand
-  // down to this page.
-  //
-  // `robots`: the layout sets `index: true, follow: true` for the real pages.
-  // Inheriting that here would contradict the `noindex` Next injects on every
-  // 404. The two tags then disagree, so say noindex explicitly instead.
+  // `robots`: say noindex explicitly, matching the `noindex` Next injects on
+  // every 404, so the two tags never disagree.
   robots: { index: false, follow: true },
-  // `alternates`: the layout sets `canonical: "/"`. A 404 carrying it tells
-  // crawlers the homepage is this URL's real version, and Search Console files
-  // the URL under "Alternative page with proper canonical tag". A page that
-  // does not exist has no canonical, so drop it.
+  // `alternates`: a 404 carrying a canonical tells crawlers the homepage is
+  // this URL's real version, and Search Console files the URL under
+  // "Alternative page with proper canonical tag". A page that does not exist
+  // has no canonical.
+  //
+  // With Cache Components, Next renders a 404 with the root layout's metadata
+  // and skips this export, so the layout itself carries no canonical and no
+  // index directive. This export still applies to the prerendered /_not-found.
   alternates: { canonical: null },
 };
 

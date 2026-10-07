@@ -267,6 +267,39 @@ test.describe("Command deep links (/help, /about, …)", () => {
   });
 });
 
+/**
+ * A 404 must not tell crawlers anything a real page would: no canonical (Search
+ * Console then files the URL as an alternate of the homepage) and no "index"
+ * directive next to the noindex Next adds. Checked in the browser, after
+ * hydration, because metadata can also arrive in the streamed payload.
+ */
+test.describe("Search signals on a 404", () => {
+  for (const path of ["/nope", "/clear", "/blog/does-not-exist"]) {
+    test(`${path} has no canonical and only noindex robots`, async ({
+      page,
+    }) => {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
+      const robots = await page
+        .locator('meta[name="robots"], meta[name="googlebot"]')
+        .evaluateAll((els) => els.map((el) => el.getAttribute("content")));
+      expect(robots.length).toBeGreaterThan(0);
+      for (const content of robots) {
+        expect(content).not.toMatch(/(^|[ ,])index/);
+      }
+    });
+  }
+
+  test("the homepage keeps its canonical", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      "https://headingfwd.com",
+    );
+  });
+});
+
 test.describe("Sitemap", () => {
   test("sitemap.xml lists every case URL and every command URL", async ({
     page,

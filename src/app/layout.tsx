@@ -45,20 +45,17 @@ export const metadata: Metadata = {
   authors: [{ name: "Bas Wenneker", url: CONTACT.linkedin }],
   creator: "Bas Wenneker",
   publisher: SITE_NAME,
-  // Explicitly allow indexing so crawlers never treat the SPA as noindex.
+  // Only the preview limits live here, not `index` / `follow` or a canonical.
+  // With Cache Components a 404 is rendered with this layout's metadata and
+  // not with the metadata in not-found.tsx, so anything set here reaches every
+  // 404 as well. Indexing is the default without a robots tag; each page sets
+  // its own canonical.
   robots: {
-    index: true,
-    follow: true,
     googleBot: {
-      index: true,
-      follow: true,
       "max-image-preview": "large",
       "max-snippet": -1,
       "max-video-preview": -1,
     },
-  },
-  alternates: {
-    canonical: "/",
   },
   openGraph: {
     type: "website",
