@@ -73,7 +73,6 @@ the person out of the loop.
 
 - Topic suggestions and brainstorming
 - Content-calendar planning
-- Performance insights *(coming soon)*
 - Audience-engagement tracking
 - Best practices and tips
 - Advice on diversifying your content
