@@ -2,14 +2,18 @@ import { type Metadata } from "next";
 import Link from "next/link";
 import styles from "../editorial.module.css";
 import pf from "../portfolio.module.css";
-import { isComingSoonCase, visibleCases } from "~/content/cases";
+import {
+  formatCasePeriod,
+  isComingSoonCase,
+  visibleCases,
+} from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
 
 /**
- * `/portfolio` — every visible case, in display order.
+ * `/portfolio` — every visible case, most recent work first.
  *
  * The same editorial shell as `/blog`: a server-rendered page outside the
- * terminal, one card per case. The case number takes the column the post date
+ * terminal, one card per case. The case period takes the column the post date
  * occupies on the blog overview.
  */
 
@@ -58,7 +62,9 @@ export default function PortfolioPage() {
               prefetch
               className={styles.listLink}
             >
-              <span className={`${styles.listMeta} ${pf.index}`}>{c.n}</span>
+              <span className={`${styles.listMeta} ${pf.period}`}>
+                {formatCasePeriod(c)}
+              </span>
               <div>
                 <h2 className={styles.listTitle}>
                   {c.title}

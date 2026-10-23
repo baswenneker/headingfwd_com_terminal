@@ -1,7 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { sendCommand, waitForTerminalReady } from "../helpers/session";
 import { COMMAND_PAGES } from "~/app/_components/terminal-commands";
-import { visibleCases } from "~/content/cases";
+import {
+  formatCasePeriod,
+  sortCases,
+  visibleCases,
+  type Case,
+} from "~/content/cases";
 
 /**
  * Tests for the portfolio pages and the shareable command deep links.
@@ -18,7 +23,7 @@ import { visibleCases } from "~/content/cases";
  * both dynamic routes).
  */
 
-// First and second visible case, in CASES order (src/content/cases.ts).
+// Two published cases, by slug. Their place in the list follows the dates.
 const CASE_1 = { slug: "ai-writing-assistant", title: "AI Writing Assistant" };
 const CASE_2 = {
   slug: "hintsay-linkedin",
@@ -76,24 +81,25 @@ test.describe("Case pages (/portfolio/<slug>)", () => {
 
   test("prev and next are real links that wrap around", async ({ page }) => {
     const cases = visibleCases();
+    const [first, second] = cases;
     const last = cases[cases.length - 1]!;
 
-    await page.goto(`/portfolio/${CASE_1.slug}`);
+    await page.goto(`/portfolio/${first!.slug}`);
 
-    // CASE_1 is the first case, so "prev" wraps to the last one.
+    // The first case, so "prev" wraps to the last one.
     await expect(page.getByRole("link", { name: "← prev" })).toHaveAttribute(
       "href",
       `/portfolio/${last.slug}`,
     );
     await expect(page.getByRole("link", { name: "next →" })).toHaveAttribute(
       "href",
-      `/portfolio/${CASE_2.slug}`,
+      `/portfolio/${second!.slug}`,
     );
 
     await page.getByRole("link", { name: "next →" }).click();
-    await expect(page).toHaveURL(`/portfolio/${CASE_2.slug}`);
+    await expect(page).toHaveURL(`/portfolio/${second!.slug}`);
     await expect(
-      page.getByRole("heading", { level: 1, name: CASE_2.title }),
+      page.getByRole("heading", { level: 1, name: second!.title }),
     ).toBeVisible();
   });
 
@@ -131,6 +137,23 @@ test.describe("Case pages (/portfolio/<slug>)", () => {
       has: page.locator(`a[href="/portfolio/${TEASER.slug}"]`),
     });
     await expect(row.getByText("coming soon")).toBeVisible();
+  });
+
+  test("the overview lists the most recent work first, with its period", async ({
+    page,
+  }) => {
+    await page.goto("/portfolio");
+
+    const cases = visibleCases();
+    const hrefs = await page
+      .locator('li a[href^="/portfolio/"]')
+      .evaluateAll((els) => els.map((el) => el.getAttribute("href")));
+    expect(hrefs).toEqual(cases.map((c) => `/portfolio/${c.slug}`));
+
+    const first = page.locator("li", {
+      has: page.locator(`a[href="/portfolio/${cases[0]!.slug}"]`),
+    });
+    await expect(first.getByText(formatCasePeriod(cases[0]!)!)).toBeVisible();
   });
 
   test("an unknown slug is a hard 404", async ({ page }) => {
@@ -377,8 +400,50 @@ test.describe("llms.txt", () => {
 
     expect(text).toContain("https://headingfwd.com/portfolio\n");
     // The old shape inlined each body under a `## 01 — Title` heading.
-    expect(text, "llms.txt still inlines case bodies").not.toContain(
-      `## ${cases[0]!.n} — ${cases[0]!.title}`,
+    expect(text, "llms.txt still inlines case bodies").not.toMatch(
+      /^## \d{2} — /m,
     );
+  });
+});
+
+/**
+ * Case dates. Pure functions, no page: the period text the site shows and the
+ * newest-first order every surface lists the cases in.
+ */
+test.describe("Case dates", () => {
+  test("the period is derived from start and end", () => {
+    expect(formatCasePeriod({ start: "2022", end: "2024" })).toBe("2022–2024");
+    expect(formatCasePeriod({ start: "2022", end: "2022" })).toBe("2022");
+    expect(formatCasePeriod({ start: "2025-01", end: "2025-03" })).toBe(
+      "Jan–Mar 2025",
+    );
+    expect(formatCasePeriod({ start: "2025-05", end: "2025-05" })).toBe(
+      "May 2025",
+    );
+    expect(formatCasePeriod({ start: "2024-11", end: "2025-02" })).toBe(
+      "Nov 2024 – Feb 2025",
+    );
+    expect(formatCasePeriod({ start: "2024" })).toBe("2024–present");
+    expect(formatCasePeriod({})).toBeUndefined();
+    expect(() => formatCasePeriod({ start: "Q1 2025" })).toThrow();
+  });
+
+  test("cases sort by end date, running first and undated last", () => {
+    const at = (slug: string, start?: string, end?: string) =>
+      ({ slug, start, end }) as Case;
+    const sorted = sortCases([
+      at("undated"),
+      at("old", "2020", "2021"),
+      at("year-end", "2023", "2023"),
+      at("month-end", "2023-01", "2023-06"),
+      at("running", "2019"),
+    ]);
+    expect(sorted.map((c) => c.slug)).toEqual([
+      "running",
+      "year-end",
+      "month-end",
+      "old",
+      "undated",
+    ]);
   });
 });

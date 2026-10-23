@@ -3,6 +3,8 @@ title: AI Personal Trainer
 slug: ai-personal-trainer
 sector: Sports & Fitness
 status: experiment
+start: 2025-05
+end: 2025-06
 role: Maker / AI engineer
 tags: [LLM, Multimodal, Motion recognition, Python]
 stack: [Google Gemini 2.5 Pro, Python, ChatGPT, GitHub Copilot, VSCode]

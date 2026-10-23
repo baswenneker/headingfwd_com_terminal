@@ -2,7 +2,7 @@
  * Canonical case data — THE single source of truth for HeadingFWD's portfolio.
  *
  * Every surface that shows a case derives from this one array:
- *   - `/portfolio`        (overview)  → one card per case: `n`, `title`, `kind`, `tags`
+ *   - `/portfolio`        (overview)  → one card per case: period, `title`, `kind`, `tags`
  *   - `/portfolio/<slug>` (case page) → the metadata fields and the rendered `body`
  *   - `/llms.txt`         (agent file)→ one link line: title, URL and `kind`
  *   - `cases/*.md`        (archive)   → `pnpm gen:cases` re-emits them in full
@@ -28,9 +28,10 @@
  * them. That is what puts the heading in the left column and its text in the
  * right, the two-column rhythm the blog uses.
  *
- * To add a case: append an entry to CASES with a unique slug, the next `n`
- * display index, a one-line `kind`, the metadata fields, and the full write-up
- * as a Markdown string in `body` (no frontmatter, no leading H1).
+ * To add a case: add an entry to CASES with a unique slug, a one-line `kind`,
+ * its `start` and `end` dates, the metadata fields, and the full write-up as a
+ * Markdown string in `body` (no frontmatter, no leading H1). Where the entry
+ * sits in the array does not matter: `visibleCases()` sorts by date.
  */
 
 /** Lifecycle of a case, mirrored by the status legend in the generated README. */
@@ -79,23 +80,29 @@ export interface CaseVideo {
  * A single portfolio case with all of its details in one place.
  *
  * Required fields drive the visible surfaces; the optional metadata fields
- * (`period`, `role`, `client`, `links`, `sources`, `updated`, `image`,
+ * (`start`, `end`, `role`, `client`, `links`, `sources`, `updated`, `image`,
  * `caseUrl`, `videos`) are preserved for provenance and future UI without
  * being required everywhere.
  */
 export interface Case {
   /** URL-safe identifier; also the generated Markdown filename. */
   slug: string;
-  /** Two-digit display index shown in the list ("01", "02", …). */
-  n: string;
   /** Case title, shown prominently in the overview and on the case page. */
   title: string;
   /** One-line outcome/role summary — the `/portfolio` list subtitle. */
   kind: string;
   /** Sector / domain label. */
   sector: string;
-  /** Engagement period, shown in the metadata line (e.g. "Q1 2025", "2024–2025"). */
-  period?: string;
+  /**
+   * When the work started, as a year ("2022") or a month ("2025-03"). The
+   * period shown on the site is derived from `start` and `end`.
+   */
+  start?: string;
+  /**
+   * When the work ended, same format as `start`. Omit it on a case that is
+   * still running: it then shows as "2024–present" and sorts as newest.
+   */
+  end?: string;
   /** Lifecycle status. */
   status: CaseStatus;
   /**
@@ -131,11 +138,11 @@ export interface Case {
 export const CASES: Case[] = [
   {
     slug: "ai-writing-assistant",
-    n: "01",
     title: "AI Writing Assistant",
     kind: "AI writing assistant that guards the house style — data stays in-house",
     sector: "Government",
-    period: "Q1 2025",
+    start: "2025-01",
+    end: "2025-03",
     status: "live",
     role: "Initiator / AI engineer",
     tags: ["LLM", "Writing", "Marketing", "Python", "VectorDB"],
@@ -222,11 +229,11 @@ organization.
   },
   {
     slug: "hintsay-linkedin",
-    n: "02",
     title: "Hintsay: AI writing assistant for LinkedIn",
     kind: "Months of LinkedIn content in minutes, in your own voice",
     sector: "Marketing",
-    period: "2022–2023",
+    start: "2022",
+    end: "2023",
     status: "live",
     role: "Maker / AI engineer",
     tags: ["LLM", "Marketing", "SaaS"],
@@ -294,7 +301,6 @@ the person out of the loop.
 
 - Topic suggestions and brainstorming
 - Content-calendar planning
-- Performance insights *(coming soon)*
 - Audience-engagement tracking
 - Best practices and tips
 - Advice on diversifying your content
@@ -329,11 +335,11 @@ the person out of the loop.
   },
   {
     slug: "myworq",
-    n: "03",
     title: "MyWorq: employee app for horticulture",
     kind: "Employee app for horticulture — live with thousands of users",
     sector: "Horticulture",
-    period: "2022–2024",
+    start: "2022",
+    end: "2024",
     status: "live",
     role: "Product Manager",
     client: "bQurius",
@@ -416,10 +422,11 @@ the product role over to the client after roughly two years.
   },
   {
     slug: "briefwijzer",
-    n: "04",
     title: "BriefWijzer",
     kind: "Make unreadable letters understandable with a single photo",
     sector: "Communication",
+    start: "2025-07",
+    end: "2025-07",
     status: "demo",
     role: "AI engineer",
     tags: ["RAG", "OCR", "LLM", "Marketing"],
@@ -496,10 +503,11 @@ bodies that want to make their letters more accessible.
   },
   {
     slug: "ai-personal-trainer",
-    n: "05",
     title: "AI Personal Trainer",
     kind: "Custom AI that analyzes fitness videos where ChatGPT fails",
     sector: "Sports & Fitness",
+    start: "2025-05",
+    end: "2025-06",
     status: "experiment",
     role: "Maker / AI engineer",
     tags: ["LLM", "Multimodal", "Motion recognition", "Python"],
@@ -604,7 +612,6 @@ multimodal models fall short for movement analysis, while a custom approach with
   },
   {
     slug: "chatbot-qa-hub",
-    n: "06",
     title: "Chatbot: a Q&A hub for your team",
     kind: "Chat with your manuals instead of searching them",
     sector: "Government",
@@ -639,7 +646,6 @@ themselves.
   },
   {
     slug: "podcast-transcription",
-    n: "07",
     title: "Podcast transcription and segmentation",
     kind: "Automatically transcribe and segment podcasts with timecodes",
     sector: "Media",
@@ -706,8 +712,78 @@ export function isComingSoonCase(c: Case): boolean {
   return caseVisibility(c) === "coming-soon";
 }
 
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+/** Split a case date into year and month; throws on anything but YYYY or YYYY-MM. */
+function parseCaseDate(date: string): { year: string; month?: number } {
+  const m = /^(\d{4})(?:-(0[1-9]|1[0-2]))?$/.exec(date);
+  if (!m) throw new Error(`Invalid case date "${date}": use YYYY or YYYY-MM`);
+  return { year: m[1]!, month: m[2] ? Number(m[2]) : undefined };
+}
+
+/** "2022" or "Mar 2025". */
+function formatCaseDate(date: string): string {
+  const { year, month } = parseCaseDate(date);
+  return month ? `${MONTHS[month - 1]} ${year}` : year;
+}
+
 /**
- * The cases shown on public surfaces: everything except `hidden` ones.
+ * The period a case covers, derived from `start` and `end`: "2022–2024",
+ * "Jan–Mar 2025", "May 2025", "2024–present". Undefined for an undated case.
+ */
+export function formatCasePeriod(
+  c: Pick<Case, "start" | "end">,
+): string | undefined {
+  if (!c.start) return c.end ? formatCaseDate(c.end) : undefined;
+  const start = formatCaseDate(c.start);
+  if (!c.end) return `${start}–present`;
+  if (c.end === c.start) return start;
+  const from = parseCaseDate(c.start);
+  const to = parseCaseDate(c.end);
+  if (from.year === to.year && from.month && to.month) {
+    return `${MONTHS[from.month - 1]}–${formatCaseDate(c.end)}`;
+  }
+  const end = formatCaseDate(c.end);
+  // A space around the dash once either side holds a month: "Nov 2024 – Feb 2025".
+  return from.month || to.month ? `${start} – ${end}` : `${start}–${end}`;
+}
+
+/**
+ * Sort key: the last month of the work as "YYYY-MM". A year-only end counts
+ * as December, a running case as the far future, an undated case as nothing.
+ */
+function caseSortKey(c: Case): string {
+  if (c.start && !c.end) return "9999-12";
+  if (!c.end) return "";
+  const { year, month } = parseCaseDate(c.end);
+  return `${year}-${String(month ?? 12).padStart(2, "0")}`;
+}
+
+/**
+ * Most recent work first, by end date; undated cases go last. Cases with the
+ * same end keep their order in CASES, because Array.prototype.sort is stable.
+ */
+export function sortCases(cases: Case[]): Case[] {
+  return [...cases].sort((a, b) =>
+    caseSortKey(b).localeCompare(caseSortKey(a)),
+  );
+}
+
+/**
+ * The cases shown on public surfaces, newest first: everything except `hidden` ones.
  *
  * The `/portfolio` overview, the case pages, `/llms.txt` and the generated
  * `cases/*.md` archive all derive their list from this, so a `hidden` case
@@ -715,5 +791,5 @@ export function isComingSoonCase(c: Case): boolean {
  * CASES itself.
  */
 export function visibleCases(cases: Case[] = CASES): Case[] {
-  return cases.filter((c) => !isHiddenCase(c));
+  return sortCases(cases.filter((c) => !isHiddenCase(c)));
 }

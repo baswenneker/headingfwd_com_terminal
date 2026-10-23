@@ -3,7 +3,8 @@ title: "Hintsay: AI writing assistant for LinkedIn"
 slug: hintsay-linkedin
 sector: Marketing
 status: live
-period: 2022–2023
+start: 2022
+end: 2023
 role: Maker / AI engineer
 tags: [LLM, Marketing, SaaS]
 stack: [React, Advanced language models, Cloud infrastructure]
@@ -73,7 +74,6 @@ the person out of the loop.
 
 - Topic suggestions and brainstorming
 - Content-calendar planning
-- Performance insights *(coming soon)*
 - Audience-engagement tracking
 - Best practices and tips
 - Advice on diversifying your content

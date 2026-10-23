@@ -7,7 +7,12 @@ import pf from "../../portfolio.module.css";
 import { PostBody } from "~/app/_components/post-body";
 import { VideoPreviews } from "~/app/_components/video-previews";
 import { postAssets } from "~/content/blog/assets";
-import { isComingSoonCase, visibleCases, type Case } from "~/content/cases";
+import {
+  formatCasePeriod,
+  isComingSoonCase,
+  visibleCases,
+  type Case,
+} from "~/content/cases";
 import { CONTACT } from "~/content/site-content";
 import { ORGANIZATION_ID, PERSON_ID, SITE_NAME, SITE_URL } from "~/config/site";
 
@@ -179,9 +184,11 @@ export default async function CasePage({ params }: CasePageProps) {
 
   // Sector leads the kicker, so the metadata line carries what is left:
   // period, state and role, each only when the case has it.
-  const meta = [c.period, comingSoon ? "coming soon" : c.status, c.role].filter(
-    Boolean,
-  );
+  const meta = [
+    formatCasePeriod(c),
+    comingSoon ? "coming soon" : c.status,
+    c.role,
+  ].filter(Boolean);
 
   // Neighbouring cases, wrapping — the same order the overview shows.
   const all = CASES;
@@ -199,9 +206,7 @@ export default async function CasePage({ params }: CasePageProps) {
 
       <article className={styles.article}>
         <div className={styles.metaBar}>
-          <span className={styles.kicker}>
-            Case {c.n} · {c.sector}
-          </span>
+          <span className={styles.kicker}>{c.sector}</span>
           <Link href="/portfolio" className={styles.backLink}>
             ← all work
           </Link>

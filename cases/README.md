@@ -6,15 +6,15 @@
 
 ## Overview
 
-| # | Case | Sector | Status | Tags | File |
+| Period | Case | Sector | Status | Tags | File |
 |---|------|--------|--------|------|------|
-| 01 | AI Writing Assistant | Government | 🟢 live | LLM, Writing, Marketing, Python, VectorDB | [ai-writing-assistant.md](./ai-writing-assistant.md) |
-| 02 | Hintsay: AI writing assistant for LinkedIn | Marketing | 🟢 live | LLM, Marketing, SaaS | [hintsay-linkedin.md](./hintsay-linkedin.md) |
-| 03 | MyWorq: employee app for horticulture | Horticulture | 🟢 live | Mobile App, Product Management, Design Thinking | [myworq.md](./myworq.md) |
-| 04 | BriefWijzer | Communication | 🔵 demo | RAG, OCR, LLM, Marketing | [briefwijzer.md](./briefwijzer.md) |
-| 05 | AI Personal Trainer | Sports & Fitness | 🟡 experiment | LLM, Multimodal, Motion recognition, Python | [ai-personal-trainer.md](./ai-personal-trainer.md) |
-| 06 | Chatbot: a Q&A hub for your team | Government | ⚪ concept · 🔜 coming soon | RAG, LLM, Chatbot, Marketing | [chatbot-qa-hub.md](./chatbot-qa-hub.md) |
-| 07 | Podcast transcription and segmentation | Media | ⚪ concept · 🔜 coming soon | Transcription, LLM, Audio | [podcast-transcription.md](./podcast-transcription.md) |
+| Jul 2025 | BriefWijzer | Communication | 🔵 demo | RAG, OCR, LLM, Marketing | [briefwijzer.md](./briefwijzer.md) |
+| May–Jun 2025 | AI Personal Trainer | Sports & Fitness | 🟡 experiment | LLM, Multimodal, Motion recognition, Python | [ai-personal-trainer.md](./ai-personal-trainer.md) |
+| Jan–Mar 2025 | AI Writing Assistant | Government | 🟢 live | LLM, Writing, Marketing, Python, VectorDB | [ai-writing-assistant.md](./ai-writing-assistant.md) |
+| 2022–2024 | MyWorq: employee app for horticulture | Horticulture | 🟢 live | Mobile App, Product Management, Design Thinking | [myworq.md](./myworq.md) |
+| 2022–2023 | Hintsay: AI writing assistant for LinkedIn | Marketing | 🟢 live | LLM, Marketing, SaaS | [hintsay-linkedin.md](./hintsay-linkedin.md) |
+| — | Chatbot: a Q&A hub for your team | Government | ⚪ concept · 🔜 coming soon | RAG, LLM, Chatbot, Marketing | [chatbot-qa-hub.md](./chatbot-qa-hub.md) |
+| — | Podcast transcription and segmentation | Media | ⚪ concept · 🔜 coming soon | Transcription, LLM, Audio | [podcast-transcription.md](./podcast-transcription.md) |
 
 ## Status legend
 
