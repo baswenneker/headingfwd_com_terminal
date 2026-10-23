@@ -3,7 +3,8 @@ title: "MyWorq: employee app for horticulture"
 slug: myworq
 sector: Horticulture
 status: live
-period: 2022–2024
+start: 2022
+end: 2024
 role: Product Manager
 client: bQurius
 tags: [Mobile App, Product Management, Design Thinking]
