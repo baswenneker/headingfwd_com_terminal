@@ -16,16 +16,19 @@ export async function cleanupDatabase() {
     // Delete in reverse order of dependencies
     // Silently ignore if tables don't exist yet
     try {
+      // eslint-disable-next-line drizzle/enforce-delete-with-where -- emptying the test database is the point
       await db.delete(chatMessages);
     } catch (e) {
       // Table might not exist yet, ignore
     }
     try {
+      // eslint-disable-next-line drizzle/enforce-delete-with-where -- emptying the test database is the point
       await db.delete(rateLimitLogs);
     } catch (e) {
       // Table might not exist yet, ignore
     }
     try {
+      // eslint-disable-next-line drizzle/enforce-delete-with-where -- emptying the test database is the point
       await db.delete(chatSessions);
     } catch (e) {
       // Table might not exist yet, ignore
@@ -125,7 +128,7 @@ export async function createExpiredSession() {
 export async function addRateLimitLogs(
   sessionId: string,
   count: number,
-  action: string = "message",
+  action = "message",
 ) {
   const now = Date.now();
 

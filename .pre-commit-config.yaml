@@ -14,7 +14,8 @@ repos:
         name: prettier --check
         entry: npx --no-install prettier --check --ignore-unknown
         language: system
-        types: [text]
+        # The same scope as `pnpm format:check`: code, not notes or generated Markdown.
+        files: \.(ts|tsx|js|jsx|mdx)$
         # Parallel batches race on Prettier's shared cache file (ENOENT on unlink).
         require_serial: true
       - id: eslint
