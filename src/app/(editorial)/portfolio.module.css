@@ -165,8 +165,8 @@
 
 /* ─── Overview ───────────────────────────────────────────────────────────── */
 
-/* The case number in the left column, where a post shows its date. */
-.index {
+/* The case period in the left column, where a post shows its date. */
+.period {
   font-weight: 700;
   color: var(--accent);
   font-variant-numeric: tabular-nums;

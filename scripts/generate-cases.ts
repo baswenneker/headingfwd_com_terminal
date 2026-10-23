@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 import {
   CASES,
   caseVisibility,
+  formatCasePeriod,
   isComingSoonCase,
   isHiddenCase,
   visibleCases,
@@ -56,7 +57,8 @@ function caseToFileMarkdown(c: Case): string {
     `sector: ${yamlScalar(c.sector)}`,
     `status: ${c.status}`,
   ];
-  if (c.period) fm.push(`period: ${yamlScalar(c.period)}`);
+  if (c.start) fm.push(`start: ${yamlScalar(c.start)}`);
+  if (c.end) fm.push(`end: ${yamlScalar(c.end)}`);
   // Only surface visibility when it differs from the default ("published").
   if (caseVisibility(c) !== "published")
     fm.push(`visibility: ${caseVisibility(c)}`);
@@ -89,7 +91,7 @@ function buildReadme(): string {
     const status = isComingSoonCase(c)
       ? `${STATUS_EMOJI[c.status]} ${c.status} · 🔜 coming soon`
       : `${STATUS_EMOJI[c.status]} ${c.status}`;
-    return `| ${c.n} | ${c.title} | ${c.sector} | ${status} | ${c.tags.join(", ")} | [${c.slug}.md](./${c.slug}.md) |`;
+    return `| ${formatCasePeriod(c) ?? "—"} | ${c.title} | ${c.sector} | ${status} | ${c.tags.join(", ")} | [${c.slug}.md](./${c.slug}.md) |`;
   });
 
   return [
@@ -101,7 +103,7 @@ function buildReadme(): string {
     "",
     "## Overview",
     "",
-    "| # | Case | Sector | Status | Tags | File |",
+    "| Period | Case | Sector | Status | Tags | File |",
     "|---|------|--------|--------|------|------|",
     ...rows,
     "",

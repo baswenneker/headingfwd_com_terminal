@@ -215,7 +215,7 @@ The editorial layout sets `ensureStatic = "navigation"`: `next dev` and `next bu
 
 ### Adding a Portfolio Case
 
-1. Append an entry to `CASES` in `src/content/cases.ts` with a unique slug, the next `n` index, a one-line `kind`, the metadata fields and the write-up as a Markdown string in `body`
+1. Add an entry to `CASES` in `src/content/cases.ts` with a unique slug, a one-line `kind`, the `start` and `end` dates (`YYYY` or `YYYY-MM`; omit `end` while the work runs), the metadata fields and the write-up as a Markdown string in `body`
 2. The body follows the post vocabulary: the text before the first `##` is the lead, a `##` is a numbered section, a `###` a numbered item. Never open a body with a heading, and never write a `###` before the first `##` — it lands in the lead
 3. Shape the body like the existing cases: a lead, then `## The work` and `## Outcome`, with each individual heading as a `###` item. Items render as two columns, heading left and text right
 4. Drop any images in `public/portfolio/<slug>/` and reference them by filename

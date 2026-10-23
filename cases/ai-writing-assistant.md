@@ -3,7 +3,8 @@ title: AI Writing Assistant
 slug: ai-writing-assistant
 sector: Government
 status: live
-period: Q1 2025
+start: 2025-01
+end: 2025-03
 role: Initiator / AI engineer
 tags: [LLM, Writing, Marketing, Python, VectorDB]
 stack: [Azure OpenAI, Python, Agentic architecture, VSCode]

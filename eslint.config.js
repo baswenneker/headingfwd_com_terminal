@@ -11,7 +11,7 @@ const eslintConfig = defineConfig([
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ["**/*.ts", "**/*.tsx", "**/*.js"],
     plugins: {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       drizzle,
