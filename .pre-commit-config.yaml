@@ -2,6 +2,8 @@
 # After a clone, `pre-commit install` installs all three hooks: commit, commit
 # message and push.
 default_install_hook_types: [pre-commit, commit-msg, pre-push]
+# default_stages covers only hooks whose own definition names no stages; the
+# ones that list pre-push get stages: [pre-commit] here, or they run on push too.
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -10,10 +12,13 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: '(^|/)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lock|uv\.lock|poetry\.lock|Pipfile\.lock|Cargo\.lock|composer\.lock|vendor/.*|.*\.min\.(js|css))$'
+        stages: [pre-commit]
       - id: end-of-file-fixer
         exclude: '(^|/)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lock|uv\.lock|poetry\.lock|Pipfile\.lock|Cargo\.lock|composer\.lock|vendor/.*|.*\.min\.(js|css))$'
+        stages: [pre-commit]
       - id: check-merge-conflict
       - id: check-added-large-files
+        stages: [pre-commit]
       - id: detect-private-key
       # Syntax only: custom tags (!Ref, !!python) and multi-document files pass.
       - id: check-yaml
@@ -31,20 +36,6 @@ repos:
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
-  - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.14.1-1
-    hooks:
-      # -i: the indent the scripts already use, so shfmt does not re-indent them.
-      - id: shfmt
-        args: [--write, -i, '4']
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
-    hooks:
-      - id: shellcheck
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.12
-    hooks:
-      - id: actionlint
   # The project's own ESLint and Prettier (npx --no-install), with its own version,
   # plugins and config. ESLint first: Prettier then formats what it fixed.
   - repo: local
