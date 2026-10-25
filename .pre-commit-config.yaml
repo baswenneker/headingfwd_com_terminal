@@ -1,36 +1,71 @@
-# Written by /fwd:setup-review. Re-running it never overwrites this file.
-# `pre-commit install` installs both the commit and the push hook.
-default_install_hook_types: [pre-commit, pre-push]
+# Written by /fwd:setup-precommit. A re-run rewrites this file; delete this line to keep your own edits.
+# After a clone, `pre-commit install` installs all three hooks: commit, commit
+# message and push.
+default_install_hook_types: [pre-commit, commit-msg, pre-push]
 default_stages: [pre-commit]
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+        exclude: '(^|/)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lock|uv\.lock|poetry\.lock|Pipfile\.lock|Cargo\.lock|composer\.lock|vendor/.*|.*\.min\.(js|css))$'
+      - id: end-of-file-fixer
+        exclude: '(^|/)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lock|uv\.lock|poetry\.lock|Pipfile\.lock|Cargo\.lock|composer\.lock|vendor/.*|.*\.min\.(js|css))$'
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: detect-private-key
+      # Syntax only: custom tags (!Ref, !!python) and multi-document files pass.
+      - id: check-yaml
+        args: [--allow-multiple-documents, --unsafe]
+      # tsconfig and editor settings are JSON with comments.
+      - id: check-json
+        exclude: '(^|/)(tsconfig[^/]*|jsconfig[^/]*)\.json$|(^|/)\.(vscode|devcontainer)/'
+      - id: check-toml
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:
       - id: gitleaks
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.14.1-1
+    hooks:
+      # -i: the indent the scripts already use, so shfmt does not re-indent them.
+      - id: shfmt
+        args: [--write, -i, '4']
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+  # The project's own ESLint and Prettier (npx --no-install), with its own version,
+  # plugins and config. ESLint first: Prettier then formats what it fixed.
   - repo: local
     hooks:
-      # The project's own Prettier and ESLint (npx --no-install), not a second copy.
-      - id: prettier
-        name: prettier --check
-        entry: npx --no-install prettier --check --ignore-unknown
-        language: system
-        # The same scope as `pnpm format:check`: code, not notes or generated Markdown.
-        files: \.(ts|tsx|js|jsx|mdx)$
-        # Parallel batches race on Prettier's shared cache file (ENOENT on unlink).
-        require_serial: true
       - id: eslint
-        name: eslint
-        entry: npx --no-install eslint
+        name: eslint --fix
+        entry: npx --no-install eslint --fix
         language: system
         types_or: [javascript, jsx, ts, tsx]
-      # Asks the Workcenter reviewer to look at the branch; returns at once.
-      - id: fwd-review-push
-        name: Workcenter reviewer (background)
-        entry: .claude/fwd/review-push.sh
-        language: script
+      - id: prettier
+        name: prettier --write
+        entry: npx --no-install prettier --write --ignore-unknown
+        language: system
+        types_or: [javascript, jsx, ts, tsx, css, scss, less, html, vue, json]
+        exclude: '(^|/)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lock|uv\.lock|poetry\.lock|Pipfile\.lock|Cargo\.lock|composer\.lock|vendor/.*|.*\.min\.(js|css))$'
+  - repo: https://github.com/google/osv-scanner
+    rev: v2.6.0
+    hooks:
+      # Every push, all lockfiles: a dependency with a known CVE blocks the push.
+      # Exit 128 is "no packages found" (a go.mod without dependencies): no
+      # reason to block.
+      - id: osv-scanner
+        entry: bash -c 'osv-scanner "$@"; rc=$?; [ "$rc" -eq 128 ] && exit 0; exit "$rc"' --
         stages: [pre-push]
-        pass_filenames: false
-        always_run: true
-        # pre-commit hides what a passing hook prints; the reviewer's warning
-        # must show.
-        verbose: true
