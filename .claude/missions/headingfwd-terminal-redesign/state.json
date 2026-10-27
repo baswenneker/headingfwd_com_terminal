@@ -50,12 +50,7 @@
       "id": "F1",
       "title": "Shell, fonts, intro en cyaan backdrop",
       "milestone": "M1",
-      "vc_ids": [
-        "VC-1",
-        "VC-2",
-        "VC-7",
-        "VC-8"
-      ],
+      "vc_ids": ["VC-1", "VC-2", "VC-7", "VC-8"],
       "status": "done",
       "attempts": 1,
       "commit_sha": "fa4c0a5c7dfa3163571802ca9f893768ebbf2b8d",
@@ -112,10 +107,7 @@
       "id": "F2",
       "title": "Feed-renderer, client-statische commands en input/history/scroll",
       "milestone": "M1",
-      "vc_ids": [
-        "VC-3",
-        "VC-8"
-      ],
+      "vc_ids": ["VC-3", "VC-8"],
       "status": "done",
       "attempts": 1,
       "commit_sha": "087b65c99dcc4667131de025b88c58e17147a437",
@@ -172,11 +164,7 @@
       "id": "F3",
       "title": "Portfolio-overlay met aanleverbaar projectdataformat",
       "milestone": "M1",
-      "vc_ids": [
-        "VC-4",
-        "VC-5",
-        "VC-8"
-      ],
+      "vc_ids": ["VC-4", "VC-5", "VC-8"],
       "status": "done",
       "attempts": 1,
       "commit_sha": "394bcd7e5a2c9a7c647f36f1ea1f5fce90035c08",
@@ -236,11 +224,7 @@
       "id": "F4",
       "title": "Mobiele afwerking en touch-bediening",
       "milestone": "M1",
-      "vc_ids": [
-        "VC-6",
-        "VC-7",
-        "VC-8"
-      ],
+      "vc_ids": ["VC-6", "VC-7", "VC-8"],
       "status": "done",
       "attempts": 1,
       "commit_sha": "1a18bcec1caa2e3cc5892f74debc3319d097a12d",
@@ -293,12 +277,7 @@
       "id": "F5",
       "title": "Uitgestelde CAPTCHA en AI-streaming in de feed",
       "milestone": "M2",
-      "vc_ids": [
-        "VC-9",
-        "VC-10",
-        "VC-12",
-        "VC-13"
-      ],
+      "vc_ids": ["VC-9", "VC-10", "VC-12", "VC-13"],
       "status": "done",
       "attempts": 1,
       "commit_sha": "0fe8114028005d5465e38a74bab98eafe87a7ec3",
@@ -353,11 +332,7 @@
       "id": "F6",
       "title": "E-mail-tool preview, bevestiging en versturen — opnieuw vormgegeven",
       "milestone": "M2",
-      "vc_ids": [
-        "VC-11",
-        "VC-12",
-        "VC-13"
-      ],
+      "vc_ids": ["VC-11", "VC-12", "VC-13"],
       "status": "done",
       "attempts": 1,
       "commit_sha": "a158feb92d42420c70c009591a26d031a9a62504",
@@ -410,10 +385,7 @@
       "id": "F7",
       "title": "Playwright-suite herschreven naar de nieuwe UI",
       "milestone": "M3",
-      "vc_ids": [
-        "VC-14",
-        "VC-16"
-      ],
+      "vc_ids": ["VC-14", "VC-16"],
       "status": "done",
       "attempts": 1,
       "commit_sha": "96a4908c701c6f3a1697f5209468305bcc7eb055",
@@ -465,10 +437,7 @@
       "id": "F8",
       "title": "Dode code verwijderd, check en build groen",
       "milestone": "M3",
-      "vc_ids": [
-        "VC-15",
-        "VC-16"
-      ],
+      "vc_ids": ["VC-15", "VC-16"],
       "status": "done",
       "attempts": 1,
       "commit_sha": "a2cde0589c7569160946f773465cf36a4d216d31",
@@ -517,12 +486,7 @@
     {
       "id": "M1",
       "title": "Statische terminal (pixel-exact, mobiel-net)",
-      "feature_ids": [
-        "F1",
-        "F2",
-        "F3",
-        "F4"
-      ],
+      "feature_ids": ["F1", "F2", "F3", "F4"],
       "validation_status": "passed",
       "validated_at": "2026-06-30T14:21:12Z",
       "gate_results": [
@@ -600,10 +564,7 @@
     {
       "id": "M2",
       "title": "AI-chat in de shell",
-      "feature_ids": [
-        "F5",
-        "F6"
-      ],
+      "feature_ids": ["F5", "F6"],
       "validation_status": "passed",
       "validated_at": "2026-06-30T16:24:03Z",
       "gate_results": [
@@ -663,10 +624,7 @@
     {
       "id": "M3",
       "title": "Tests en opruimen",
-      "feature_ids": [
-        "F7",
-        "F8"
-      ],
+      "feature_ids": ["F7", "F8"],
       "validation_status": "passed",
       "validated_at": "2026-06-30T17:02:08Z",
       "gate_results": [

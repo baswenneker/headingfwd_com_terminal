@@ -63,11 +63,11 @@ Your task: **recreate this design in the existing Next.js codebase** using its e
 
 **ASCII banner:** a `<pre>` in JetBrains Mono, accent color, `text-shadow:0 0 20px rgba(46,230,246,.38)`, `font-size:clamp(9px,2.3cqw,18px)`, line-height 1.05, `white-space:pre`. Banner art (block letters "FWD"):
 ```
-██████  ██   ██  █████ 
+██████  ██   ██  █████
 ██      ██   ██  ██  ██
 █████   ██ █ ██  ██  ██
 ██      ███████  ██  ██
-██      ██   ██  █████ 
+██      ██   ██  █████
 ```
 Below it: `// selected work — AI engineering & product design` in `rgba(160,178,182,.78)`.
 

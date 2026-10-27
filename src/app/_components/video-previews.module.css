@@ -60,7 +60,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.25s ease, filter 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
 }
 
 .videoThumb:hover .videoThumbImg,
@@ -88,7 +90,9 @@
   font-size: 18px;
   box-shadow: 0 0 22px rgba(46, 230, 246, 0.35);
   pointer-events: none;
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
 }
 
 .videoThumb:hover .videoPlay,
