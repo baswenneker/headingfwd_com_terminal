@@ -59,3 +59,6 @@ tmp/db
 # design-sync build output (regenerated, not source)
 ds-bundle/
 .playwright-mcp/
+
+# Claude Code worktrees: machine-specific, never shared.
+.claude/worktrees/
